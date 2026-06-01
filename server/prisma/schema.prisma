@@ -1,0 +1,252 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id        String   @id @default(cuid())
+  clerkId   String   @unique
+  email     String   @unique
+  name      String?
+  username  String?  @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  creditBalance   CreditBalance?
+  creditPurchases CreditPurchase[]
+  giftCards       GiftCard[]
+  listings        Listing[]
+  bidsPlaced      Bid[]            @relation("BuyerBids")
+  tradesAsBuyer   Trade[]          @relation("BuyerTrades")
+  tradesAsSeller  Trade[]          @relation("SellerTrades")
+  payouts         Payout[]
+  reviewsGiven    Review[]         @relation("ReviewsGiven")
+  reviewsReceived Review[]         @relation("ReviewsReceived")
+  verification    UserVerification?
+}
+
+model GiftCard {
+  id         String         @id @default(cuid())
+  userId     String?
+  user       User?          @relation(fields: [userId], references: [id])
+  brand      String
+  cardNumber String
+  pin        String
+  balance    Float
+  faceValue  Float
+  status     GiftCardStatus @default(PENDING)
+  source     GiftCardSource @default(USER)
+  vendorId   String?
+  vendor     Vendor?        @relation(fields: [vendorId], references: [id])
+  verifiedAt DateTime?
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @updatedAt
+
+  listing    Listing?
+}
+
+model Listing {
+  id                 String        @id @default(cuid())
+  userId             String
+  user               User          @relation(fields: [userId], references: [id])
+  giftCardId         String        @unique
+  giftCard           GiftCard      @relation(fields: [giftCardId], references: [id])
+  buyNowPrice        Float?
+  minAcceptPrice     Float?
+  acceptsExchange    Boolean       @default(false)
+  preferredBrand     String?
+  preferredMinValue  Float?
+  status             ListingStatus @default(PENDING_VERIFICATION)
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+
+  bids               Bid[]
+  trade              Trade?
+}
+
+model Bid {
+  id            String    @id @default(cuid())
+  listingId     String
+  listing       Listing   @relation(fields: [listingId], references: [id])
+  bidderId      String
+  bidder        User      @relation("BuyerBids", fields: [bidderId], references: [id])
+  bidType       BidType
+  cashAmount    Float?
+  offeredCardId String?
+  status        BidStatus @default(PENDING)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  trade         Trade?
+}
+
+model Trade {
+  id          String      @id @default(cuid())
+  listingId   String      @unique
+  listing     Listing     @relation(fields: [listingId], references: [id])
+  bidId       String?     @unique
+  bid         Bid?        @relation(fields: [bidId], references: [id])
+  sellerId    String
+  seller      User        @relation("SellerTrades", fields: [sellerId], references: [id])
+  buyerId     String
+  buyer       User        @relation("BuyerTrades", fields: [buyerId], references: [id])
+  tradeType   TradeType
+  finalPrice  Float?
+  status      TradeStatus @default(PENDING)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  reviews     Review[]
+}
+
+model CreditBalance {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id])
+  balance   Float    @default(0)
+  updatedAt DateTime @updatedAt
+}
+
+model CreditPurchase {
+  id        String               @id @default(cuid())
+  userId    String
+  user      User                 @relation(fields: [userId], references: [id])
+  amount    Float
+  status    CreditPurchaseStatus @default(PENDING)
+  method    PayoutMethod
+  createdAt DateTime             @default(now())
+  updatedAt DateTime             @updatedAt
+}
+
+model Payout {
+  id          String       @id @default(cuid())
+  userId      String
+  user        User         @relation(fields: [userId], references: [id])
+  amount      Float
+  status      PayoutStatus @default(PENDING)
+  method      PayoutMethod
+  destination String
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+model Review {
+  id         String   @id @default(cuid())
+  tradeId    String
+  trade      Trade    @relation(fields: [tradeId], references: [id])
+  reviewerId String
+  reviewer   User     @relation("ReviewsGiven", fields: [reviewerId], references: [id])
+  revieweeId String
+  reviewee   User     @relation("ReviewsReceived", fields: [revieweeId], references: [id])
+  rating     Int
+  comment    String?
+  createdAt  DateTime @default(now())
+}
+
+model UserVerification {
+  id        String             @id @default(cuid())
+  userId    String             @unique
+  user      User               @relation(fields: [userId], references: [id])
+  status    VerificationStatus @default(PENDING)
+  method    String?
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+}
+
+model Vendor {
+  id        String       @id @default(cuid())
+  name      String
+  contact   String?
+  status    VendorStatus @default(PENDING)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  giftCards GiftCard[]
+}
+
+enum GiftCardStatus {
+  PENDING
+  VERIFIED
+  AVAILABLE
+  RESERVED
+  TRADED
+  CASHED_OUT
+  FLAGGED
+  FAILED
+}
+
+enum GiftCardSource {
+  USER
+  VENDOR
+  LANTANA
+}
+
+enum ListingStatus {
+  PENDING_VERIFICATION
+  ACTIVE
+  RESERVED
+  COMPLETED
+  CANCELLED
+}
+
+enum BidType {
+  CASH
+  EXCHANGE
+}
+
+enum BidStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  EXPIRED
+  CANCELLED
+}
+
+enum TradeType {
+  CASH
+  EXCHANGE
+  CREDITS
+}
+
+enum TradeStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  DISPUTED
+}
+
+enum PayoutStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+enum PayoutMethod {
+  ACH
+  CRYPTO
+  PAYPAL
+  MONEY_ORDER
+}
+
+enum CreditPurchaseStatus {
+  PENDING
+  COMPLETED
+  FAILED
+}
+
+enum VendorStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
+}
+
+enum VerificationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
