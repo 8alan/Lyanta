@@ -1,11 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useApi } from '../services/api.ts'
-
-const SUPPORTED_BRANDS = [
-  'Amazon', 'Visa', 'Mastercard', 'Target', 'Walmart',
-  'Best Buy', 'Steam', 'Apple', 'Google Play', 'Nike', 'Starbucks', 'Sephora'
-]
+import { SUPPORTED_BRANDS } from '../services/brandImages.ts'
 
 export default function SubmitCard() {
   const navigate = useNavigate()
@@ -72,49 +68,62 @@ export default function SubmitCard() {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <label className="block text-xs uppercase tracking-widest text-[#7a7a9a] mb-2">Brand</label>
-            <select
-              value={form.brand}
-              onChange={e => setForm({ ...form, brand: e.target.value })}
-              required
-              className="w-full bg-white border border-[#e2e0db] px-4 py-3 text-sm text-[#1a1a2e] focus:outline-none focus:border-[#1a1a2e] transition-colors"
-            >
-              <option value="">Select a brand</option>
-              {SUPPORTED_BRANDS.map(b => (
-                <option key={b} value={b}>{b}</option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-xs uppercase tracking-widest text-[#7a7a9a] mb-2">Card Number</label>
-            <input
+          {/* Brand */}
+            <div className="relative">
+              <label className="block text-xs uppercase tracking-widest text-[#7a7a9a] mb-2">Brand</label>
+              <input
                 type="text"
-                value={form.cardNumber}
-                onChange={e => setForm({ ...form, cardNumber: e.target.value })}
+                value={form.brand}
+                onChange={e => setForm({ ...form, brand: e.target.value })}
                 required
-                maxLength={20}
-                minLength={8}
-                placeholder="Enter card number"
+                placeholder="Search or select a brand"
                 className="w-full bg-white border border-[#e2e0db] px-4 py-3 text-sm text-[#1a1a2e] placeholder-[#b0b0c0] focus:outline-none focus:border-[#1a1a2e] transition-colors"
-                />
-          </div>
-
-          <div>
-            <label className="block text-xs uppercase tracking-widest text-[#7a7a9a] mb-2">PIN</label>
-            <input
-                type="text"
-                value={form.pin}
-                onChange={e => setForm({ ...form, pin: e.target.value })}
-                required
-                maxLength={8}
-                minLength={4}
-                placeholder="Enter PIN"
-                className="w-full bg-white border border-[#e2e0db] px-4 py-3 text-sm text-[#1a1a2e] placeholder-[#b0b0c0] focus:outline-none focus:border-[#1a1a2e] transition-colors"
-                />
-          </div>
-
+              />
+              {form.brand && SUPPORTED_BRANDS.filter(b =>
+                b.toLowerCase().includes(form.brand.toLowerCase()) && b !== form.brand
+              ).length > 0 && (
+                <div className="absolute z-10 w-full bg-white border border-[#e2e0db] border-t-0 max-h-48 overflow-y-auto">
+                  {SUPPORTED_BRANDS.filter(b =>
+                    b.toLowerCase().includes(form.brand.toLowerCase()) && b !== form.brand
+                  ).map(b => (
+                    <button
+                      key={b}
+                      type="button"
+                      onClick={() => setForm({ ...form, brand: b })}
+                      className="w-full text-left px-4 py-2 text-sm text-[#1a1a2e] hover:bg-[#f8f7f4] transition-colors"
+                    >
+                      {b}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+                      <div>
+                        <label className="block text-xs uppercase tracking-widest text-[#7a7a9a] mb-2">Card Number</label>
+                        <input
+                            type="text"
+                            value={form.cardNumber}
+                            onChange={e => setForm({ ...form, cardNumber: e.target.value })}
+                            required
+                            maxLength={20}
+                            minLength={8}
+                            placeholder="Enter card number"
+                            className="w-full bg-white border border-[#e2e0db] px-4 py-3 text-sm text-[#1a1a2e] placeholder-[#b0b0c0] focus:outline-none focus:border-[#1a1a2e] transition-colors"
+                            />
+                      </div>
+                      <div>
+                        <label className="block text-xs uppercase tracking-widest text-[#7a7a9a] mb-2">PIN</label>
+                        <input
+                            type="text"
+                            value={form.pin}
+                            onChange={e => setForm({ ...form, pin: e.target.value })}
+                            required
+                            maxLength={8}
+                            minLength={4}
+                            placeholder="Enter PIN"
+                            className="w-full bg-white border border-[#e2e0db] px-4 py-3 text-sm text-[#1a1a2e] placeholder-[#b0b0c0] focus:outline-none focus:border-[#1a1a2e] transition-colors"
+                            />
+                      </div>
           <div>
             <label className="block text-xs uppercase tracking-widest text-[#7a7a9a] mb-2">Card Value ($)</label>
             <input

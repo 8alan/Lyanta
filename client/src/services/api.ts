@@ -43,10 +43,11 @@ export function useApi() {
 
     createListing: (payload: {
       giftCardId: string
-      listingType: 'SELL' | 'EXCHANGE' | 'BOTH'
-      askingPrice: number
+      buyNowPrice?: number
+      minAcceptPrice?: number
+      acceptsExchange: boolean
       preferredBrand?: string
-      maxExchangeValue?: number
+      preferredMinValue?: number
     }) => request('POST', '/api/listings/create', payload),
 
     getActiveListings: (brand?: string, type?: string) =>
@@ -64,11 +65,26 @@ export function useApi() {
       request('GET', `/api/listings/${id}`),
 
     getAdminOverview: () => request('GET', '/api/admin/overview'),
+
     getAdminPendingCards: () => request('GET', '/api/admin/gift-cards/pending'),
+
     adminVerifyCard: (id: string, verifiedBalance?: number) =>
       request('POST', `/api/admin/gift-cards/${id}/verify`, { verifiedBalance }),
+    
     adminRejectCard: (id: string) =>
       request('POST', `/api/admin/gift-cards/${id}/reject`, {}),
+
+    placeBid: (listingId: string, payload: {
+      bidType: 'CASH' | 'EXCHANGE'
+      cashAmount?: number
+      offeredCardId?: string
+    }) => request('POST', `/api/listings/${listingId}/bid`, payload),
+
+    acceptBid: (listingId: string, bidId: string) =>
+      request('POST', `/api/listings/${listingId}/bids/${bidId}/accept`, {}),
+
+    rejectBid: (listingId: string, bidId: string) =>
+      request('POST', `/api/listings/${listingId}/bids/${bidId}/reject`, {}),
   }
       
 }

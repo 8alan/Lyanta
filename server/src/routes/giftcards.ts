@@ -5,8 +5,11 @@ import prisma from '../db.js'
 const router = Router()
 
 const SUPPORTED_BRANDS = [
-  'Amazon', 'Visa', 'Mastercard', 'Target', 'Walmart',
-  'Best Buy', 'Steam', 'Apple', 'Google Play', 'Nike', 'Starbucks', 'Sephora',
+  'Abercrombie', 'Amazon', 'Banana Republic', 'Best Buy', 'Blizzard',
+  'Chipotle', 'DoorDash', 'GameStop', 'Google Play', 'H&M',
+  'IKEA', 'Instacart', 'Kohls', 'Lego', 'Lowes', 'Lululemon',
+  'Macys', 'Mastercard', 'Nautica', 'Pink', 'Roblox', 'Sephora',
+  'Staples', 'Starbucks', 'Steam', 'Taco Bell', 'Tinder', 'Uber', 'Valorant', 'Other'
 ]
 
 // Submit a gift card
@@ -35,7 +38,7 @@ router.post('/submit', requireAuth, async (req: Request, res: Response) => {
       return
     }
 
-    if (!SUPPORTED_BRANDS.includes(brand)) {
+    if (!SUPPORTED_BRANDS.includes(brand) && brand !== 'Other') {
       res.status(400).json({ error: 'Unsupported gift card brand' })
       return
     }
