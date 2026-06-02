@@ -76,9 +76,14 @@ router.post('/create', requireAuth, async (req: Request, res: Response) => {
 router.get('/active', requireAuth, async (req: Request, res: Response) => {
   try {
     
-    const brand = Array.isArray(req.query.brand) ? req.query.brand[0] : req.query.brand
-    const search = Array.isArray(req.query.search) ? req.query.search[0] : req.query.search
+    const brandFilter = typeof req.query.brand === 'string' ? req.query.brand : undefined
+    const searchFilter = typeof req.query.search === 'string' ? req.query.search : undefined
     const clerkId = req.userId!
+    const giftCardFilter = searchFilter
+      ? { brand: { contains: searchFilter, mode: 'insensitive' as const } }
+      : brandFilter
+      ? { brand: { equals: brandFilter } }
+      : undefined
 
     const user = await prisma.user.findUnique({ where: { clerkId } })
     if (!user) {
@@ -87,16 +92,13 @@ router.get('/active', requireAuth, async (req: Request, res: Response) => {
     }
 
     const listings = await prisma.listing.findMany({
-      where: {
-        status: 'ACTIVE',
-        userId: { not: user.id },
-        giftCard: search
-        ? { brand: { contains: search as string, mode: 'insensitive' as const} }
-        : brand
-        ? { brand: brand as string }
-        : undefined
-      },
-      include: {
+        where: {
+          status: 'ACTIVE',
+          userId: { not: user.id },
+          giftCard: giftCardFilter
+        },
+
+            include: {
         giftCard: {
           select: { brand: true, faceValue: true }
         },
@@ -117,7 +119,7 @@ router.get('/active', requireAuth, async (req: Request, res: Response) => {
 // Get market rate for a brand
 router.get('/market-rate/:brand', requireAuth, async (req: Request, res: Response) => {
   try {
-    const { brand } = req.params
+    const brand = req.params.brand as string
 
     const recentTrades = await prisma.trade.findMany({
       where: {
@@ -126,7 +128,7 @@ router.get('/market-rate/:brand', requireAuth, async (req: Request, res: Respons
         listing: {
           giftCard: { brand }
         }
-      },
+  },
       orderBy: { createdAt: 'desc' },
       take: 10,
       include: {

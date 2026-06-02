@@ -21,7 +21,7 @@ router.get('/gift-cards/pending', requireAuth, requireAdmin, async (req: Request
       where: { status: 'PENDING' },
       include: {
         user: { select: { email: true, name: true } },
-        listing: { select: { listingType: true, askingPrice: true } }
+        listing: { select: { buyNowPrice: true, minAcceptPrice: true, acceptsExchange: true } }
       },
       orderBy: { createdAt: 'asc' }
     })
@@ -48,28 +48,24 @@ router.post('/gift-cards/:id/verify', requireAuth, requireAdmin, async (req: Req
       return
     }
 
-    await prisma.$transaction(async (tx) => {
-      // Update gift card status
-      await tx.giftCard.update({
-        where: { id },
-        data: {
-          status: 'AVAILABLE',
-          balance: verifiedBalance ?? giftCard.faceValue,
-          verifiedAt: new Date()
+      await prisma.$transaction(async (tx) => {
+        await tx.giftCard.update({
+          where: { id },
+          data: {
+            status: 'AVAILABLE',
+            balance: verifiedBalance ?? giftCard.faceValue,
+            verifiedAt: new Date()
+          }
+        })
+
+        // Activate the listing if one exists
+        if (giftCard.listing) {
+          await tx.listing.update({
+            where: { id: giftCard.listing.id },
+            data: { status: 'ACTIVE' }
+          })
         }
       })
-
-      // Credit the user
-      const fee = giftCard.faceValue * 0.07
-      const creditAmount = giftCard.faceValue - fee
-
-      await tx.creditBalance.upsert({
-        where: { userId: giftCard.userId! },
-        update: { balance: { increment: creditAmount } },
-        create: { userId: giftCard.userId!, balance: creditAmount }
-      })
-    })
-
     res.json({ success: true })
   } catch (error) {
     console.error(error)
