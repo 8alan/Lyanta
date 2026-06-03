@@ -1,6 +1,12 @@
 import { Router, Request, Response } from 'express'
 import { requireAuth } from '../middleware/auth.js'
 import prisma from '../db.js'
+import {
+  sendBidReceivedEmail,
+  sendBidAcceptedEmail,
+  sendBidRejectedEmail,
+  sendCardSoldEmail
+} from '../services/email.js'
 
 const router = Router()
 
@@ -367,6 +373,19 @@ router.post('/:id/bid', requireAuth, async (req: Request, res: Response) => {
       }
     })
 
+    // Notify seller
+    const seller = await prisma.user.findUnique({ where: { id: listing.userId } })
+    if (seller?.email) {
+      sendBidReceivedEmail(
+        seller.email,
+        seller.name ?? 'there',
+        listing.giftCard.brand,
+        listing.giftCard.faceValue,
+        bidType,
+        cashAmount ?? null
+      ).catch(console.error)
+    }
+
     // If bid matches buy now price, auto accept
     if (bidType === 'CASH' && listing.buyNowPrice && cashAmount >= listing.buyNowPrice) {
       await prisma.bid.update({ where: { id: bid.id }, data: { status: 'ACCEPTED' } })
@@ -433,6 +452,20 @@ router.post('/:id/bids/:bidId/accept', requireAuth, async (req: Request, res: Re
       })
     ])
 
+    const bidder = await prisma.user.findUnique({ where: { id: bid.bidderId } })
+    const listingWithCard = await prisma.listing.findUnique({
+      where: { id: id as string },
+      include: { giftCard: true }
+    })
+    if (bidder?.email && listingWithCard) {
+      sendBidAcceptedEmail(
+        bidder.email,
+        bidder.name ?? 'there',
+        listingWithCard.giftCard.brand,
+        listingWithCard.giftCard.faceValue
+      ).catch(console.error)
+    }
+
     res.json({ success: true })
   } catch (error) {
     console.error(error)
@@ -463,11 +496,25 @@ router.post('/:id/bids/:bidId/reject', requireAuth, async (req: Request, res: Re
       data: { status: 'REJECTED' }
     })
 
+    const rejectedBid = await prisma.bid.findUnique({ where: { id: bidId as string } })
+    const listingWithCard = await prisma.listing.findUnique({
+      where: { id: id as string },
+      include: { giftCard: true }
+    })
+    const bidder = rejectedBid ? await prisma.user.findUnique({ where: { id: rejectedBid.bidderId } }) : null
+    if (bidder?.email && listingWithCard) {
+      sendBidRejectedEmail(
+        bidder.email,
+        bidder.name ?? 'there',
+        listingWithCard.giftCard.brand,
+        listingWithCard.giftCard.faceValue
+      ).catch(console.error)
+    }
     res.json({ success: true })
-  } catch (error) {
-    console.error(error)
-    res.status(500).json({ error: 'Internal server error' })
-  }
+    } catch (error) {
+      console.error(error)
+      res.status(500).json({ error: 'Internal server error' })
+    }
 })
 
 export default router
