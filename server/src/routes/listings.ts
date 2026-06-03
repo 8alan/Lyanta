@@ -71,6 +71,99 @@ router.post('/create', requireAuth, async (req: Request, res: Response) => {
   }
 })
 
+// Edit a listing
+router.patch('/:id', requireAuth, async (req: Request, res: Response) => {
+  try {
+    const id = req.params.id as string
+    const { buyNowPrice, minAcceptPrice, acceptsExchange, preferredBrand, preferredMinValue } = req.body
+    const clerkId = req.userId!
+
+    const user = await prisma.user.findUnique({ where: { clerkId } })
+    if (!user) {
+      res.status(404).json({ error: 'User not found' })
+      return
+    }
+
+    const listing = await prisma.listing.findUnique({ where: { id } })
+    if (!listing || listing.userId !== user.id) {
+      res.status(403).json({ error: 'Not authorized' })
+      return
+    }
+
+    if (listing.status !== 'ACTIVE' && listing.status !== 'PENDING_VERIFICATION') {
+      res.status(400).json({ error: 'This listing cannot be edited' })
+      return
+    }
+
+    const updated = await prisma.listing.update({
+      where: { id },
+      data: {
+        buyNowPrice: buyNowPrice ?? listing.buyNowPrice,
+        minAcceptPrice: minAcceptPrice ?? listing.minAcceptPrice,
+        acceptsExchange: acceptsExchange ?? listing.acceptsExchange,
+        preferredBrand: preferredBrand ?? listing.preferredBrand,
+        preferredMinValue: preferredMinValue ?? listing.preferredMinValue,
+      }
+    })
+
+    res.json({ listing: updated })
+  } catch (error) {
+    console.error(error)
+    res.status(500).json({ error: 'Internal server error' })
+  }
+})
+
+// Cancel a listing
+router.post('/:id/cancel', requireAuth, async (req: Request, res: Response) => {
+  try {
+    const id = req.params.id as string
+    const clerkId = req.userId!
+
+    const user = await prisma.user.findUnique({ where: { clerkId } })
+    if (!user) {
+      res.status(404).json({ error: 'User not found' })
+      return
+    }
+
+    const listing = await prisma.listing.findUnique({
+      where: { id },
+      include: { bids: { where: { status: 'PENDING' } } }
+    })
+
+    if (!listing || listing.userId !== user.id) {
+      res.status(403).json({ error: 'Not authorized' })
+      return
+    }
+
+    if (listing.status !== 'ACTIVE' && listing.status !== 'PENDING_VERIFICATION') {
+      res.status(400).json({ error: 'This listing cannot be cancelled' })
+      return
+    }
+
+    await prisma.$transaction(async (tx) => {
+      // Reject all pending bids
+      await tx.bid.updateMany({
+        where: { listingId: id, status: 'PENDING' },
+        data: { status: 'CANCELLED' }
+      })
+      // Cancel the listing
+      await tx.listing.update({
+        where: { id },
+        data: { status: 'CANCELLED' }
+      })
+      // Return gift card to available
+      await tx.giftCard.update({
+        where: { id: listing.giftCardId },
+        data: { status: 'AVAILABLE' }
+      })
+    })
+
+    res.json({ success: true })
+  } catch (error) {
+    console.error(error)
+    res.status(500).json({ error: 'Internal server error' })
+  }
+})
 // Get all active listings
 
 router.get('/active', requireAuth, async (req: Request, res: Response) => {
@@ -94,7 +187,6 @@ router.get('/active', requireAuth, async (req: Request, res: Response) => {
     const listings = await prisma.listing.findMany({
         where: {
           status: 'ACTIVE',
-          userId: { not: user.id },
           giftCard: giftCardFilter
         },
 
@@ -102,9 +194,7 @@ router.get('/active', requireAuth, async (req: Request, res: Response) => {
         giftCard: {
           select: { brand: true, faceValue: true }
         },
-        user: {
-          select: { username: true, name: true }
-        }
+        user: { select: { username: true, name: true, clerkId: true } }
       },
       orderBy: { createdAt: 'desc' }
     })

@@ -2,13 +2,14 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useApi } from '../services/api.ts'
 import { getBrandImage, SUPPORTED_BRANDS } from '../services/brandImages.ts'
+import { useUser } from '@clerk/react'
 
 interface Listing {
   id: string
   buyNowPrice: number | null
   minAcceptPrice: number | null
   acceptsExchange: boolean
-  preferredBrand: string | null
+  preferredBrand: string[]
   status: string
   giftCard: {
     brand: string
@@ -17,6 +18,7 @@ interface Listing {
   user: {
     username: string | null
     name: string | null
+    clerkId: string
   }
 }
 
@@ -32,7 +34,8 @@ export default function BrowseCards() {
   const [loading, setLoading] = useState(true)
   const [selectedBrand, setSelectedBrand] = useState<string | null>(null)
   const [search, setSearch] = useState('')
-
+  const { user } = useUser()
+  
   useEffect(() => {
   api.getActiveListings(selectedBrand ?? undefined)
     .then(data => setListings(data.listings))
@@ -169,7 +172,6 @@ export default function BrowseCards() {
                           ${listing.giftCard.faceValue.toFixed(2)}
                         </p>
                       </div>
-
                       <div className="flex items-center justify-between">
                         <div className="flex gap-2">
                           {listing.buyNowPrice && (
@@ -189,6 +191,16 @@ export default function BrowseCards() {
                           )}
                         </div>
                       </div>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          navigate(`/listing/${listing.id}`)
+                        }}
+                        disabled={listing.user.clerkId === user?.id}
+                        className="w-full mt-4 bg-[#1a1a2e] text-white py-2 text-sm hover:bg-[#2d2d4e] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                      >
+                        {listing.user.clerkId === user?.id ? 'Your listing' : 'View listing'}
+                      </button>
                     </div>
                   </div>
                 )

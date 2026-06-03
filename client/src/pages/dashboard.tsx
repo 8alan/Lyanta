@@ -19,7 +19,6 @@ export default function Dashboard() {
   const { setBalance } = useStore()
   const [cards, setCards] = useState<GiftCard[]>([])
   const [loading, setLoading] = useState(true)
-
   const hour = new Date().getHours()
   const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening'
 
@@ -37,7 +36,7 @@ export default function Dashboard() {
   const actions = [
     { label: 'Submit a Gift Card', desc: 'Exchange for cash or credits', path: '/submit' },
     { label: 'Browse Cards', desc: 'Trade for a card you want', path: '/browse' },
-    // { label: 'Cash Out', desc: 'Transfer your credits to bank', path: '/cashout' },
+    { label: 'My Listings', desc: 'Manage your active listings', path: '/my-listings' },
   ]
 
   const statusLabel: Record<string, string> = {
@@ -119,22 +118,35 @@ export default function Dashboard() {
               </div>
             ) : (
               cards.map((card, i) => (
-                <div
-                  key={card.id}
-                  className={`flex items-center justify-between px-6 py-4 ${i !== cards.length - 1 ? 'border-b border-[#e2e0db]' : ''}`}
-                >
-                  <div>
-                    <p className="text-sm font-semibold text-[#1a1a2e]">{card.brand} Gift Card</p>
-                    <p className="text-xs text-[#7a7a9a]">{new Date(card.createdAt).toLocaleDateString()}</p>
-                  </div>
+              <div
+                key={card.id}
+                className={`flex items-center justify-between px-6 py-4 ${i !== cards.length - 1 ? 'border-b border-[#e2e0db]' : ''}`}
+              >
+                <div>
+                  <p className="text-sm font-semibold text-[#1a1a2e]">{card.brand} Gift Card</p>
+                  <p className="text-xs text-[#7a7a9a]">{new Date(card.createdAt).toLocaleDateString()}</p>
+                </div>
+                <div className="flex items-center gap-4">
                   <div className="text-right">
                     <p className="text-sm font-semibold text-[#1a1a2e]">${card.faceValue.toFixed(2)}</p>
                     <p className={`text-xs ${statusColor[card.status] ?? 'text-[#7a7a9a]'}`}>
                       {statusLabel[card.status] ?? card.status}
                     </p>
                   </div>
+                  {card.status === 'PENDING' && (
+                    <button
+                      onClick={async () => {
+                        await api.deleteGiftCard(card.id)
+                        setCards(prev => prev.filter(c => c.id !== card.id))
+                      }}
+                      className="text-xs text-red-500 hover:text-red-700 transition-colors"
+                    >
+                      Delete
+                    </button>
+                  )}
                 </div>
-              ))
+              </div>
+            ))
             )}
           </div>
         </div>

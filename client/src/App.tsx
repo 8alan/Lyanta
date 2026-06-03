@@ -9,6 +9,8 @@ import BuyCredits from './pages/BuyCredits.tsx'
 import CreateListing from './pages/CreateListing.tsx'
 import ListingDetail from './pages/ListingDetail.tsx'
 import Admin from './pages/Admin.tsx'
+import MyListings from './pages/MyListings.tsx'
+import EditListing from './pages/EditListing.tsx'
 
 function App() {
   const { isSignedIn, isLoaded } = useAuth()
@@ -26,6 +28,8 @@ function App() {
       <Route path="/create-listing" element={isSignedIn ? <CreateListing /> : <Navigate to="/" />} />
       <Route path="/listing/:id" element={isSignedIn ? <ListingDetail /> : <Navigate to="/" />} />
       <Route path="/admin" element={isSignedIn ? <Admin /> : <Navigate to="/" />} />
+      <Route path="/my-listings" element={isSignedIn ? <MyListings /> : <Navigate to="/" />} />
+      <Route path="/edit-listing/:id" element={isSignedIn ? <EditListing /> : <Navigate to="/" />} />
     </Routes>
   )
 }

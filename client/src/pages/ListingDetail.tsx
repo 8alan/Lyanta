@@ -1,58 +1,102 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useApi } from '../services/api.ts'
-import { useStore } from '../store/useStore.ts'
-
+import { getBrandImage } from '../services/brandImages.ts'
+interface MyCard {
+  id: string
+  brand: string
+  faceValue: number
+  status: string
+}
 interface Listing {
   id: string
-  askingPrice: number
-  listingType: string
-  preferredBrand: string | null
+  buyNowPrice: number | null
+  minAcceptPrice: number | null
+  acceptsExchange: boolean
+  preferredBrand: string[]
   status: string
   giftCard: {
     brand: string
     faceValue: number
   }
+  user: {
+    username: string | null
+    name: string | null
+  }
+  bids: {
+    id: string
+    bidType: string
+    cashAmount: number | null
+    createdAt: string
+  }[]
 }
 
 export default function ListingDetail() {
   const { id } = useParams()
   const navigate = useNavigate()
   const api = useApi()
-  const { balance, setBalance } = useStore()
   const [listing, setListing] = useState<Listing | null>(null)
   const [loading, setLoading] = useState(true)
-  const [purchasing, setPurchasing] = useState(false)
+  const [bidType, setBidType] = useState<'CASH' | 'EXCHANGE'>('CASH')
+  const [cashAmount, setCashAmount] = useState('')
+  const [offeredCardId, setOfferedCardId] = useState('')
+  const [myCards, setMyCards] = useState<MyCard[]>([])
+  const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
-  const [purchased, setPurchased] = useState<{
-    brand: string
-    cardNumber: string
-    pin: string
-    faceValue: number
-  } | null>(null)
+  const [success, setSuccess] = useState('')
 
   useEffect(() => {
     if (!id) return
-    api.getListingById(id)
-      .then(data => setListing(data.listing))
-      .catch(() => navigate('/browse'))
-      .finally(() => setLoading(false))
+    Promise.all([
+      api.getListingById(id),
+      api.getMyCards()
+    ]).then(([listingData, cardsData]) => {
+      setListing(listingData.listing)
+      setMyCards(cardsData.giftCards.filter((c: MyCard) => c.status === 'AVAILABLE'))
+    }).catch(() => navigate('/browse'))
+    .finally(() => setLoading(false))
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id])
 
-  const handlePurchase = async () => {
-    if (!id) return
-    setPurchasing(true)
+  const handleBuyNow = async () => {
+    if (!id || !listing?.buyNowPrice) return
+    setSubmitting(true)
     setError('')
     try {
-      const result = await api.purchaseListing(id)
-      setBalance(balance - (listing?.askingPrice ?? 0))
-      setPurchased(result.giftCard)
+      await api.placeBid(id, {
+        bidType: 'CASH',
+        cashAmount: listing.buyNowPrice
+      })
+      setSuccess('Purchase successful! The seller will be notified.')
+      setListing(prev => prev ? { ...prev, status: 'RESERVED' } : prev)
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Something went wrong'
       setError(message)
     } finally {
-      setPurchasing(false)
+      setSubmitting(false)
+    }
+  }
+
+  const handleBid = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!id) return
+    setSubmitting(true)
+    setError('')
+    try {
+      await api.placeBid(id, {
+        bidType,
+        cashAmount: bidType === 'CASH' ? parseFloat(cashAmount) : undefined,
+        offeredCardId: bidType === 'EXCHANGE' ? offeredCardId : undefined
+      })
+      setSuccess(bidType === 'CASH'
+        ? 'Bid submitted! The seller will review your offer.'
+        : 'Exchange offer submitted! The seller will review your card.'
+      )
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Something went wrong'
+      setError(message)
+    } finally {
+      setSubmitting(false)
     }
   }
 
@@ -64,52 +108,13 @@ export default function ListingDetail() {
     )
   }
 
-  if (purchased) {
-    return (
-      <div className="min-h-screen bg-[#f8f7f4] text-[#1a1a2e]">
-        <nav className="flex items-center justify-between px-8 py-5 border-b border-[#e2e0db] bg-white">
-          <button onClick={() => navigate('/dashboard')} className="text-xl font-semibold tracking-tight">
-            Lantana
-          </button>
-        </nav>
-        <div className="max-w-2xl mx-auto px-8 py-24 text-center">
-          <p className="text-xs uppercase tracking-widest text-[#7a7a9a] mb-4">Purchase complete</p>
-          <h1 className="text-3xl font-semibold text-[#1a1a2e] mb-4">Your card is ready.</h1>
-          <p className="text-sm text-[#4a4a6a] mb-8">
-            Save these details — they won't be shown again.
-          </p>
-          <div className="bg-white border border-[#e2e0db] p-8 text-left space-y-4 mb-8">
-            <div className="flex justify-between text-sm">
-              <span className="text-[#7a7a9a]">Brand</span>
-              <span className="font-semibold">{purchased.brand}</span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-[#7a7a9a]">Card Number</span>
-              <span className="font-semibold font-mono">{purchased.cardNumber}</span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-[#7a7a9a]">PIN</span>
-              <span className="font-semibold font-mono">{purchased.pin}</span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-[#7a7a9a]">Face Value</span>
-              <span className="font-semibold">${purchased.faceValue.toFixed(2)}</span>
-            </div>
-          </div>
-          <button
-            onClick={() => navigate('/dashboard')}
-            className="bg-[#1a1a2e] text-white px-8 py-3 text-sm hover:bg-[#2d2d4e] transition-colors"
-          >
-            Back to dashboard
-          </button>
-        </div>
-      </div>
-    )
-  }
-
   if (!listing) return null
 
-  const discount = (((listing.giftCard.faceValue - listing.askingPrice) / listing.giftCard.faceValue) * 100).toFixed(0)
+  const image = getBrandImage(listing.giftCard.brand)
+  const seller = listing.user.username ?? listing.user.name ?? 'Anonymous'
+  const discount = listing.buyNowPrice
+    ? (((listing.giftCard.faceValue - listing.buyNowPrice) / listing.giftCard.faceValue) * 100).toFixed(0)
+    : null
 
   return (
     <div className="min-h-screen bg-[#f8f7f4] text-[#1a1a2e]">
@@ -125,53 +130,200 @@ export default function ListingDetail() {
         </button>
       </nav>
 
-      <div className="max-w-2xl mx-auto px-8 py-12">
-        <div className="mb-10">
-          <p className="text-xs uppercase tracking-widest text-[#7a7a9a] mb-2">Marketplace</p>
-          <h1 className="text-3xl font-semibold text-[#1a1a2e]">{listing.giftCard.brand} Gift Card</h1>
-        </div>
+      <div className="max-w-4xl mx-auto px-8 py-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
 
-        <div className="bg-white border border-[#e2e0db] p-8 mb-6 space-y-4">
-          <div className="flex justify-between text-sm">
-            <span className="text-[#7a7a9a]">Face value</span>
-            <span className="line-through text-[#4a4a6a]">${listing.giftCard.faceValue.toFixed(2)}</span>
-          </div>
-          <div className="flex justify-between text-sm">
-            <span className="text-[#7a7a9a]">Discount</span>
-            <span className="text-green-600">{discount}% off</span>
-          </div>
-          <div className="flex justify-between text-sm">
-            <span className="text-[#7a7a9a]">Listing type</span>
-            <span className="text-[#1a1a2e]">
-              {listing.listingType === 'SELL' ? 'For sale' : listing.listingType === 'EXCHANGE' ? 'For exchange' : 'Sale or exchange'}
-            </span>
-          </div>
-          {listing.preferredBrand && (
-            <div className="flex justify-between text-sm">
-              <span className="text-[#7a7a9a]">Seller wants</span>
-              <span className="text-[#1a1a2e]">{listing.preferredBrand}</span>
+          {/* Left — Card Info */}
+          <div>
+            <div className="relative mb-6">
+              <img
+                src={image ?? ''}
+                alt={listing.giftCard.brand}
+                className="w-full h-56 object-cover"
+              />
+              {discount && (
+                <span className="absolute top-3 right-3 text-xs bg-white text-green-700 border border-green-200 px-2 py-1 font-semibold">
+                  {discount}% off
+                </span>
+              )}
             </div>
-          )}
-          <div className="border-t border-[#e2e0db] pt-4 flex justify-between">
-            <span className="text-sm font-semibold text-[#1a1a2e]">Your price</span>
-            <span className="text-xl font-semibold text-[#1a1a2e]">{listing.askingPrice.toFixed(2)} credits</span>
+
+            <div className="bg-white border border-[#e2e0db] p-6 space-y-3">
+              <div className="flex justify-between text-sm">
+                <span className="text-[#7a7a9a]">Brand</span>
+                <span className="font-semibold">{listing.giftCard.brand}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-[#7a7a9a]">Face value</span>
+                <span className="line-through text-[#4a4a6a]">${listing.giftCard.faceValue.toFixed(2)}</span>
+              </div>
+              {listing.buyNowPrice && (
+                <div className="flex justify-between text-sm">
+                  <span className="text-[#7a7a9a]">Buy now</span>
+                  <span className="font-semibold text-[#1a1a2e]">${listing.buyNowPrice.toFixed(2)}</span>
+                </div>
+              )}
+              {listing.minAcceptPrice && (
+                <div className="flex justify-between text-sm">
+                  <span className="text-[#7a7a9a]">Minimum bid</span>
+                  <span className="text-[#1a1a2e]">${listing.minAcceptPrice.toFixed(2)}</span>
+                </div>
+              )}
+              <div className="flex justify-between text-sm">
+                <span className="text-[#7a7a9a]">Seller</span>
+                <span className="text-[#1a1a2e]">@{seller}</span>
+              </div>
+              {listing.acceptsExchange && (
+                <div className="flex justify-between text-sm">
+                  <span className="text-[#7a7a9a]">Accepts exchange</span>
+                  <span className="text-green-600">Yes</span>
+                </div>
+              )}
+              {listing.preferredBrand.length > 0 && (
+                <div className="flex justify-between text-sm">
+                  <span className="text-[#7a7a9a]">Wants</span>
+                  <span className="text-[#1a1a2e]">{listing.preferredBrand.join(', ')}</span>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Right — Actions */}
+          <div className="space-y-4">
+            <div>
+              <p className="text-xs uppercase tracking-widest text-[#7a7a9a] mb-2">Marketplace</p>
+              <h1 className="text-2xl font-semibold text-[#1a1a2e]">{listing.giftCard.brand} Gift Card</h1>
+            </div>
+
+            {success && (
+              <div className="bg-green-50 border border-green-200 p-4">
+                <p className="text-sm text-green-700">{success}</p>
+              </div>
+            )}
+
+            {error && (
+              <div className="bg-red-50 border border-red-200 p-4">
+                <p className="text-sm text-red-600">{error}</p>
+              </div>
+            )}
+
+            {listing.status === 'ACTIVE' && !success && (
+              <>
+                {/* Buy Now */}
+                {listing.buyNowPrice && (
+                  <div className="bg-white border border-[#e2e0db] p-6">
+                    <p className="text-sm font-semibold text-[#1a1a2e] mb-1">
+                      Buy now for ${listing.buyNowPrice.toFixed(2)}
+                    </p>
+                    <p className="text-xs text-[#7a7a9a] mb-4">
+                      Instant purchase — seller confirms and sends card details
+                    </p>
+                    <button
+                      onClick={handleBuyNow}
+                      disabled={submitting}
+                      className="w-full bg-[#1a1a2e] text-white py-3 text-sm font-semibold hover:bg-[#2d2d4e] transition-colors disabled:opacity-50"
+                    >
+                      {submitting ? 'Processing...' : `Buy for $${listing.buyNowPrice.toFixed(2)}`}
+                    </button>
+                  </div>
+                )}
+
+                {/* Place Bid / Exchange Offer */}
+                <div className="bg-white border border-[#e2e0db] p-6">
+                  <p className="text-sm font-semibold text-[#1a1a2e] mb-4">Make an offer</p>
+
+                  {/* Bid Type Toggle */}
+                  <div className="grid grid-cols-2 gap-2 mb-4">
+                    <button
+                      type="button"
+                      onClick={() => setBidType('CASH')}
+                      className={`py-2 text-sm border transition-colors ${
+                        bidType === 'CASH'
+                          ? 'bg-[#1a1a2e] text-white border-[#1a1a2e]'
+                          : 'bg-white text-[#1a1a2e] border-[#e2e0db] hover:border-[#1a1a2e]'
+                      }`}
+                    >
+                      Cash offer
+                    </button>
+                    {listing.acceptsExchange && (
+                      <button
+                        type="button"
+                        onClick={() => setBidType('EXCHANGE')}
+                        className={`py-2 text-sm border transition-colors ${
+                          bidType === 'EXCHANGE'
+                            ? 'bg-[#1a1a2e] text-white border-[#1a1a2e]'
+                            : 'bg-white text-[#1a1a2e] border-[#e2e0db] hover:border-[#1a1a2e]'
+                        }`}
+                      >
+                        Exchange card
+                      </button>
+                    )}
+                  </div>
+
+                  <form onSubmit={handleBid} className="space-y-4">
+                    {bidType === 'CASH' ? (
+                      <div>
+                        <label className="block text-xs uppercase tracking-widest text-[#7a7a9a] mb-2">
+                          Your offer ($)
+                        </label>
+                        <input
+                          type="number"
+                          value={cashAmount}
+                          onChange={e => setCashAmount(e.target.value)}
+                          required
+                          min={listing.minAcceptPrice ?? 1}
+                          max={listing.buyNowPrice ?? listing.giftCard.faceValue}
+                          step="0.01"
+                          placeholder={listing.minAcceptPrice ? `Min $${listing.minAcceptPrice}` : '0.00'}
+                          className="w-full bg-white border border-[#e2e0db] px-4 py-3 text-sm focus:outline-none focus:border-[#1a1a2e] transition-colors"
+                        />
+                      </div>
+                    ) : (
+                      <div>
+                        <label className="block text-xs uppercase tracking-widest text-[#7a7a9a] mb-2">
+                          Select a card to offer
+                        </label>
+                        {myCards.length === 0 ? (
+                          <p className="text-sm text-[#7a7a9a]">
+                            You have no verified cards available for exchange.
+                          </p>
+                        ) : (
+                          <select
+                            value={offeredCardId}
+                            onChange={e => setOfferedCardId(e.target.value)}
+                            required
+                            className="w-full bg-white border border-[#e2e0db] px-4 py-3 text-sm focus:outline-none focus:border-[#1a1a2e] transition-colors"
+                          >
+                            <option value="">Select a card</option>
+                            {myCards.map((card: MyCard) => (
+                              <option key={card.id} value={card.id}>
+                                {card.brand} — ${card.faceValue.toFixed(2)}
+                              </option>
+                            ))}
+                          </select>
+                        )}
+                      </div>
+                    )}
+
+                    <button
+                      type="submit"
+                      disabled={submitting || (bidType === 'EXCHANGE' && myCards.length === 0)}
+                      className="w-full bg-white border border-[#1a1a2e] text-[#1a1a2e] py-3 text-sm font-semibold hover:bg-[#f8f7f4] transition-colors disabled:opacity-50"
+                    >
+                      {submitting ? 'Submitting...' : bidType === 'CASH' ? 'Submit cash offer' : 'Submit exchange offer'}
+                    </button>
+                  </form>
+                </div>
+              </>
+            )}
+
+            {listing.status !== 'ACTIVE' && !success && (
+              <div className="bg-white border border-[#e2e0db] p-6 text-center">
+                <p className="text-sm text-[#7a7a9a]">This listing is no longer available.</p>
+              </div>
+            )}
           </div>
         </div>
-
-        <div className="bg-white border border-[#e2e0db] p-6 mb-6 flex justify-between items-center">
-          <span className="text-sm text-[#4a4a6a]">Your balance</span>
-          <span className="text-sm font-semibold text-[#1a1a2e]">{balance.toFixed(2)} credits</span>
-        </div>
-
-        {error && <p className="text-sm text-red-600 mb-4">{error}</p>}
-
-        <button
-          onClick={handlePurchase}
-          disabled={purchasing || balance < listing.askingPrice || listing.status !== 'ACTIVE'}
-          className="w-full bg-[#1a1a2e] text-white py-3 text-sm font-semibold hover:bg-[#2d2d4e] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-        >
-          {purchasing ? 'Processing...' : balance < listing.askingPrice ? 'Insufficient credits' : `Purchase for ${listing.askingPrice.toFixed(2)} credits`}
-        </button>
       </div>
     </div>
   )

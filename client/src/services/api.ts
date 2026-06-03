@@ -41,14 +41,27 @@ export function useApi() {
     createPaymentIntent: (amount: number) =>
       request('POST', '/api/stripe/create-payment-intent', { amount }),
 
-    createListing: (payload: {
-      giftCardId: string
+    editListing: (id: string, payload: {
       buyNowPrice?: number
       minAcceptPrice?: number
-      acceptsExchange: boolean
+      acceptsExchange?: boolean
       preferredBrand?: string[]
       preferredMinValue?: number
-    }) => request('POST', '/api/listings/create', payload),
+    }) => request('PATCH', `/api/listings/${id}`, payload),
+
+    cancelListing: (id: string) =>
+      request('POST', `/api/listings/${id}/cancel`, {}),
+        createListing: (payload: {
+          giftCardId: string
+          buyNowPrice?: number
+          minAcceptPrice?: number
+          acceptsExchange: boolean
+          preferredBrand?: string[]
+          preferredMinValue?: number
+        }) => request('POST', '/api/listings/create', payload),
+
+    deleteGiftCard: (id: string) =>
+      request('DELETE', `/api/giftcards/${id}`),
 
     getActiveListings: (brand?: string, type?: string) =>
       request('GET', `/api/listings/active${brand ? `?brand=${brand}` : ''}${type ? `${brand ? '&' : '?'}type=${type}` : ''}`),

@@ -3,18 +3,23 @@ import { useNavigate } from 'react-router-dom'
 import { useUser } from '@clerk/react'
 import { useApi } from '../services/api.ts'
 
-const ADMIN_CLERK_ID = 'user_3E5oYSNAmxL21Dl2gbwF6G2AnbL'
+const ADMIN_CLERK_ID = 'user_3EbwSlFA3r3KenRx7GfwXnrtEw1'
 
 interface GiftCard {
   id: string
   brand: string
+  description: string | null
   cardNumber: string
   pin: string
   faceValue: number
   status: string
   createdAt: string
   user: { email: string; name: string | null }
-  listing: { listingType: string; askingPrice: number } | null
+  listing: {
+    buyNowPrice: number | null
+    minAcceptPrice: number | null
+    acceptsExchange: boolean
+  } | null
 }
 
 interface Overview {
@@ -131,7 +136,7 @@ export default function Admin() {
                   <div className="flex items-start justify-between">
                     <div className="space-y-1">
                       <p className="text-sm font-semibold text-[#1a1a2e]">
-                        {card.brand} — ${card.faceValue.toFixed(2)}
+                        {card.brand}{card.description ? ` — ${card.description}` : ''} — ${card.faceValue.toFixed(2)}
                       </p>
                       <p className="text-xs text-[#7a7a9a]">
                         Submitted by {card.user.name ?? card.user.email}
@@ -141,16 +146,28 @@ export default function Admin() {
                       </p>
                       <div className="pt-2 space-y-1">
                         <p className="text-xs font-mono text-[#4a4a6a]">
-                          Card: {card.cardNumber}
+                          Card Number: {card.cardNumber}
                         </p>
                         <p className="text-xs font-mono text-[#4a4a6a]">
                           PIN: {card.pin}
                         </p>
                       </div>
                       {card.listing && (
-                        <p className="text-xs text-[#7a7a9a] pt-1">
-                          Listed as: {card.listing.listingType} — {card.listing.askingPrice} credits
-                        </p>
+                        <div className="pt-2 space-y-1">
+                          {card.listing.buyNowPrice && (
+                            <p className="text-xs text-[#7a7a9a]">
+                              Buy now: ${card.listing.buyNowPrice.toFixed(2)}
+                            </p>
+                          )}
+                          {card.listing.minAcceptPrice && (
+                            <p className="text-xs text-[#7a7a9a]">
+                              Min bid: ${card.listing.minAcceptPrice.toFixed(2)}
+                            </p>
+                          )}
+                          {card.listing.acceptsExchange && (
+                            <p className="text-xs text-[#7a7a9a]">Accepts exchange</p>
+                          )}
+                        </div>
                       )}
                     </div>
                     <div className="flex gap-2">

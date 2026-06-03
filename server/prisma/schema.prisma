@@ -34,6 +34,7 @@ model GiftCard {
   userId     String?
   user       User?          @relation(fields: [userId], references: [id])
   brand      String
+  description String?
   cardNumber String
   pin        String
   balance    Float

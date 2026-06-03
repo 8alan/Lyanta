@@ -10,7 +10,8 @@ export default function SubmitCard() {
     brand: '',
     cardNumber: '',
     pin: '',
-    declaredValue: ''
+    declaredValue: '',
+    description: ''
   })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -139,23 +140,21 @@ export default function SubmitCard() {
                 />
           </div>
 
-          {/* {form.declaredValue && (
-            <div className="bg-white border border-[#e2e0db] p-6 space-y-3">
-              <div className="flex justify-between text-sm">
-                <span className="text-[#4a4a6a]">Card value</span>
-                <span className="text-[#1a1a2e]">${parseFloat(form.declaredValue).toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-[#4a4a6a]">Service fee (7%)</span>
-                <span className="text-[#1a1a2e]">-${fee.toFixed(2)}</span>
-              </div>
-              <div className="border-t border-[#e2e0db] pt-3 flex justify-between text-sm font-semibold">
-                <span className="text-[#1a1a2e]">You receive</span>
-                <span className="text-[#1a1a2e]">${creditValue.toFixed(2)} in credits</span>
-              </div>
+          {form.brand === 'Other' && (
+            <div>
+              <label className="block text-xs uppercase tracking-widest text-[#7a7a9a] mb-2">
+                Card Description <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                value={form.description}
+                onChange={e => setForm({ ...form, description: e.target.value })}
+                required
+                placeholder="e.g. Nordstrom gift card, $50"
+                className="w-full bg-white border border-[#e2e0db] px-4 py-3 text-sm text-[#1a1a2e] placeholder-[#b0b0c0] focus:outline-none focus:border-[#1a1a2e] transition-colors"
+              />
             </div>
-          )} */}
-
+          )}
           {error && <p className="text-sm text-red-600">{error}</p>}
 
           <button
