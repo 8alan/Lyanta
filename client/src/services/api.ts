@@ -46,7 +46,7 @@ export function useApi() {
       buyNowPrice?: number
       minAcceptPrice?: number
       acceptsExchange: boolean
-      preferredBrand?: string
+      preferredBrand?: string[]
       preferredMinValue?: number
     }) => request('POST', '/api/listings/create', payload),
 

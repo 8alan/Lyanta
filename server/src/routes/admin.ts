@@ -48,24 +48,24 @@ router.post('/gift-cards/:id/verify', requireAuth, requireAdmin, async (req: Req
       return
     }
 
-      await prisma.$transaction(async (tx) => {
-        await tx.giftCard.update({
-          where: { id },
-          data: {
-            status: 'AVAILABLE',
-            balance: verifiedBalance ?? giftCard.faceValue,
-            verifiedAt: new Date()
-          }
-        })
+      // await prisma.$transaction(async (tx) => {
+      //   await tx.giftCard.update({
+      //     where: { id },
+      //     data: {
+      //       status: 'AVAILABLE',
+      //       balance: verifiedBalance ?? giftCard.faceValue,
+      //       verifiedAt: new Date()
+      //     }
+      //   })
 
-        // Activate the listing if one exists
-        if (giftCard.listing) {
-          await tx.listing.update({
-            where: { id: giftCard.listing.id },
-            data: { status: 'ACTIVE' }
-          })
-        }
-      })
+      //   // Activate the listing if one exists
+      //   if (giftCard.listing) {
+      //     await tx.listing.update({
+      //       where: { id: giftCard.listing.id },
+      //       data: { status: 'ACTIVE' }
+      //     })
+      //   }
+      // })
     res.json({ success: true })
   } catch (error) {
     console.error(error)

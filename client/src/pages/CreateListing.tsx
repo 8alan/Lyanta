@@ -17,7 +17,7 @@ export default function CreateListing() {
   const [buyNowPrice, setBuyNowPrice] = useState<string>('')
   const [minAcceptPrice, setMinAcceptPrice] = useState<string>('')
   const [acceptsExchange, setAcceptsExchange] = useState(false)
-  const [preferredBrand, setPreferredBrand] = useState<string>('')
+  const [preferredBrands, setPreferredBrands] = useState<string[]>([])
   const [preferredMinValue, setPreferredMinValue] = useState<string>('')
   const [marketRate, setMarketRate] = useState<number>(0.90)
   const [loading, setLoading] = useState(false)
@@ -55,7 +55,7 @@ export default function CreateListing() {
         buyNowPrice: buyNowPrice ? parseFloat(buyNowPrice) : undefined,
         minAcceptPrice: minAcceptPrice ? parseFloat(minAcceptPrice) : undefined,
         acceptsExchange,
-        preferredBrand: preferredBrand || undefined,
+        preferredBrand: preferredBrands,
         preferredMinValue: preferredMinValue ? parseFloat(preferredMinValue) : undefined,
       })
       navigate('/dashboard')
@@ -159,19 +159,34 @@ export default function CreateListing() {
               <div className="mt-6 space-y-4 pt-4 border-t border-[#e2e0db]">
                 <div>
                   <label className="block text-xs uppercase tracking-widest text-[#7a7a9a] mb-2">
-                    Preferred brand <span className="text-[#b0b0c0] normal-case">(optional)</span>
+                    Preferred brands <span className="text-[#b0b0c0] normal-case">(optional — select all that apply)</span>
                   </label>
-                  <select
-                    value={preferredBrand}
-                    onChange={e => setPreferredBrand(e.target.value)}
-                    className="w-full bg-white border border-[#e2e0db] px-4 py-3 text-sm text-[#1a1a2e] focus:outline-none focus:border-[#1a1a2e] transition-colors"
-                  >
-                    <option value="">Any brand</option>
+                  <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto border border-[#e2e0db] bg-white p-3">
                     {SUPPORTED_BRANDS.filter(b => b !== brand).map(b => (
-                      <option key={b} value={b}>{b}</option>
+                      <button
+                        key={b}
+                        type="button"
+                        onClick={() => {
+                          setPreferredBrands(prev =>
+                            prev.includes(b) ? prev.filter(x => x !== b) : [...prev, b]
+                          )
+                        }}
+                        className={`text-left text-sm px-3 py-2 border transition-colors ${
+                          preferredBrands.includes(b)
+                            ? 'bg-[#1a1a2e] text-white border-[#1a1a2e]'
+                            : 'bg-white text-[#1a1a2e] border-[#e2e0db] hover:border-[#1a1a2e]'
+                        }`}
+                      >
+                        {b}
+                      </button>
                     ))}
-                  </select>
-                </div>
+                  </div>
+                  {preferredBrands.length > 0 && (
+                    <p className="text-xs text-[#7a7a9a] mt-1">
+                      Selected: {preferredBrands.join(', ')}
+                    </p>
+                  )}
+                </div>                                          
                 <div>
                   <label className="block text-xs uppercase tracking-widest text-[#7a7a9a] mb-2">
                     Minimum card value ($) <span className="text-[#b0b0c0] normal-case">(optional)</span>

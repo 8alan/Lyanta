@@ -15,8 +15,8 @@ export default function SubmitCard() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
-  const fee = form.declaredValue ? parseFloat(form.declaredValue) * 0.07 : 0
-  const creditValue = form.declaredValue ? parseFloat(form.declaredValue) - fee : 0
+  // const fee = form.declaredValue ? parseFloat(form.declaredValue) * 0.07 : 0
+  // const creditValue = form.declaredValue ? parseFloat(form.declaredValue) - fee : 0
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -139,7 +139,7 @@ export default function SubmitCard() {
                 />
           </div>
 
-          {form.declaredValue && (
+          {/* {form.declaredValue && (
             <div className="bg-white border border-[#e2e0db] p-6 space-y-3">
               <div className="flex justify-between text-sm">
                 <span className="text-[#4a4a6a]">Card value</span>
@@ -154,7 +154,7 @@ export default function SubmitCard() {
                 <span className="text-[#1a1a2e]">${creditValue.toFixed(2)} in credits</span>
               </div>
             </div>
-          )}
+          )} */}
 
           {error && <p className="text-sm text-red-600">{error}</p>}
 

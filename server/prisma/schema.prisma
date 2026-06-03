@@ -58,7 +58,7 @@ model Listing {
   buyNowPrice        Float?
   minAcceptPrice     Float?
   acceptsExchange    Boolean       @default(false)
-  preferredBrand     String?
+  preferredBrand     String[]
   preferredMinValue  Float?
   status             ListingStatus @default(PENDING_VERIFICATION)
   createdAt          DateTime      @default(now())
