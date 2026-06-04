@@ -6,7 +6,7 @@ dotenv.config({ path: path.resolve(process.cwd(), '.env') })
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
-const FROM_EMAIL = 'Lantana <onboarding@resend.dev>'
+const FROM_EMAIL = 'Lantana <notifications@myriapods.com>'
 
 export async function sendBidReceivedEmail(
   sellerEmail: string,

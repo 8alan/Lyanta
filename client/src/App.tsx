@@ -22,11 +22,11 @@ function App() {
       <Route path="/" element={isSignedIn ? <Navigate to="/dashboard" /> : <Landing />} />
       <Route path="/dashboard" element={isSignedIn ? <Dashboard /> : <Navigate to="/" />} />
       <Route path="/submit" element={isSignedIn ? <SubmitCard /> : <Navigate to="/" />} />
-      <Route path="/browse" element={isSignedIn ? <BrowseCards /> : <Navigate to="/" />} />
+      <Route path="/browse" element={<BrowseCards />} />
       <Route path="/cashout" element={isSignedIn ? <CashOut /> : <Navigate to="/" />} />
       <Route path="/buy-credits" element={isSignedIn ? <BuyCredits /> : <Navigate to="/" />} />
       <Route path="/create-listing" element={isSignedIn ? <CreateListing /> : <Navigate to="/" />} />
-      <Route path="/listing/:id" element={isSignedIn ? <ListingDetail /> : <Navigate to="/" />} />
+      <Route path="/listing/:id" element={<ListingDetail />} />
       <Route path="/admin" element={isSignedIn ? <Admin /> : <Navigate to="/" />} />
       <Route path="/my-listings" element={isSignedIn ? <MyListings /> : <Navigate to="/" />} />
       <Route path="/edit-listing/:id" element={isSignedIn ? <EditListing /> : <Navigate to="/" />} />

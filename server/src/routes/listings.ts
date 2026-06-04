@@ -43,11 +43,16 @@ router.post('/create', requireAuth, async (req: Request, res: Response) => {
       return
     }
 
-    if (giftCard.status !== 'PENDING' && giftCard.status !== 'VERIFIED') {
-      res.status(400).json({ error: 'Gift card is not available for listing' })
+    const allowedStatuses = ['PENDING', 'VERIFIED', 'AVAILABLE']
+    if (!allowedStatuses.includes(giftCard.status)) {
+      res.status(400).json({ error: 'This gift card cannot be listed' })
       return
     }
 
+    if (giftCard.status === 'TRADED' || giftCard.status === 'CASHED_OUT') {
+      res.status(400).json({ error: 'This gift card has already been sold' })
+      return
+    }
     const existingListing = await prisma.listing.findUnique({
       where: { giftCardId }
     })
