@@ -177,34 +177,24 @@ router.post('/:id/cancel', requireAuth, async (req: Request, res: Response) => {
 })
 // Get all active listings
 
-router.get('/active', requireAuth, async (req: Request, res: Response) => {
+router.get('/active', async (req: Request, res: Response) => {
   try {
-    
     const brandFilter = typeof req.query.brand === 'string' ? req.query.brand : undefined
     const searchFilter = typeof req.query.search === 'string' ? req.query.search : undefined
-    const clerkId = req.userId!
+
     const giftCardFilter = searchFilter
       ? { brand: { contains: searchFilter, mode: 'insensitive' as const } }
       : brandFilter
       ? { brand: { equals: brandFilter } }
       : undefined
 
-    const user = await prisma.user.findUnique({ where: { clerkId } })
-    if (!user) {
-      res.status(404).json({ error: 'User not found' })
-      return
-    }
-
     const listings = await prisma.listing.findMany({
-        where: {
-          status: 'ACTIVE',
-          giftCard: giftCardFilter
-        },
-
-            include: {
-        giftCard: {
-          select: { brand: true, faceValue: true }
-        },
+      where: {
+        status: 'ACTIVE',
+        giftCard: giftCardFilter
+      },
+      include: {
+        giftCard: { select: { brand: true, faceValue: true, description: true } },
         user: { select: { username: true, name: true, clerkId: true } }
       },
       orderBy: { createdAt: 'desc' }
@@ -285,7 +275,7 @@ router.get('/mine', requireAuth, async (req: Request, res: Response) => {
 })
 
 // Get a single listing
-router.get('/:id', requireAuth, async (req: Request, res: Response) => {
+router.get('/:id', async (req: Request, res: Response) => {
   try {
     const id = req.params.id as string
 

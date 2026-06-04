@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import { useApi } from '../services/api.ts'
 import { getBrandImage, SUPPORTED_BRANDS } from '../services/brandImages.ts'
 import { useUser } from '@clerk/react'
+import { useAuth } from '@clerk/react'
+import { SignUpButton } from '@clerk/react'
 
 interface Listing {
   id: string
@@ -35,6 +37,7 @@ export default function BrowseCards() {
   const [selectedBrand, setSelectedBrand] = useState<string | null>(null)
   const [search, setSearch] = useState('')
   const { user } = useUser()
+  const { isSignedIn } = useAuth()
   
   useEffect(() => {
   api.getActiveListings(selectedBrand ?? undefined)
@@ -70,6 +73,16 @@ export default function BrowseCards() {
           ← Back to dashboard
         </button>
       </nav>
+      {!isSignedIn && (
+        <div className="bg-[#1a1a2e] text-white px-8 py-3 flex items-center justify-between">
+          <p className="text-sm">Want to sell your gift cards or make offers? Create a free account.</p>
+          <SignUpButton mode="modal">
+            <button className="text-sm bg-white text-[#1a1a2e] px-4 py-1.5 hover:bg-gray-100 transition-colors">
+              Sign up free
+            </button>
+          </SignUpButton>
+        </div>
+      )}
 
       <div className="flex min-h-[calc(100vh-64px)]">
 

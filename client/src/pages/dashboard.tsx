@@ -66,6 +66,12 @@ export default function Dashboard() {
       <nav className="flex items-center justify-between px-8 py-5 border-b border-[#e2e0db] bg-white">
         <span className="text-xl font-semibold tracking-tight">Lantana</span>
         <div className="flex items-center gap-6">
+          <button
+            onClick={() => navigate('/browse')}
+            className="text-sm text-[#4a4a6a] hover:text-[#1a1a2e] transition-colors"
+          >
+            Browse
+          </button>
           <span className="text-sm text-[#4a4a6a]">{user?.emailAddresses[0]?.emailAddress}</span>
           <UserButton />
         </div>

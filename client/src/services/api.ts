@@ -5,22 +5,26 @@ const BASE_URL = 'http://localhost:5000'
 export function useApi() {
   const { getToken } = useAuth()
 
-  const request = async (method: string, path: string, body?: object) => {
-    const token = await getToken()
-    const res = await fetch(`${BASE_URL}${path}`, {
-      method,
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
-      ...(body ? { body: JSON.stringify(body) } : {}),
-    })
-    const text = await res.text()
-    console.log('RAW RESPONSE:', text)
-    const data = JSON.parse(text)
-    if (!res.ok) throw new Error(data.error || 'Request failed')
-    return data
+  const request = async (method: string, path: string, body?: object, requiresAuth = true) => {
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
   }
+
+  if (requiresAuth) {
+    const token = await getToken()
+    if (token) headers['Authorization'] = `Bearer ${token}`
+  }
+
+  const res = await fetch(`${BASE_URL}${path}`, {
+    method,
+    headers,
+    ...(body ? { body: JSON.stringify(body) } : {}),
+  })
+
+  const data = await res.json()
+  if (!res.ok) throw new Error(data.error || 'Request failed')
+  return data
+}
   
   
   return {
@@ -64,7 +68,7 @@ export function useApi() {
       request('DELETE', `/api/giftcards/${id}`),
 
     getActiveListings: (brand?: string, type?: string) =>
-      request('GET', `/api/listings/active${brand ? `?brand=${brand}` : ''}${type ? `${brand ? '&' : '?'}type=${type}` : ''}`),
+      request('GET', `/api/listings/active${brand ? `?brand=${brand}` : ''}${type ? `${brand ? '&' : '?'}type=${type}` : ''}`, undefined, false),
 
     getMarketRate: (brand: string) =>
       request('GET', `/api/listings/market-rate/${brand}`),
@@ -75,8 +79,8 @@ export function useApi() {
       request('POST', `/api/listings/${id}/purchase`, {}),
 
     getListingById: (id: string) =>
-      request('GET', `/api/listings/${id}`),
-
+      request('GET', `/api/listings/${id}`, undefined, false),
+    
     getAdminOverview: () => request('GET', '/api/admin/overview'),
 
     getAdminPendingCards: () => request('GET', '/api/admin/gift-cards/pending'),
