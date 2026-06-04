@@ -118,35 +118,35 @@ export default function Dashboard() {
               </div>
             ) : (
               cards.map((card, i) => (
-              <div
-                key={card.id}
-                className={`flex items-center justify-between px-6 py-4 ${i !== cards.length - 1 ? 'border-b border-[#e2e0db]' : ''}`}
-              >
-                <div>
-                  <p className="text-sm font-semibold text-[#1a1a2e]">{card.brand} Gift Card</p>
-                  <p className="text-xs text-[#7a7a9a]">{new Date(card.createdAt).toLocaleDateString()}</p>
-                </div>
-                <div className="flex items-center gap-4">
-                  <div className="text-right">
-                    <p className="text-sm font-semibold text-[#1a1a2e]">${card.faceValue.toFixed(2)}</p>
-                    <p className={`text-xs ${statusColor[card.status] ?? 'text-[#7a7a9a]'}`}>
-                      {statusLabel[card.status] ?? card.status}
-                    </p>
+                <div
+                  key={card.id}
+                  className={`group flex items-center justify-between px-6 py-4 ${i !== cards.length - 1 ? 'border-b border-[#e2e0db]' : ''}`}
+                >
+                  <div>
+                    <p className="text-sm font-semibold text-[#1a1a2e]">{card.brand} Gift Card</p>
+                    <p className="text-xs text-[#7a7a9a]">{new Date(card.createdAt).toLocaleDateString()}</p>
                   </div>
-                  {card.status === 'PENDING' && (
-                    <button
-                      onClick={async () => {
-                        await api.deleteGiftCard(card.id)
-                        setCards(prev => prev.filter(c => c.id !== card.id))
-                      }}
-                      className="text-xs text-red-500 hover:text-red-700 transition-colors"
-                    >
-                      Delete
-                    </button>
-                  )}
+                  <div className="flex items-center gap-4">
+                    <div className="text-right">
+                      <p className="text-sm font-semibold text-[#1a1a2e]">${card.faceValue.toFixed(2)}</p>
+                      <p className={`text-xs ${statusColor[card.status] ?? 'text-[#7a7a9a]'}`}>
+                        {statusLabel[card.status] ?? card.status}
+                      </p>
+                    </div>
+                    {(card.status === 'PENDING' || card.status === 'AVAILABLE') && (
+                      <button
+                        onClick={async () => {
+                          await api.deleteGiftCard(card.id)
+                          setCards(prev => prev.filter(c => c.id !== card.id))
+                        }}
+                        className="text-xs text-red-500 hover:text-red-700 transition-colors opacity-0 group-hover:opacity-100"
+                      >
+                        Delete
+                      </button>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))
+              ))
             )}
           </div>
         </div>
