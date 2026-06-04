@@ -105,6 +105,9 @@ export function useApi() {
 
     getCardDetails: (listingId: string) =>
       request('GET', `/api/listings/${listingId}/card-details`),
+    
+    getMyTrades: () => request('GET', '/api/trades/mine'),
+
   }
       
 }

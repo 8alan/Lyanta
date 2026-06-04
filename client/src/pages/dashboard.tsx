@@ -19,6 +19,7 @@ export default function Dashboard() {
   const { setBalance } = useStore()
   const [cards, setCards] = useState<GiftCard[]>([])
   const [loading, setLoading] = useState(true)
+
   const hour = new Date().getHours()
   const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening'
 
@@ -33,18 +34,11 @@ export default function Dashboard() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const actions = [
-    { label: 'Submit a Gift Card', desc: 'Exchange for cash or credits', path: '/submit' },
-    { label: 'Browse Cards', desc: 'Trade for a card you want', path: '/browse' },
-    { label: 'My Listings', desc: 'Manage your active listings', path: '/my-listings' },
-  ]
-
   const statusLabel: Record<string, string> = {
     PENDING: 'Pending verification',
     VERIFIED: 'Verified',
-    LOCKED: 'Locked',
-    AVAILABLE: 'Available',
-    TRADED: 'Traded',
+    AVAILABLE: 'Listed',
+    TRADED: 'Sold',
     CASHED_OUT: 'Cashed out',
     FLAGGED: 'Flagged',
     FAILED: 'Failed',
@@ -53,7 +47,6 @@ export default function Dashboard() {
   const statusColor: Record<string, string> = {
     PENDING: 'text-[#7a7a9a]',
     VERIFIED: 'text-green-600',
-    LOCKED: 'text-yellow-600',
     AVAILABLE: 'text-green-600',
     TRADED: 'text-[#1a1a2e]',
     CASHED_OUT: 'text-[#1a1a2e]',
@@ -78,41 +71,51 @@ export default function Dashboard() {
       </nav>
 
       <div className="max-w-4xl mx-auto px-8 py-12">
-        <div className="mb-12">
-          <p className="text-xs uppercase tracking-widest text-[#7a7a9a] mb-2">Dashboard</p>
-          <h1 className="text-3xl font-semibold text-[#1a1a2e]">
-            {greeting}, {user?.firstName ?? 'there'}.
-          </h1>
-        </div>
 
-        {/* <div className="bg-white border border-[#e2e0db] p-8 mb-6 flex items-center justify-between">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-10">
           <div>
-            <p className="text-xs uppercase tracking-widest text-[#7a7a9a] mb-1">Lantana Credits</p>
-            <p className="text-4xl font-semibold text-[#1a1a2e]">${balance.toFixed(2)}</p>
+            <p className="text-xs uppercase tracking-widest text-[#7a7a9a] mb-1">Dashboard</p>
+            <h1 className="text-3xl font-semibold text-[#1a1a2e]">
+              {greeting}, {user?.firstName ?? 'there'}.
+            </h1>
           </div>
           <button
-            onClick={() => navigate('/buy-credits')}
-            className="text-sm bg-[#1a1a2e] text-white px-4 py-2 hover:bg-[#2d2d4e] transition-colors"
+            onClick={() => navigate('/submit')}
+            className="bg-[#1a1a2e] text-white px-5 py-2 text-sm hover:bg-[#2d2d4e] transition-colors"
           >
-            Buy credits
+            + Submit a card
           </button>
-        </div> */}
+        </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-12">
-          {actions.map(({ label, desc, path }) => (
+        {/* Quick Links */}
+        <div className="flex gap-3 mb-10 flex-wrap">
+          {[
+            { label: 'My Listings', path: '/my-listings' },
+            { label: 'My Trades', path: '/my-trades' },
+            { label: 'Browse Cards', path: '/browse' },
+          ].map(({ label, path }) => (
             <button
               key={label}
               onClick={() => navigate(path)}
-              className="bg-white border border-[#e2e0db] p-6 text-left hover:border-[#1a1a2e] transition-colors"
+              className="text-sm border border-[#e2e0db] bg-white px-4 py-2 text-[#4a4a6a] hover:border-[#1a1a2e] hover:text-[#1a1a2e] transition-colors"
             >
-              <p className="text-sm font-semibold text-[#1a1a2e] mb-1">{label}</p>
-              <p className="text-xs text-[#7a7a9a]">{desc}</p>
+              {label}
             </button>
           ))}
         </div>
 
+        {/* Recent Activity */}
         <div>
-          <p className="text-xs uppercase tracking-widest text-[#7a7a9a] mb-4">Recent Activity</p>
+          <div className="flex items-center justify-between mb-4">
+            <p className="text-xs uppercase tracking-widest text-[#7a7a9a]">My Cards</p>
+            <button
+              onClick={() => navigate('/submit')}
+              className="text-xs text-[#4a4a6a] hover:text-[#1a1a2e] transition-colors"
+            >
+              Submit new →
+            </button>
+          </div>
           <div className="bg-white border border-[#e2e0db]">
             {loading ? (
               <div className="p-8 text-center">
@@ -120,7 +123,13 @@ export default function Dashboard() {
               </div>
             ) : cards.length === 0 ? (
               <div className="p-8 text-center">
-                <p className="text-sm text-[#7a7a9a]">No transactions yet.</p>
+                <p className="text-sm text-[#7a7a9a] mb-3">No cards submitted yet.</p>
+                <button
+                  onClick={() => navigate('/submit')}
+                  className="text-sm bg-[#1a1a2e] text-white px-5 py-2 hover:bg-[#2d2d4e] transition-colors"
+                >
+                  Submit your first card
+                </button>
               </div>
             ) : (
               cards.map((card, i) => (

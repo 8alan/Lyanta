@@ -9,6 +9,7 @@ import webhookRouter from './routes/webhooks.js'
 import stripeRouter from './routes/stripe.js'
 import listingsRouter from './routes/listings.js'
 import adminRouter from './routes/admin.js'
+import tradesRouter from './routes/trades.js'
 console.log('Stripe router loaded:', stripeRouter)
 
 dotenv.config()
@@ -16,6 +17,8 @@ dotenv.config()
 
 const app = express()
 const PORT = process.env.PORT || 5000
+
+app.use('/api/trades', tradesRouter)
 
 app.use(cors({
   origin: ['http://localhost:5173', 'http://localhost:5174'],

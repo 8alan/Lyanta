@@ -52,7 +52,7 @@ router.post('/create', requireAuth, async (req: Request, res: Response) => {
     const existingListing = await prisma.listing.findUnique({
       where: { giftCardId }
     })
-
+    
     if (existingListing) {
       res.status(400).json({ error: 'A listing already exists for this card' })
       return
@@ -70,14 +70,14 @@ router.post('/create', requireAuth, async (req: Request, res: Response) => {
         status: 'PENDING_VERIFICATION'
       }
     })
-
+    
     res.status(201).json({ listing })
   } catch (error) {
     console.error(error)
     res.status(500).json({ error: 'Internal server error' })
   }
 })
-
+  
 // Edit a listing
 router.patch('/:id', requireAuth, async (req: Request, res: Response) => {
   try {
@@ -101,7 +101,7 @@ router.patch('/:id', requireAuth, async (req: Request, res: Response) => {
       res.status(400).json({ error: 'This listing cannot be edited' })
       return
     }
-
+      
     const updated = await prisma.listing.update({
       where: { id },
       data: {
@@ -440,7 +440,18 @@ router.post('/:id/bid', requireAuth, async (req: Request, res: Response) => {
         status: 'PENDING'
       }
     })
+    const existingBid = await prisma.bid.findFirst({
+      where: {
+        listingId: id,
+        bidderId: user.id,
+        status: 'PENDING'
+      }
+    })
 
+    if (existingBid) {
+      res.status(400).json({ error: 'You already have a pending bid on this listing' })
+      return
+    }
     // Notify seller
     const seller = await prisma.user.findUnique({ where: { id: listing.userId } })
     if (seller?.email) {
