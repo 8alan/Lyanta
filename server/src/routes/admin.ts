@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express'
 import { requireAuth } from '../middleware/auth.js'
 import prisma from '../db.js'
+import { decrypt } from '../services/encryption.js'
 
 const router = Router()
 const ADMIN_CLERK_ID = 'user_3EbwSlFA3r3KenRx7GfwXnrtEw1'
@@ -24,6 +25,13 @@ router.get('/gift-cards/pending', requireAuth, requireAdmin, async (req: Request
       },
       orderBy: { createdAt: 'asc' }
     })
+
+    const decrypted = giftCards.map(card => ({
+      ...card,
+      cardNumber: decrypt(card.cardNumber),
+      pin: decrypt(card.pin)
+    }))
+    res.json({ giftCards: decrypted })
     res.json({ giftCards })
   } catch (error) {
     console.error(error)

@@ -80,7 +80,7 @@ export function useApi() {
 
     getListingById: (id: string) =>
       request('GET', `/api/listings/${id}`, undefined, false),
-    
+
     getAdminOverview: () => request('GET', '/api/admin/overview'),
 
     getAdminPendingCards: () => request('GET', '/api/admin/gift-cards/pending'),
@@ -102,6 +102,9 @@ export function useApi() {
 
     rejectBid: (listingId: string, bidId: string) =>
       request('POST', `/api/listings/${listingId}/bids/${bidId}/reject`, {}),
+
+    getCardDetails: (listingId: string) =>
+      request('GET', `/api/listings/${listingId}/card-details`),
   }
       
 }

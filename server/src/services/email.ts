@@ -5,7 +5,6 @@ import path from 'path'
 dotenv.config({ path: path.resolve(process.cwd(), '.env') })
 
 const resend = new Resend(process.env.RESEND_API_KEY)
-
 const FROM_EMAIL = 'Lantana <notifications@myriapods.com>'
 
 export async function sendBidReceivedEmail(
@@ -107,6 +106,40 @@ export async function sendCardSoldEmail(
         </p>
         <p style="color: #4a4a6a; font-size: 14px;">
           Log in to Lantana to complete the transaction.
+        </p>
+      </div>
+    `
+  })
+}
+
+export async function sendCardDetailsEmail(
+  buyerEmail: string,
+  buyerName: string,
+  brand: string,
+  cardNumber: string,
+  pin: string,
+  faceValue: number
+) {
+  await resend.emails.send({
+    from: FROM_EMAIL,
+    to: buyerEmail,
+    subject: `Your ${brand} gift card is ready`,
+    html: `
+      <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto; padding: 32px;">
+        <h2 style="font-size: 20px; font-weight: 600; color: #1a1a2e;">Your card is ready</h2>
+        <p style="color: #4a4a6a; font-size: 14px;">
+          Hi ${buyerName}, your ${brand} gift card worth $${faceValue.toFixed(2)} is ready to use.
+        </p>
+        <div style="background: #f8f7f4; border: 1px solid #e2e0db; padding: 24px; margin: 24px 0;">
+          <p style="margin: 0 0 8px; font-size: 14px; color: #1a1a2e;">
+            <strong>Card Number:</strong> ${cardNumber}
+          </p>
+          <p style="margin: 0; font-size: 14px; color: #1a1a2e;">
+            <strong>PIN:</strong> ${pin}
+          </p>
+        </div>
+        <p style="color: #7a7a9a; font-size: 12px;">
+          Keep this email safe. These details will not be shown again on Lantana.
         </p>
       </div>
     `

@@ -1,12 +1,8 @@
 import { Router, Request, Response } from 'express'
 import { requireAuth } from '../middleware/auth.js'
 import prisma from '../db.js'
-import {
-  sendBidReceivedEmail,
-  sendBidAcceptedEmail,
-  sendBidRejectedEmail,
-  sendCardSoldEmail
-} from '../services/email.js'
+import { decrypt } from '../services/encryption.js'
+import { sendBidReceivedEmail, sendBidAcceptedEmail, sendBidRejectedEmail, sendCardDetailsEmail } from '../services/email.js'
 
 const router = Router()
 
@@ -176,6 +172,83 @@ router.post('/:id/cancel', requireAuth, async (req: Request, res: Response) => {
   }
 })
 // Get all active listings
+// Get card details for a completed trade (buyer only, one-time reveal)
+router.get('/:id/card-details', requireAuth, async (req: Request, res: Response) => {
+  try {
+    const id = req.params.id as string
+    const clerkId = req.userId!
+
+    const user = await prisma.user.findUnique({ where: { clerkId } })
+    if (!user) {
+      res.status(404).json({ error: 'User not found' })
+      return
+    }
+
+    const trade = await prisma.trade.findFirst({
+      where: {
+        listingId: id,
+        buyerId: user.id,
+        status: { in: ['PENDING', 'COMPLETED'] }
+      },
+      include: {
+        listing: {
+          include: {
+            giftCard: true
+          }
+        },
+        seller: { select: { email: true, name: true } }
+      }
+    })
+
+    if (!trade) {
+      res.status(403).json({ error: 'Not authorized to view these card details' })
+      return
+    }
+
+    const giftCard = trade.listing.giftCard
+
+    const cardDetails = {
+      brand: giftCard.brand,
+      cardNumber: decrypt(giftCard.cardNumber),
+      pin: decrypt(giftCard.pin),
+      faceValue: giftCard.faceValue,
+      description: giftCard.description
+    }
+
+    // Mark as revealed and complete the trade
+    await prisma.$transaction([
+      prisma.giftCard.update({
+        where: { id: giftCard.id },
+        data: { revealed: true, status: 'TRADED' }
+      }),
+      prisma.trade.update({
+        where: { id: trade.id },
+        data: { status: 'COMPLETED' }
+      }),
+      prisma.listing.update({
+        where: { id },
+        data: { status: 'COMPLETED' }
+      })
+    ])
+
+    // Send card details via email
+    if (user.email) {
+      sendCardDetailsEmail(
+        user.email,
+        user.name ?? 'there',
+        cardDetails.brand,
+        cardDetails.cardNumber,
+        cardDetails.pin,
+        cardDetails.faceValue
+      ).catch(console.error)
+    }
+
+    res.json({ cardDetails })
+  } catch (error) {
+    console.error(error)
+    res.status(500).json({ error: 'Internal server error' })
+  }
+})
 
 router.get('/active', async (req: Request, res: Response) => {
   try {

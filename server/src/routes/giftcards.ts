@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express'
 import { requireAuth } from '../middleware/auth.js'
 import prisma from '../db.js'
+import { encrypt } from '../services/encryption.js'
 
 const router = Router()
 
@@ -62,8 +63,8 @@ router.post('/submit', requireAuth, async (req: Request, res: Response) => {
       data: {
         userId: user.id,
         brand,
-        cardNumber,
-        pin,
+        cardNumber: encrypt(cardNumber),
+        pin: encrypt(pin),
         balance: declaredValue,
         faceValue: declaredValue,
         status: 'PENDING',

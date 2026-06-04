@@ -46,7 +46,7 @@ model GiftCard {
   verifiedAt DateTime?
   createdAt  DateTime       @default(now())
   updatedAt  DateTime       @updatedAt
-
+  revealed    Boolean  @default(false)
   listing    Listing?
 }
 
