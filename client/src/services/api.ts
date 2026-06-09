@@ -12,6 +12,7 @@ export function useApi() {
 
   if (requiresAuth) {
     const token = await getToken()
+    console.log('Token being sent:', token ? token.substring(0, 20) + '...' : 'NULL')
     if (token) headers['Authorization'] = `Bearer ${token}`
   }
 
@@ -33,6 +34,7 @@ export function useApi() {
       cardNumber: string
       pin: string
       declaredValue: number
+      description?: string
     }) => request('POST', '/api/giftcards/submit', payload),
 
     getMyCards: () => request('GET', '/api/giftcards/mine'),

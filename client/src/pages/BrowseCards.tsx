@@ -16,6 +16,7 @@ interface Listing {
   giftCard: {
     brand: string
     faceValue: number
+    description: string | null
   }
   user: {
     username: string | null
@@ -178,7 +179,11 @@ export default function BrowseCards() {
                     <div className="p-4">
                       <div className="flex items-start justify-between mb-3">
                         <div>
-                          <p className="text-sm font-semibold text-[#1a1a2e]">{listing.giftCard.brand}</p>
+                          <p className="text-sm font-semibold text-[#1a1a2e]">
+                            {listing.giftCard.brand === 'Other' && listing.giftCard.description
+                              ? listing.giftCard.description
+                              : listing.giftCard.brand}
+                          </p>
                           <p className="text-xs text-[#7a7a9a] mt-0.5">@{seller}</p>
                         </div>
                         <p className="text-xs text-[#7a7a9a] line-through">

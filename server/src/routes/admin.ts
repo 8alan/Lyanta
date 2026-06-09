@@ -4,9 +4,11 @@ import prisma from '../db.js'
 import { decrypt } from '../services/encryption.js'
 
 const router = Router()
-const ADMIN_CLERK_ID = 'user_3EbwSlFA3r3KenRx7GfwXnrtEw1'
+const ADMIN_CLERK_ID = 'user_3EkMoyxFtTPRfXQUL5VL5eKCPil'
 
 function requireAdmin(req: Request, res: Response, next: Function) {
+  console.log('requireAdmin - userId:', req.userId)
+  console.log('requireAdmin - ADMIN_CLERK_ID:', ADMIN_CLERK_ID)
   if (req.userId !== ADMIN_CLERK_ID) {
     res.status(403).json({ error: 'Forbidden' })
     return
@@ -14,12 +16,19 @@ function requireAdmin(req: Request, res: Response, next: Function) {
   next()
 }
 
-// Get all pending gift cards
 router.get('/gift-cards/pending', requireAuth, requireAdmin, async (req: Request, res: Response) => {
   try {
     const giftCards = await prisma.giftCard.findMany({
       where: { status: 'PENDING' },
-      include: {
+      select: {
+        id: true,
+        brand: true,
+        description: true,
+        cardNumber: true,
+        pin: true,
+        faceValue: true,
+        status: true,
+        createdAt: true,
         user: { select: { email: true, name: true } },
         listing: { select: { buyNowPrice: true, minAcceptPrice: true, acceptsExchange: true } }
       },
@@ -31,15 +40,14 @@ router.get('/gift-cards/pending', requireAuth, requireAdmin, async (req: Request
       cardNumber: decrypt(card.cardNumber),
       pin: decrypt(card.pin)
     }))
+
     res.json({ giftCards: decrypted })
-    res.json({ giftCards })
   } catch (error) {
     console.error(error)
     res.status(500).json({ error: 'Internal server error' })
   }
 })
 
-// Verify a gift card
 router.post('/gift-cards/:id/verify', requireAuth, requireAdmin, async (req: Request, res: Response) => {
   try {
     const id = req.params.id as string
@@ -65,16 +73,11 @@ router.post('/gift-cards/:id/verify', requireAuth, requireAdmin, async (req: Req
         }
       })
 
-      console.log('Gift card updated, listing:', giftCard.listing)
-
       if (giftCard.listing) {
         await tx.listing.update({
           where: { id: giftCard.listing.id },
           data: { status: 'ACTIVE' }
         })
-        console.log('Listing activated:', giftCard.listing.id)
-      } else {
-        console.log('No listing found for this card')
       }
     })
 
@@ -85,7 +88,6 @@ router.post('/gift-cards/:id/verify', requireAuth, requireAdmin, async (req: Req
   }
 })
 
-// Reject a gift card
 router.post('/gift-cards/:id/reject', requireAuth, requireAdmin, async (req: Request, res: Response) => {
   try {
     const id = req.params.id as string
@@ -95,12 +97,10 @@ router.post('/gift-cards/:id/reject', requireAuth, requireAdmin, async (req: Req
       data: { status: 'FAILED' }
     })
 
-    if (id) {
-      await prisma.listing.updateMany({
-        where: { giftCardId: id },
-        data: { status: 'CANCELLED' }
-      })
-    }
+    await prisma.listing.updateMany({
+      where: { giftCardId: id },
+      data: { status: 'CANCELLED' }
+    })
 
     res.json({ success: true })
   } catch (error) {
@@ -109,7 +109,6 @@ router.post('/gift-cards/:id/reject', requireAuth, requireAdmin, async (req: Req
   }
 })
 
-// Get all users
 router.get('/users', requireAuth, requireAdmin, async (req: Request, res: Response) => {
   try {
     const users = await prisma.user.findMany({
@@ -123,7 +122,6 @@ router.get('/users', requireAuth, requireAdmin, async (req: Request, res: Respon
   }
 })
 
-// Get platform overview
 router.get('/overview', requireAuth, requireAdmin, async (req: Request, res: Response) => {
   try {
     const [totalUsers, pendingCards, activeListings, completedListings] = await Promise.all([

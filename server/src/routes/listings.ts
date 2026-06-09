@@ -49,8 +49,11 @@ router.post('/create', requireAuth, async (req: Request, res: Response) => {
       res.status(400).json({ error: 'This gift card has already been sold' })
       return
     }
-    const existingListing = await prisma.listing.findUnique({
-      where: { giftCardId }
+    const existingListing = await prisma.listing.findFirst({
+      where: { 
+        giftCardId,
+        status: { not: 'CANCELLED' }
+      }
     })
     
     if (existingListing) {
@@ -150,9 +153,9 @@ router.post('/:id/cancel', requireAuth, async (req: Request, res: Response) => {
     await prisma.$transaction(async (tx) => {
       // Reject all pending bids
       await tx.bid.updateMany({
-        where: { listingId: id, status: 'PENDING' },
-        data: { status: 'CANCELLED' }
-      })
+      where: { listingId: id, status: 'PENDING' },
+      data: { status: 'CANCELLED' }
+    })
       // Cancel the listing
       await tx.listing.update({
         where: { id },
@@ -355,7 +358,7 @@ router.get('/:id', async (req: Request, res: Response) => {
     const listing = await prisma.listing.findUnique({
       where: { id },
       include: {
-        giftCard: { select: { brand: true, faceValue: true } },
+        giftCard: { select: { brand: true, faceValue: true, description: true } },
         user: { select: { username: true, name: true } },
         bids: {
           where: { status: 'PENDING' },
@@ -430,16 +433,7 @@ router.post('/:id/bid', requireAuth, async (req: Request, res: Response) => {
       return
     }
 
-    const bid = await prisma.bid.create({
-      data: {
-        listingId: id,
-        bidderId: user.id,
-        bidType,
-        cashAmount: cashAmount ?? null,
-        offeredCardId: offeredCardId ?? null,
-        status: 'PENDING'
-      }
-    })
+    
     const existingBid = await prisma.bid.findFirst({
       where: {
         listingId: id,
@@ -452,6 +446,17 @@ router.post('/:id/bid', requireAuth, async (req: Request, res: Response) => {
       res.status(400).json({ error: 'You already have a pending bid on this listing' })
       return
     }
+    
+    const bid = await prisma.bid.create({
+      data: {
+        listingId: id,
+        bidderId: user.id,
+        bidType,
+        cashAmount: cashAmount ?? null,
+        offeredCardId: offeredCardId ?? null,
+        status: 'PENDING'
+      }
+    })
     // Notify seller
     const seller = await prisma.user.findUnique({ where: { id: listing.userId } })
     if (seller?.email) {

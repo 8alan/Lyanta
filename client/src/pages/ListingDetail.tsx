@@ -18,6 +18,7 @@ interface Listing {
   giftCard: {
     brand: string
     faceValue: number
+    description: string | null
   }
   user: {
     username: string | null
@@ -154,8 +155,12 @@ export default function ListingDetail() {
                 <span className="font-semibold">{listing.giftCard.brand}</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-[#7a7a9a]">Face value</span>
-                <span className="line-through text-[#4a4a6a]">${listing.giftCard.faceValue.toFixed(2)}</span>
+                <span className="text-[#7a7a9a]">Brand</span>
+                <span className="font-semibold">
+                  {listing.giftCard.brand === 'Other' && listing.giftCard.description
+                    ? listing.giftCard.description
+                    : listing.giftCard.brand}
+                </span>
               </div>
               {listing.buyNowPrice && (
                 <div className="flex justify-between text-sm">
@@ -192,7 +197,11 @@ export default function ListingDetail() {
           <div className="space-y-4">
             <div>
               <p className="text-xs uppercase tracking-widest text-[#7a7a9a] mb-2">Marketplace</p>
-              <h1 className="text-2xl font-semibold text-[#1a1a2e]">{listing.giftCard.brand} Gift Card</h1>
+              <h1 className="text-2xl font-semibold text-[#1a1a2e]">
+                {listing.giftCard.brand === 'Other' && listing.giftCard.description
+                  ? listing.giftCard.description
+                  : `${listing.giftCard.brand} Gift Card`}
+              </h1>
             </div>
 
             {success && (

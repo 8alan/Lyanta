@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useUser } from '@clerk/react'
 import { useApi } from '../services/api.ts'
 
-const ADMIN_CLERK_ID = 'user_3EbwSlFA3r3KenRx7GfwXnrtEw1'
+const ADMIN_CLERK_ID = 'user_3EkMoyxFtTPRfXQUL5VL5eKCPil'
 
 interface GiftCard {
   id: string
@@ -136,7 +136,7 @@ export default function Admin() {
                   <div className="flex items-start justify-between">
                     <div className="space-y-1">
                       <p className="text-sm font-semibold text-[#1a1a2e]">
-                        {card.brand}{card.description ? ` — ${card.description}` : ''} — ${card.faceValue.toFixed(2)}
+                        {card.brand === 'Other' && card.description ? card.description : card.brand} — ${card.faceValue.toFixed(2)}
                       </p>
                       <p className="text-xs text-[#7a7a9a]">
                         Submitted by {card.user.name ?? card.user.email}

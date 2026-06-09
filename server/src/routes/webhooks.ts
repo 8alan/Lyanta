@@ -51,14 +51,10 @@ router.post('/clerk', async (req: Request, res: Response) => {
       return
     }
 
-    const existingUser = await prisma.user.findUnique({ where: { clerkId: id } })
-    if (existingUser) {
-      res.json({ received: true })
-      return
-    }
-
-    await prisma.user.create({
-      data: {
+    await prisma.user.upsert({
+      where: { clerkId: id },
+      update: { email, name },
+      create: {
         clerkId: id,
         email,
         name,

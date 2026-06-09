@@ -156,7 +156,11 @@ router.delete('/:id', requireAuth, async (req: Request, res: Response) => {
 
     await prisma.$transaction(async (tx) => {
       if (giftCard.listing) {
-        await tx.listing.delete({ where: { id: giftCard.listing!.id } })
+        await tx.bid.updateMany({
+          where: { listingId: giftCard.listing.id, status: 'PENDING' },
+          data: { status: 'CANCELLED' }
+        })
+        await tx.listing.delete({ where: { id: giftCard.listing.id } })
       }
       await tx.giftCard.delete({ where: { id } })
     })

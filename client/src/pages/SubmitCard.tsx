@@ -25,11 +25,12 @@ export default function SubmitCard() {
     setLoading(true)
     try {
       const result = await api.submitGiftCard({
-        brand: form.brand,
-        cardNumber: form.cardNumber,
-        pin: form.pin,
-        declaredValue: parseFloat(form.declaredValue)
-      })
+      brand: form.brand,
+      cardNumber: form.cardNumber,
+      pin: form.pin,
+      declaredValue: parseFloat(form.declaredValue),
+      description: form.description || undefined
+    })
       navigate('/create-listing', {
         state: {
           giftCardId: result.giftCard.id,
