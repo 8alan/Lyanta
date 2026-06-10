@@ -110,6 +110,30 @@ export function useApi() {
     
     getMyTrades: () => request('GET', '/api/trades/mine'),
 
+    getMyProfile: () => request('GET', '/api/profile/me'),
+    updateUsername: (username: string) =>
+      request('PATCH', '/api/profile/username', { username }),
+    
+    getPublicProfile: (username: string) =>
+      request('GET', `/api/profile/${username}`, undefined, false),
+
+    updateBio: (bio: string) =>
+      request('PATCH', '/api/profile/bio', { bio }),
+
+    uploadAvatar: (file: File) => {
+      const formData = new FormData()
+      formData.append('avatar', file)
+      return getToken().then(token =>
+        fetch(`${BASE_URL}/api/profile/avatar`, {
+          method: 'POST',
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+          body: formData
+        }).then(res => res.json())
+      )
+    },
+
+    submitReview: (tradeId: string, payload: { rating: number; comment?: string }) =>
+     request('POST', `/api/trades/${tradeId}/review`, payload),
   }
       
 }

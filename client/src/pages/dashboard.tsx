@@ -31,7 +31,7 @@ export default function Dashboard() {
     api.getBalance()
       .then(data => setBalance(data.balance))
       .catch(console.error)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const statusLabel: Record<string, string> = {
@@ -65,14 +65,20 @@ export default function Dashboard() {
           >
             Browse
           </button>
-          <span className="text-sm text-[#4a4a6a]">{user?.emailAddresses[0]?.emailAddress}</span>
-          <UserButton />
+          <UserButton>
+            <UserButton.MenuItems>
+              <UserButton.Action
+                label="My Profile"
+                labelIcon={<span style={{ fontSize: '14px' }}>👤</span>}
+                onClick={() => navigate('/profile')}
+              />
+            </UserButton.MenuItems>
+          </UserButton>
         </div>
       </nav>
 
+      {/* rest of dashboard unchanged */}
       <div className="max-w-4xl mx-auto px-8 py-12">
-
-        {/* Header */}
         <div className="flex items-center justify-between mb-10">
           <div>
             <p className="text-xs uppercase tracking-widest text-[#7a7a9a] mb-1">Dashboard</p>
@@ -88,7 +94,6 @@ export default function Dashboard() {
           </button>
         </div>
 
-        {/* Quick Links */}
         <div className="flex gap-3 mb-10 flex-wrap">
           {[
             { label: 'My Listings', path: '/my-listings' },
@@ -105,7 +110,6 @@ export default function Dashboard() {
           ))}
         </div>
 
-        {/* Recent Activity */}
         <div>
           <div className="flex items-center justify-between mb-4">
             <p className="text-xs uppercase tracking-widest text-[#7a7a9a]">My Cards</p>

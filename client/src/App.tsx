@@ -12,7 +12,8 @@ import Admin from './pages/Admin.tsx'
 import MyListings from './pages/MyListings.tsx'
 import EditListing from './pages/EditListing.tsx'
 import MyTrades from './pages/MyTrades.tsx'
-
+import Profile from './pages/Profile.tsx'
+import PublicProfile from './pages/PublicProfile.tsx'
 function App() {
   const { isSignedIn, isLoaded } = useAuth()
 
@@ -32,6 +33,8 @@ function App() {
       <Route path="/my-listings" element={isSignedIn ? <MyListings /> : <Navigate to="/" />} />
       <Route path="/edit-listing/:id" element={isSignedIn ? <EditListing /> : <Navigate to="/" />} />
       <Route path="/my-trades" element={isSignedIn ? <MyTrades /> : <Navigate to="/" />} />
+      <Route path="/profile" element={isSignedIn ? <Profile /> : <Navigate to="/" />} />
+      <Route path="/profile/:username" element={<PublicProfile />} />
     </Routes>
   )
 }

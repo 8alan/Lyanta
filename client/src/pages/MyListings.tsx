@@ -175,7 +175,15 @@ export default function MyListings() {
                                 <button
                                   onClick={() => api.acceptBid(listing.id, bid.id).then(() => {
                                     setListings(prev => prev.map(l =>
-                                      l.id === listing.id ? { ...l, status: 'RESERVED' } : l
+                                      l.id === listing.id
+                                        ? {
+                                            ...l,
+                                            status: 'RESERVED',
+                                            bids: l.bids.map(b =>
+                                              b.id === bid.id ? { ...b, status: 'ACCEPTED' } : { ...b, status: 'REJECTED' }
+                                            )
+                                          }
+                                        : l
                                     ))
                                   })}
                                   className="text-green-600 hover:text-green-700 font-semibold"

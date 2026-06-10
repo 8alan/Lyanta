@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useApi } from '../services/api.ts'
 import { getBrandImage } from '../services/brandImages.ts'
+
 interface MyCard {
   id: string
   brand: string
@@ -23,6 +24,8 @@ interface Listing {
   user: {
     username: string | null
     name: string | null
+    avgRating: number | null
+    reviewCount: number
   }
   bids: {
     id: string
@@ -30,6 +33,31 @@ interface Listing {
     cashAmount: number | null
     createdAt: string
   }[]
+}
+
+function StarDisplay({ avg }: { avg: number }) {
+  const rounded = Math.ceil(avg * 2) / 2
+  return (
+    <div className="flex gap-0.5">
+      {[1, 2, 3, 4, 5].map(star => {
+        const full = star <= Math.floor(rounded)
+        const half = !full && star === Math.ceil(rounded) && rounded % 1 !== 0
+        return (
+          <span key={star} className="text-sm relative">
+            <span className="text-[#e2e0db]">★</span>
+            {(full || half) && (
+              <span
+                className="absolute inset-0 text-yellow-400 overflow-hidden"
+                style={{ width: full ? '100%' : '50%' }}
+              >
+                ★
+              </span>
+            )}
+          </span>
+        )
+      })}
+    </div>
+  )
 }
 
 export default function ListingDetail() {
@@ -152,10 +180,6 @@ export default function ListingDetail() {
             <div className="bg-white border border-[#e2e0db] p-6 space-y-3">
               <div className="flex justify-between text-sm">
                 <span className="text-[#7a7a9a]">Brand</span>
-                <span className="font-semibold">{listing.giftCard.brand}</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-[#7a7a9a]">Brand</span>
                 <span className="font-semibold">
                   {listing.giftCard.brand === 'Other' && listing.giftCard.description
                     ? listing.giftCard.description
@@ -176,7 +200,24 @@ export default function ListingDetail() {
               )}
               <div className="flex justify-between text-sm">
                 <span className="text-[#7a7a9a]">Seller</span>
-                <span className="text-[#1a1a2e]">@{seller}</span>
+                <div className="flex flex-col items-end gap-1">
+                  {listing.user.username ? (
+                    <button
+                      onClick={() => navigate(`/profile/${listing.user.username}`)}
+                      className="text-[#1a1a2e] hover:underline transition-colors"
+                    >
+                      @{seller}
+                    </button>
+                  ) : (
+                    <span className="text-[#1a1a2e]">{seller}</span>
+                  )}
+                  {listing.user.avgRating !== null && listing.user.reviewCount > 0 && (
+                    <div className="flex items-center gap-1">
+                      <StarDisplay avg={listing.user.avgRating} />
+                      <span className="text-xs text-[#7a7a9a]">({listing.user.reviewCount})</span>
+                    </div>
+                  )}
+                </div>
               </div>
               {listing.acceptsExchange && (
                 <div className="flex justify-between text-sm">
