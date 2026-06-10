@@ -15,6 +15,8 @@ model User {
   username  String?  @unique
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  bio String? @db.VarChar(300)
+  avatarUrl String?
 
   creditBalance   CreditBalance?
   creditPurchases CreditPurchase[]
@@ -27,6 +29,7 @@ model User {
   reviewsGiven    Review[]         @relation("ReviewsGiven")
   reviewsReceived Review[]         @relation("ReviewsReceived")
   verification    UserVerification?
+  
 }
 
 model GiftCard {

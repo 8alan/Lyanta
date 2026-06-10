@@ -11,6 +11,7 @@ import listingsRouter from './routes/listings.js'
 import adminRouter from './routes/admin.js'
 import tradesRouter from './routes/trades.js'
 import { requireAuth } from './middleware/auth.js'
+import profileRouter from './routes/profile.js'
 
 dotenv.config()
 
@@ -86,6 +87,8 @@ app.use('/api/stripe', stripeRouter)
 app.use('/api/listings', listingsRouter)
 app.use('/api/admin', adminRouter)
 app.use('/api/trades', tradesRouter)
+app.use('/api/profile', profileRouter)
+
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)

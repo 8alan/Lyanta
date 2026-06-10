@@ -354,25 +354,42 @@ router.get('/mine', requireAuth, async (req: Request, res: Response) => {
 router.get('/:id', async (req: Request, res: Response) => {
   try {
     const id = req.params.id as string
-
     const listing = await prisma.listing.findUnique({
       where: { id },
       include: {
         giftCard: { select: { brand: true, faceValue: true, description: true } },
-        user: { select: { username: true, name: true } },
+        user: {
+          select: {
+            username: true,
+            name: true,
+            reviewsReceived: { select: { rating: true } }
+          }
+        },
         bids: {
           where: { status: 'PENDING' },
           select: { id: true, bidType: true, cashAmount: true, createdAt: true }
         }
       }
     })
-
     if (!listing) {
       res.status(404).json({ error: 'Listing not found' })
       return
     }
-
-    res.json({ listing })
+    const reviews = listing.user.reviewsReceived
+    const avgRating = reviews.length
+      ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
+      : null
+    res.json({
+      listing: {
+        ...listing,
+        user: {
+          username: listing.user.username,
+          name: listing.user.name,
+          avgRating,
+          reviewCount: reviews.length
+        }
+      }
+    })
   } catch (error) {
     console.error(error)
     res.status(500).json({ error: 'Internal server error' })
