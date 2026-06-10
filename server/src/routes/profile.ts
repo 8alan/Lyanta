@@ -88,7 +88,7 @@ router.patch('/username', requireAuth, async (req: Request, res: Response) => {
     }
     const user = await prisma.user.update({
       where: { clerkId },
-      data: { username }
+      data: { username: username.toLowerCase() }
     })
     res.json({ username: user.username })
   } catch (error) {
@@ -160,8 +160,13 @@ router.post('/avatar', requireAuth, upload.single('avatar'), async (req: Request
 router.get('/:username', async (req: Request, res: Response) => {
   try {
     const username = req.params.username as string
-    const user = await prisma.user.findUnique({
-      where: { username },
+    const user = await prisma.user.findFirst({
+      where: {
+        username: {
+          equals: username,
+          mode: 'insensitive'
+        }
+      },
       include: {
         verification: true,
         listings: {
