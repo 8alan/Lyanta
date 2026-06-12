@@ -45,23 +45,25 @@ export default function Dashboard() {
   }
 
   const statusColor: Record<string, string> = {
-    PENDING: 'text-[#7a7a9a]',
-    VERIFIED: 'text-green-600',
-    AVAILABLE: 'text-green-600',
-    TRADED: 'text-[#1a1a2e]',
-    CASHED_OUT: 'text-[#1a1a2e]',
+    PENDING: 'text-[#7c6992]',
+    VERIFIED: 'text-[#2e7d32]',
+    AVAILABLE: 'text-[#2e7d32]',
+    TRADED: 'text-[#2e1a47]',
+    CASHED_OUT: 'text-[#2e1a47]',
     FLAGGED: 'text-red-600',
     FAILED: 'text-red-600',
   }
 
   return (
-    <div className="min-h-screen bg-[#f8f7f4] text-[#1a1a2e]">
-      <nav className="flex items-center justify-between px-8 py-5 border-b border-[#e2e0db] bg-white">
-        <span className="text-xl font-semibold tracking-tight">Lantana</span>
+    <div className="min-h-screen bg-[#F6F3F9] text-[#2e1a47]">
+
+      {/* ── Nav ── */}
+      <nav className="flex items-center justify-between px-8 py-5 border-b border-[#E3DFEF] bg-white shadow-sm">
+        <span className="text-xl font-semibold tracking-tight text-[#2e1a47]">Lantana</span>
         <div className="flex items-center gap-6">
           <button
             onClick={() => navigate('/browse')}
-            className="text-sm text-[#4a4a6a] hover:text-[#1a1a2e] transition-colors"
+            className="text-sm text-[#7c6992] hover:text-[#2e1a47] transition-colors font-medium"
           >
             Browse
           </button>
@@ -77,23 +79,28 @@ export default function Dashboard() {
         </div>
       </nav>
 
-      {/* rest of dashboard unchanged */}
+      {/* ── Main content ── */}
       <div className="max-w-4xl mx-auto px-8 py-12">
+
+        {/* Header row */}
         <div className="flex items-center justify-between mb-10">
           <div>
-            <p className="text-xs uppercase tracking-widest text-[#7a7a9a] mb-1">Dashboard</p>
-            <h1 className="text-3xl font-semibold text-[#1a1a2e]">
+            <p className="text-xs uppercase tracking-widest text-[#7c6992] mb-1 font-semibold">
+              Dashboard
+            </p>
+            <h1 className="text-3xl font-light text-[#2e1a47]">
               {greeting}, {user?.firstName ?? 'there'}.
             </h1>
           </div>
           <button
             onClick={() => navigate('/submit')}
-            className="bg-[#1a1a2e] text-white px-5 py-2 text-sm hover:bg-[#2d2d4e] transition-colors"
+            className="bg-[#2e1a47] text-white px-5 py-2.5 text-sm font-semibold rounded-lg hover:bg-[#72569C] transition-colors"
           >
             + Submit a card
           </button>
         </div>
 
+        {/* Tab buttons */}
         <div className="flex gap-3 mb-10 flex-wrap">
           {[
             { label: 'My Listings', path: '/my-listings' },
@@ -103,34 +110,38 @@ export default function Dashboard() {
             <button
               key={label}
               onClick={() => navigate(path)}
-              className="text-sm border border-[#e2e0db] bg-white px-4 py-2 text-[#4a4a6a] hover:border-[#1a1a2e] hover:text-[#1a1a2e] transition-colors"
+              className="text-sm border border-[#AFABC9] bg-white px-5 py-2 text-[#7c6992] rounded-lg hover:border-[#2e1a47] hover:text-[#2e1a47] hover:bg-[#F6F3F9] transition-colors font-medium"
             >
               {label}
             </button>
           ))}
         </div>
 
+        {/* My Cards section */}
         <div>
           <div className="flex items-center justify-between mb-4">
-            <p className="text-xs uppercase tracking-widest text-[#7a7a9a]">My Cards</p>
+            <p className="text-xs uppercase tracking-widest text-[#7c6992] font-semibold">
+              My Cards
+            </p>
             <button
               onClick={() => navigate('/submit')}
-              className="text-xs text-[#4a4a6a] hover:text-[#1a1a2e] transition-colors"
+              className="text-xs text-[#72569C] hover:text-[#2e1a47] transition-colors font-medium"
             >
               Submit new →
             </button>
           </div>
-          <div className="bg-white border border-[#e2e0db]">
+
+          <div className="bg-white border border-[#E3DFEF] rounded-2xl overflow-hidden shadow-sm">
             {loading ? (
-              <div className="p-8 text-center">
-                <p className="text-sm text-[#7a7a9a]">Loading...</p>
+              <div className="p-10 text-center">
+                <p className="text-sm text-[#7c6992]">Loading...</p>
               </div>
             ) : cards.length === 0 ? (
-              <div className="p-8 text-center">
-                <p className="text-sm text-[#7a7a9a] mb-3">No cards submitted yet.</p>
+              <div className="p-10 text-center">
+                <p className="text-sm text-[#7c6992] mb-4">No cards submitted yet.</p>
                 <button
                   onClick={() => navigate('/submit')}
-                  className="text-sm bg-[#1a1a2e] text-white px-5 py-2 hover:bg-[#2d2d4e] transition-colors"
+                  className="text-sm bg-[#2e1a47] text-white px-6 py-2.5 rounded-lg hover:bg-[#72569C] transition-colors font-semibold"
                 >
                   Submit your first card
                 </button>
@@ -139,16 +150,22 @@ export default function Dashboard() {
               cards.map((card, i) => (
                 <div
                   key={card.id}
-                  className={`group flex items-center justify-between px-6 py-4 ${i !== cards.length - 1 ? 'border-b border-[#e2e0db]' : ''}`}
+                  className={`group flex items-center justify-between px-6 py-4 hover:bg-[#F6F3F9] transition-colors ${
+                    i !== cards.length - 1 ? 'border-b border-[#E3DFEF]' : ''
+                  }`}
                 >
                   <div>
-                    <p className="text-sm font-semibold text-[#1a1a2e]">{card.brand} Gift Card</p>
-                    <p className="text-xs text-[#7a7a9a]">{new Date(card.createdAt).toLocaleDateString()}</p>
+                    <p className="text-sm font-semibold text-[#2e1a47]">{card.brand} Gift Card</p>
+                    <p className="text-xs text-[#AFABC9]">
+                      {new Date(card.createdAt).toLocaleDateString()}
+                    </p>
                   </div>
                   <div className="flex items-center gap-4">
                     <div className="text-right">
-                      <p className="text-sm font-semibold text-[#1a1a2e]">${card.faceValue.toFixed(2)}</p>
-                      <p className={`text-xs ${statusColor[card.status] ?? 'text-[#7a7a9a]'}`}>
+                      <p className="text-sm font-semibold text-[#2e1a47]">
+                        ${card.faceValue.toFixed(2)}
+                      </p>
+                      <p className={`text-xs ${statusColor[card.status] ?? 'text-[#7c6992]'}`}>
                         {statusLabel[card.status] ?? card.status}
                       </p>
                     </div>
