@@ -37,16 +37,17 @@ export default function BrowseCards() {
   const [loading, setLoading] = useState(true)
   const [selectedBrand, setSelectedBrand] = useState<string | null>(null)
   const [search, setSearch] = useState('')
+  const [sidebarOpen, setSidebarOpen] = useState(false)
   const { user } = useUser()
   const { isSignedIn } = useAuth()
-  
+
   useEffect(() => {
-  api.getActiveListings(selectedBrand ?? undefined)
-    .then(data => setListings(data.listings))
-    .catch(console.error)
-    .finally(() => setLoading(false))
-// eslint-disable-next-line react-hooks/exhaustive-deps
-}, [selectedBrand])
+    api.getActiveListings(selectedBrand ?? undefined)
+      .then(data => setListings(data.listings))
+      .catch(console.error)
+      .finally(() => setLoading(false))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedBrand])
 
   const filtered = search
     ? listings.filter(l => l.giftCard.brand.toLowerCase().includes(search.toLowerCase()))
@@ -62,41 +63,85 @@ export default function BrowseCards() {
   })
 
   return (
-    <div className="min-h-screen bg-[#f8f7f4] text-[#1a1a2e]">
-      <nav className="flex items-center justify-between px-8 py-5 border-b border-[#e2e0db] bg-white">
-        <button onClick={() => navigate('/dashboard')} className="text-xl font-semibold tracking-tight">
-          Lantana
-        </button>
+    <div className="min-h-screen bg-[#F6F3F9] text-[#2e1a47]">
+
+      {/* ── Nav ── */}
+      <nav className="flex items-center justify-between px-4 sm:px-8 py-5 border-b border-[#E3DFEF] bg-white shadow-sm">
         <button
           onClick={() => navigate('/dashboard')}
-          className="text-sm text-[#4a4a6a] hover:text-[#1a1a2e] transition-colors"
+          className="text-xl font-semibold tracking-tight text-[#2e1a47]"
         >
-          ← Back to dashboard
+          Lantana
         </button>
+        <div className="flex items-center gap-3">
+          {/* Mobile sidebar toggle */}
+          <button
+            className="md:hidden text-sm text-[#7c6992] border border-[#E3DFEF] px-3 py-1.5 rounded-lg hover:border-[#2e1a47] transition-colors"
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+          >
+            {sidebarOpen ? 'Hide brands' : 'Filter brands'}
+          </button>
+          <button
+            onClick={() => navigate('/dashboard')}
+            className="hidden sm:block text-sm text-[#7c6992] hover:text-[#2e1a47] transition-colors font-medium"
+          >
+            ← Back to dashboard
+          </button>
+        </div>
       </nav>
+
+      {/* ── Sign-up banner ── */}
       {!isSignedIn && (
-        <div className="bg-[#1a1a2e] text-white px-8 py-3 flex items-center justify-between">
-          <p className="text-sm">Want to sell your gift cards or make offers? Create a free account.</p>
+        <div className="bg-[#2e1a47] text-white px-4 sm:px-8 py-3 flex items-center justify-between gap-4 flex-wrap">
+          <p className="text-sm text-[#AFABC9]">
+            Want to sell your gift cards or make offers? Create a free account.
+          </p>
           <SignUpButton mode="modal">
-            <button className="text-sm bg-white text-[#1a1a2e] px-4 py-1.5 hover:bg-gray-100 transition-colors">
+            <button className="text-sm bg-white text-[#2e1a47] px-4 py-1.5 rounded-lg font-semibold hover:bg-[#F6F3F9] transition-colors shrink-0">
               Sign up free
             </button>
           </SignUpButton>
         </div>
       )}
 
-      <div className="flex min-h-[calc(100vh-64px)]">
+      <div className="flex relative">
 
-        {/* Sidebar */}
-        <div className="w-56 border-r border-[#e2e0db] bg-white px-4 py-8 shrink-0">
-          <p className="text-xs uppercase tracking-widest text-[#7a7a9a] mb-4">Browse by brand</p>
+        {/* ── Sidebar — mobile overlay ── */}
+        {sidebarOpen && (
+          <div
+            className="fixed inset-0 bg-black/30 z-20 md:hidden"
+            onClick={() => setSidebarOpen(false)}
+          />
+        )}
+
+        {/* ── Sidebar ── */}
+        <div className={`
+          fixed md:static top-0 left-0 h-full md:h-auto z-30 md:z-auto
+          w-64 md:w-56 border-r border-[#E3DFEF] bg-white px-4 py-8 shrink-0
+          transform transition-transform duration-200
+          ${sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
+          overflow-y-auto md:max-h-[calc(100vh-73px)] md:sticky md:top-0
+        `}>
+          {/* Mobile close */}
+          <div className="flex items-center justify-between mb-4 md:block">
+            <p className="text-xs uppercase tracking-widest text-[#7c6992] font-semibold">
+              Browse by brand
+            </p>
+            <button
+              className="md:hidden text-[#7c6992] text-lg leading-none"
+              onClick={() => setSidebarOpen(false)}
+            >
+              ✕
+            </button>
+          </div>
+
           <div className="space-y-1">
             <button
-              onClick={() => setSelectedBrand(null)}
-              className={`w-full text-left text-sm px-3 py-2 transition-colors ${
+              onClick={() => { setSelectedBrand(null); setSidebarOpen(false) }}
+              className={`w-full text-left text-sm px-3 py-2 rounded-lg transition-colors ${
                 selectedBrand === null
-                  ? 'bg-[#1a1a2e] text-white'
-                  : 'text-[#4a4a6a] hover:bg-[#f8f7f4]'
+                  ? 'bg-[#2e1a47] text-white font-semibold'
+                  : 'text-[#7c6992] hover:bg-[#F6F3F9] hover:text-[#2e1a47]'
               }`}
             >
               All cards
@@ -104,11 +149,11 @@ export default function BrowseCards() {
             {SUPPORTED_BRANDS.sort().map(brand => (
               <button
                 key={brand}
-                onClick={() => setSelectedBrand(brand)}
-                className={`w-full text-left text-sm px-3 py-2 transition-colors ${
+                onClick={() => { setSelectedBrand(brand); setSidebarOpen(false) }}
+                className={`w-full text-left text-sm px-3 py-2 rounded-lg transition-colors ${
                   selectedBrand === brand
-                    ? 'bg-[#1a1a2e] text-white'
-                    : 'text-[#4a4a6a] hover:bg-[#f8f7f4]'
+                    ? 'bg-[#2e1a47] text-white font-semibold'
+                    : 'text-[#7c6992] hover:bg-[#F6F3F9] hover:text-[#2e1a47]'
                 }`}
               >
                 {brand}
@@ -117,14 +162,16 @@ export default function BrowseCards() {
           </div>
         </div>
 
-        {/* Main content */}
-        <div className="flex-1 px-8 py-8">
+        {/* ── Main content ── */}
+        <div className="flex-1 px-4 sm:px-8 py-8 min-w-0">
 
           {/* Header + Search */}
-          <div className="flex items-center justify-between mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
             <div>
-              <p className="text-xs uppercase tracking-widest text-[#7a7a9a] mb-1">Marketplace</p>
-              <h1 className="text-2xl font-semibold text-[#1a1a2e]">
+              <p className="text-xs uppercase tracking-widest text-[#7c6992] mb-1 font-semibold">
+                Marketplace
+              </p>
+              <h1 className="text-2xl font-light text-[#2e1a47]">
                 {selectedBrand ? `${selectedBrand} gift cards` : 'All gift cards'}
               </h1>
             </div>
@@ -133,21 +180,21 @@ export default function BrowseCards() {
               value={search}
               onChange={e => setSearch(e.target.value)}
               placeholder="Search brands..."
-              className="bg-white border border-[#e2e0db] px-4 py-2 text-sm text-[#1a1a2e] placeholder-[#b0b0c0] focus:outline-none focus:border-[#1a1a2e] transition-colors w-56"
+              className="bg-white border border-[#E3DFEF] rounded-lg px-4 py-2 text-sm text-[#2e1a47] placeholder-[#AFABC9] focus:outline-none focus:border-[#72569C] focus:ring-1 focus:ring-[#72569C] transition-colors w-full sm:w-56"
             />
           </div>
 
           {/* Listings Grid */}
           {loading ? (
-            <div className="bg-white border border-[#e2e0db] p-8 text-center">
-              <p className="text-sm text-[#7a7a9a]">Loading...</p>
+            <div className="bg-white border border-[#E3DFEF] rounded-2xl p-10 text-center shadow-sm">
+              <p className="text-sm text-[#7c6992]">Loading...</p>
             </div>
           ) : sorted.length === 0 ? (
-            <div className="bg-white border border-[#e2e0db] p-8 text-center">
-              <p className="text-sm text-[#7a7a9a]">No cards available right now. Check back soon.</p>
+            <div className="bg-white border border-[#E3DFEF] rounded-2xl p-10 text-center shadow-sm">
+              <p className="text-sm text-[#7c6992]">No cards available right now. Check back soon.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {sorted.map(listing => {
                 const image = getBrandImage(listing.giftCard.brand)
                 const seller = listing.user.username ?? listing.user.name ?? 'Anonymous'
@@ -159,7 +206,7 @@ export default function BrowseCards() {
                   <div
                     key={listing.id}
                     onClick={() => navigate(`/listing/${listing.id}`)}
-                    className="bg-white border border-[#e2e0db] hover:border-[#1a1a2e] transition-colors cursor-pointer"
+                    className="bg-white border border-[#E3DFEF] rounded-2xl overflow-hidden hover:border-[#72569C] hover:shadow-md transition-all cursor-pointer"
                   >
                     {/* Card Image */}
                     <div className="relative">
@@ -169,7 +216,7 @@ export default function BrowseCards() {
                         className="w-full h-40 object-cover"
                       />
                       {discount && (
-                        <span className="absolute top-3 right-3 text-xs bg-white text-green-700 border border-green-200 px-2 py-1 font-semibold">
+                        <span className="absolute top-3 right-3 text-xs bg-white text-[#2e7d32] border border-green-200 px-2 py-1 rounded-full font-semibold shadow-sm">
                           {discount}% off
                         </span>
                       )}
@@ -179,43 +226,43 @@ export default function BrowseCards() {
                     <div className="p-4">
                       <div className="flex items-start justify-between mb-3">
                         <div>
-                          <p className="text-sm font-semibold text-[#1a1a2e]">
+                          <p className="text-sm font-semibold text-[#2e1a47]">
                             {listing.giftCard.brand === 'Other' && listing.giftCard.description
                               ? listing.giftCard.description
                               : listing.giftCard.brand}
                           </p>
-                          <p className="text-xs text-[#7a7a9a] mt-0.5">@{seller}</p>
+                          <p className="text-xs text-[#AFABC9] mt-0.5">@{seller}</p>
                         </div>
-                        <p className="text-xs text-[#7a7a9a] line-through">
+                        <p className="text-xs text-[#AFABC9] line-through">
                           ${listing.giftCard.faceValue.toFixed(2)}
                         </p>
                       </div>
-                      <div className="flex items-center justify-between">
-                        <div className="flex gap-2">
-                          {listing.buyNowPrice && (
-                            <span className="text-xs bg-[#f8f7f4] border border-[#e2e0db] px-2 py-1 text-[#1a1a2e]">
-                              Buy ${listing.buyNowPrice.toFixed(2)}
-                            </span>
-                          )}
-                          {listing.acceptsExchange && (
-                            <span className="text-xs bg-[#f8f7f4] border border-[#e2e0db] px-2 py-1 text-[#1a1a2e]">
-                              Trade
-                            </span>
-                          )}
-                          {listing.minAcceptPrice && (
-                            <span className="text-xs bg-[#f8f7f4] border border-[#e2e0db] px-2 py-1 text-[#1a1a2e]">
-                              Bids from ${listing.minAcceptPrice.toFixed(2)}
-                            </span>
-                          )}
-                        </div>
+
+                      <div className="flex flex-wrap gap-2 mb-4">
+                        {listing.buyNowPrice && (
+                          <span className="text-xs bg-[#F6F3F9] border border-[#E3DFEF] rounded-full px-2.5 py-1 text-[#2e1a47] font-medium">
+                            Buy ${listing.buyNowPrice.toFixed(2)}
+                          </span>
+                        )}
+                        {listing.acceptsExchange && (
+                          <span className="text-xs bg-[#F6F3F9] border border-[#E3DFEF] rounded-full px-2.5 py-1 text-[#2e1a47] font-medium">
+                            Trade
+                          </span>
+                        )}
+                        {listing.minAcceptPrice && (
+                          <span className="text-xs bg-[#F6F3F9] border border-[#E3DFEF] rounded-full px-2.5 py-1 text-[#2e1a47] font-medium">
+                            Bids from ${listing.minAcceptPrice.toFixed(2)}
+                          </span>
+                        )}
                       </div>
+
                       <button
                         onClick={(e) => {
                           e.stopPropagation()
                           navigate(`/listing/${listing.id}`)
                         }}
                         disabled={listing.user.clerkId === user?.id}
-                        className="w-full mt-4 bg-[#1a1a2e] text-white py-2 text-sm hover:bg-[#2d2d4e] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                        className="w-full bg-[#2e1a47] text-white py-2 text-sm font-semibold rounded-lg hover:bg-[#72569C] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                       >
                         {listing.user.clerkId === user?.id ? 'Your listing' : 'View listing'}
                       </button>
