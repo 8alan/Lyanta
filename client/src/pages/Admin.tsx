@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useUser } from '@clerk/react'
 import { useApi } from '../services/api.ts'
 
-const ADMIN_CLERK_ID = 'user_3EkMoyxFtTPRfXQUL5VL5eKCPil'
+const ADMIN_CLERK_ID = 'user_3F481w6C6mRIvyVI1yr3dseubnS'
 
 interface GiftCard {
   id: string
