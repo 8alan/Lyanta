@@ -1,6 +1,6 @@
 import { useAuth } from '@clerk/react'
 
-const BASE_URL = 'https://lantana-production.up.railway.app'
+const BASE_URL = 'https://api.myriapods.com'
 
 export function useApi() {
   const { getToken } = useAuth()
