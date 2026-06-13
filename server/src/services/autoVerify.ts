@@ -1,36 +1,41 @@
-import puppeteer from 'puppeteer-core'
+import { connect } from 'puppeteer-core'
+import * as puppeteerExtra from 'puppeteer-extra'
+import StealthPlugin from 'puppeteer-extra-plugin-stealth'
 
+(puppeteerExtra as any).use(StealthPlugin())
 const BROWSERLESS_TOKEN = process.env.BROWSERLESS_TOKEN!
 
 export async function verifyStarbucks(cardNumber: string, pin: string): Promise<{ verified: boolean, balance?: number, error?: string }> {
   let browser
   try {
-    browser = await puppeteer.connect({
+    browser = await connect({
       browserWSEndpoint: `wss://chrome.browserless.io?token=${BROWSERLESS_TOKEN}`,
     })
 
     const page = await browser.newPage()
     await page.goto('https://www.starbucks.com/gift', { waitUntil: 'networkidle2', timeout: 30000 })
+
     // Dismiss cookie banner if present
     try {
-    await page.waitForSelector('#truste-consent-button', { timeout: 5000 })
-    await page.click('#truste-consent-button')
-    await new Promise(resolve => setTimeout(resolve, 1000))
+      await page.waitForSelector('#truste-consent-button', { timeout: 5000 })
+      await page.click('#truste-consent-button')
+      await new Promise(resolve => setTimeout(resolve, 1000))
     } catch {
-    // No cookie banner, continue
+      // No cookie banner, continue
     }
 
     // Click the balance check link
     await page.waitForSelector('[data-e2e="check-balance-button"]', { timeout: 10000 })
     await page.click('[data-e2e="check-balance-button"]')
-    
+    await new Promise(resolve => setTimeout(resolve, 2000))
+
     // Enter card number
     await page.waitForSelector('input[name="cardNumber"]', { timeout: 10000 })
-    await page.type('input[name="cardNumber"]', cardNumber)
+    await page.type('input[name="cardNumber"]', cardNumber, { delay: 100 })
 
     // Enter PIN
     await page.waitForSelector('input[name="securityCode"]', { timeout: 10000 })
-    await page.type('input[name="securityCode"]', pin)
+    await page.type('input[name="securityCode"]', pin, { delay: 100 })
 
     // Submit
     await page.click('button[type="submit"]')
