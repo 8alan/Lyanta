@@ -4,7 +4,7 @@ import prisma from '../db.js'
 import { decrypt } from '../services/encryption.js'
 
 const router = Router()
-const ADMIN_CLERK_ID = 'user_3EkMoyxFtTPRfXQUL5VL5eKCPil'
+const ADMIN_CLERK_ID = 'user_3F481w6C6mRIvyVI1yr3dseubnS'
 
 function requireAdmin(req: Request, res: Response, next: Function) {
   console.log('requireAdmin - userId:', req.userId)
