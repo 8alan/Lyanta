@@ -2,7 +2,9 @@ import { Router, Request, Response } from 'express'
 import { requireAuth } from '../middleware/auth.js'
 import prisma from '../db.js'
 import { encrypt } from '../services/encryption.js'
-
+import { autoVerify } from '../services/autoVerify.js'
+import { decrypt } from '../services/encryption.js'
+import { GiftCardStatus } from '../generated/prisma/enums.js'
 const router = Router()
 
 const SUPPORTED_BRANDS = [
@@ -73,10 +75,35 @@ router.post('/submit', requireAuth, async (req: Request, res: Response) => {
       }
     })
 
+    // Auto-verify if supported
+    const autoVerifyBrands = ['Starbucks']
+    if (autoVerifyBrands.includes(brand)) {
+      const result = await autoVerify(brand, cardNumber, pin)
+
+      if (result.verified && result.balance !== undefined) {
+        const statusUpdate = result.balance >= declaredValue ? GiftCardStatus.VERIFIED : GiftCardStatus.FAILED
+        await prisma.giftCard.update({
+          where: { id: giftCard.id },
+          data: {
+            status: statusUpdate,
+            balance: result.balance
+          }
+        })
+        res.status(201).json({
+          giftCard: { ...giftCard, status: statusUpdate, balance: result.balance },
+          message: statusUpdate === 'VERIFIED'
+            ? 'Card verified successfully!'
+            : 'Card rejected — the balance did not match the declared value.'
+        })
+        return
+      }
+    }
+
     res.status(201).json({
       giftCard,
       message: 'Gift card submitted successfully. Verification in progress.'
     })
+
   } catch (error) {
     console.error(error)
     res.status(500).json({ error: 'Internal server error' })
