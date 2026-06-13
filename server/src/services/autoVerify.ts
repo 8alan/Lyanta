@@ -23,11 +23,7 @@ export async function verifyStarbucks(cardNumber: string, pin: string): Promise<
     // Click the balance check link
     await page.waitForSelector('[data-e2e="check-balance-button"]', { timeout: 10000 })
     await page.click('[data-e2e="check-balance-button"]')
-    await new Promise(resolve => setTimeout(resolve, 2000))
     
-    await page.screenshot({ path: '/tmp/starbucks-debug.png' })
-    
-
     // Enter card number
     await page.waitForSelector('input[name="cardNumber"]', { timeout: 10000 })
     await page.type('input[name="cardNumber"]', cardNumber)
@@ -38,6 +34,8 @@ export async function verifyStarbucks(cardNumber: string, pin: string): Promise<
 
     // Submit
     await page.click('button[type="submit"]')
+    await new Promise(resolve => setTimeout(resolve, 3000))
+    await page.screenshot({ path: '/tmp/starbucks-debug.png' })
 
     // Wait for balance report
     await page.waitForSelector('[data-e2e="balanceReport"]', { timeout: 15000 })
