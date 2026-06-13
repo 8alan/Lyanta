@@ -12,12 +12,19 @@ import adminRouter from './routes/admin.js'
 import tradesRouter from './routes/trades.js'
 import { requireAuth } from './middleware/auth.js'
 import profileRouter from './routes/profile.js'
+import fs from 'fs'
 
 dotenv.config()
 
 
 const app = express()
 app.set('trust proxy', 1)
+
+app.get('/debug-screenshot', (req: Request, res: Response) => {
+  const img = fs.readFileSync('/tmp/starbucks-debug.png')
+  res.setHeader('Content-Type', 'image/png')
+  res.send(img)
+})
 
 const PORT = process.env.PORT || 5000
 

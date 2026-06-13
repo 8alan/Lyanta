@@ -11,6 +11,8 @@ export async function verifyStarbucks(cardNumber: string, pin: string): Promise<
 
     const page = await browser.newPage()
     await page.goto('https://www.starbucks.com/gift', { waitUntil: 'networkidle2', timeout: 30000 })
+    await page.screenshot({ path: '/tmp/starbucks-debug.png' })
+    
 
     // Enter card number
     await page.waitForSelector('input[name="cardNumber"]', { timeout: 10000 })
