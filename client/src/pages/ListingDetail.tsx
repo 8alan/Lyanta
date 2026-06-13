@@ -73,6 +73,8 @@ export default function ListingDetail() {
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
+  const [showScamWarning, setShowScamWarning] = useState(false)
+  const [pendingAction, setPendingAction] = useState<(() => void) | null>(null)
 
   useEffect(() => {
     if (!id) return
@@ -89,43 +91,57 @@ export default function ListingDetail() {
 
   const handleBuyNow = async () => {
     if (!id || !listing?.buyNowPrice) return
-    setSubmitting(true)
-    setError('')
-    try {
-      await api.placeBid(id, {
-        bidType: 'CASH',
-        cashAmount: listing.buyNowPrice
-      })
-      setSuccess('Purchase successful! The seller will be notified.')
-      setListing(prev => prev ? { ...prev, status: 'RESERVED' } : prev)
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Something went wrong'
-      setError(message)
-    } finally {
-      setSubmitting(false)
-    }
+    setPendingAction(() => async () => {
+      setSubmitting(true)
+      setError('')
+      try {
+        await api.placeBid(id, {
+          bidType: 'CASH',
+          cashAmount: listing.buyNowPrice!
+        })
+        setSuccess('Purchase successful! The seller will be notified.')
+        setListing(prev => prev ? { ...prev, status: 'RESERVED' } : prev)
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : 'Something went wrong'
+        setError(message)
+      } finally {
+        setSubmitting(false)
+      }
+    })
+    setShowScamWarning(true)
   }
 
   const handleBid = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!id) return
-    setSubmitting(true)
-    setError('')
-    try {
-      await api.placeBid(id, {
-        bidType,
-        cashAmount: bidType === 'CASH' ? parseFloat(cashAmount) : undefined,
-        offeredCardId: bidType === 'EXCHANGE' ? offeredCardId : undefined
-      })
-      setSuccess(bidType === 'CASH'
-        ? 'Bid submitted! The seller will review your offer.'
-        : 'Exchange offer submitted! The seller will review your card.'
-      )
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Something went wrong'
-      setError(message)
-    } finally {
-      setSubmitting(false)
+    setPendingAction(() => async () => {
+      setSubmitting(true)
+      setError('')
+      try {
+        await api.placeBid(id, {
+          bidType,
+          cashAmount: bidType === 'CASH' ? parseFloat(cashAmount) : undefined,
+          offeredCardId: bidType === 'EXCHANGE' ? offeredCardId : undefined
+        })
+        setSuccess(bidType === 'CASH'
+          ? 'Bid submitted! The seller will review your offer.'
+          : 'Exchange offer submitted! The seller will review your card.'
+        )
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : 'Something went wrong'
+        setError(message)
+      } finally {
+        setSubmitting(false)
+      }
+    })
+    setShowScamWarning(true)
+  }
+
+  const handleScamWarningConfirm = async () => {
+    setShowScamWarning(false)
+    if (pendingAction) {
+      await pendingAction()
+      setPendingAction(null)
     }
   }
 
@@ -197,7 +213,7 @@ export default function ListingDetail() {
                   <span className="text-[#7a7a9a]">Minimum bid</span>
                   <span className="text-[#1a1a2e]">${listing.minAcceptPrice.toFixed(2)}</span>
                 </div>
-              )}
+          )}
               <div className="flex justify-between text-sm">
                 <span className="text-[#7a7a9a]">Seller</span>
                 <div className="flex flex-col items-end gap-1">
@@ -302,7 +318,7 @@ export default function ListingDetail() {
                         className={`py-2 text-sm border transition-colors ${
                           bidType === 'EXCHANGE'
                             ? 'bg-[#1a1a2e] text-white border-[#1a1a2e]'
-                            : 'bg-white text-[#1a1a2e] border-[#e2e0db] hover:border-[#1a1a2e]'
+                            : 'bg-white text-[#1a1a2e] border-[#e2e0db] hover:border-[#1a1a1e]'
                         }`}
                       >
                         Exchange card
@@ -375,6 +391,46 @@ export default function ListingDetail() {
           </div>
         </div>
       </div>
+
+      {/* Scam Warning Modal */}
+      {showScamWarning && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4">
+          <div className="bg-white max-w-md w-full p-8 space-y-4">
+            <h2 className="text-lg font-semibold text-[#1a1a2e]">Before you continue</h2>
+            <p className="text-sm text-[#4a4a6a] leading-relaxed">
+              <span className="font-semibold text-red-600">Only scammers will tell you to buy a gift card</span> — like a Google Play or Apple Card — and give them the numbers off the back. No matter what they say, that's a scam.
+            </p>
+            <p className="text-sm text-[#4a4a6a] leading-relaxed">
+              No real business or government agency will ever tell you to buy a gift card to pay them. Always keep a copy of your gift card and store receipt so you can report any issues.
+            </p>
+            <a
+              href="https://consumer.ftc.gov/articles/avoiding-and-reporting-gift-card-scams"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block text-sm text-blue-600 hover:underline"
+            >
+              Learn more about avoiding and reporting gift card scams →
+            </a>
+            <div className="flex gap-3 pt-2">
+              <button
+                onClick={() => {
+                  setShowScamWarning(false)
+                  setPendingAction(null)
+                }}
+                className="flex-1 py-3 text-sm border border-[#e2e0db] text-[#4a4a6a] hover:border-[#1a1a2e] transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleScamWarningConfirm}
+                className="flex-1 py-3 text-sm bg-[#1a1a2e] text-white font-semibold hover:bg-[#2d2d4e] transition-colors"
+              >
+                I understand, continue
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
