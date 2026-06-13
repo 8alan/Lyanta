@@ -1,8 +1,10 @@
 import { connect } from 'puppeteer-core'
-import * as puppeteerExtra from 'puppeteer-extra'
+import puppeteerExtra from 'puppeteer-extra'
 import StealthPlugin from 'puppeteer-extra-plugin-stealth'
 
-(puppeteerExtra as any).use(StealthPlugin())
+const puppeteer = puppeteerExtra as any
+puppeteer.use(StealthPlugin())
+
 const BROWSERLESS_TOKEN = process.env.BROWSERLESS_TOKEN!
 
 export async function verifyStarbucks(cardNumber: string, pin: string): Promise<{ verified: boolean, balance?: number, error?: string }> {
