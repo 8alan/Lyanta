@@ -10,25 +10,25 @@ export async function verifyStarbucks(cardNumber: string, pin: string): Promise<
     })
 
     const page = await browser.newPage()
-    await page.goto('https://www.starbucks.com/card/balance', { waitUntil: 'networkidle2', timeout: 30000 })
+    await page.goto('https://www.starbucks.com/gift', { waitUntil: 'networkidle2', timeout: 30000 })
 
     // Enter card number
     await page.waitForSelector('input[name="cardNumber"]', { timeout: 10000 })
     await page.type('input[name="cardNumber"]', cardNumber)
 
     // Enter PIN
-    await page.waitForSelector('input[name="cardPin"]', { timeout: 10000 })
-    await page.type('input[name="cardPin"]', pin)
+    await page.waitForSelector('input[name="securityCode"]', { timeout: 10000 })
+    await page.type('input[name="securityCode"]', pin)
 
     // Submit
-    await Promise.all([
-      page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 30000 }),
-      page.click('button[type="submit"]')
-    ])
+    await page.click('button[type="submit"]')
+
+    // Wait for balance report
+    await page.waitForSelector('[data-e2e="balanceReport"]', { timeout: 15000 })
 
     // Parse balance
     const balance = await page.evaluate(() => {
-      const el = document.querySelector('[data-e2e="balance-amount"]')
+      const el = document.querySelector('[data-e2e="balanceReport"] span')
       if (!el) return null
       const text = el.textContent?.replace(/[^0-9.]/g, '')
       return text ? parseFloat(text) : null
