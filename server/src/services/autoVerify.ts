@@ -11,6 +11,20 @@ export async function verifyStarbucks(cardNumber: string, pin: string): Promise<
 
     const page = await browser.newPage()
     await page.goto('https://www.starbucks.com/gift', { waitUntil: 'networkidle2', timeout: 30000 })
+    // Dismiss cookie banner if present
+    try {
+    await page.waitForSelector('#truste-consent-button', { timeout: 5000 })
+    await page.click('#truste-consent-button')
+    await new Promise(resolve => setTimeout(resolve, 1000))
+    } catch {
+    // No cookie banner, continue
+    }
+
+    // Click the balance check link
+    await page.waitForSelector('[data-e2e="check-balance-button"]', { timeout: 10000 })
+    await page.click('[data-e2e="check-balance-button"]')
+    await new Promise(resolve => setTimeout(resolve, 2000))
+    
     await page.screenshot({ path: '/tmp/starbucks-debug.png' })
     
 
