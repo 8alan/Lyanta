@@ -72,7 +72,8 @@ router.post('/submit', requireAuth, async (req: Request, res: Response) => {
         status: 'PENDING',
         source: 'USER',
         description: description ?? null,
-      }
+      },
+      include: { listing: true }
     })
 
     // Auto-verify if supported
@@ -81,21 +82,42 @@ router.post('/submit', requireAuth, async (req: Request, res: Response) => {
       const result = await autoVerify(brand, cardNumber, pin)
 
       if (result.verified && result.balance !== undefined) {
-        const statusUpdate = result.balance >= declaredValue ? GiftCardStatus.VERIFIED : GiftCardStatus.FAILED
-        await prisma.giftCard.update({
-          where: { id: giftCard.id },
-          data: {
-            status: statusUpdate,
-            balance: result.balance
-          }
-        })
-        res.status(201).json({
-          giftCard: { ...giftCard, status: statusUpdate, balance: result.balance },
-          message: statusUpdate === 'VERIFIED'
-            ? 'Card verified successfully!'
-            : 'Card rejected — the balance did not match the declared value.'
-        })
-        return
+        if (result.balance >= declaredValue) {
+          await prisma.$transaction(async (tx) => {
+            await tx.giftCard.update({
+              where: { id: giftCard.id },
+              data: {
+                status: 'AVAILABLE',
+                balance: result.balance,
+                verifiedAt: new Date()
+              }
+            })
+
+            if (giftCard.listing) {
+              await tx.listing.update({
+                where: { id: giftCard.listing.id },
+                data: { status: 'ACTIVE' }
+              })
+            }
+          })
+
+          res.status(201).json({
+            giftCard: { ...giftCard, status: 'AVAILABLE', balance: result.balance },
+            message: 'Card verified and listed successfully!'
+          })
+          return
+        } else {
+          await prisma.giftCard.update({
+            where: { id: giftCard.id },
+            data: { status: 'FAILED' }
+          })
+
+          res.status(201).json({
+            giftCard: { ...giftCard, status: 'FAILED' },
+            message: 'Card rejected — the balance did not match the declared value.'
+          })
+          return
+        }
       }
     }
 

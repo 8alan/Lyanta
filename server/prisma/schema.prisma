@@ -51,6 +51,7 @@ model GiftCard {
   updatedAt  DateTime       @updatedAt
   revealed    Boolean  @default(false)
   listing    Listing?
+  autoVerified Boolean @default(false)
 }
 
 model Listing {
