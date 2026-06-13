@@ -2,7 +2,6 @@ import { Router, Request, Response } from 'express'
 import { requireAuth } from '../middleware/auth.js'
 import prisma from '../db.js'
 import { encrypt } from '../services/encryption.js'
-import { autoVerify } from '../services/autoVerify.js'
 import { decrypt } from '../services/encryption.js'
 import { GiftCardStatus } from '../generated/prisma/enums.js'
 const router = Router()
@@ -77,50 +76,6 @@ router.post('/submit', requireAuth, async (req: Request, res: Response) => {
     })
 
     // Auto-verify if supported
-    const autoVerifyBrands = ['Starbucks']
-    if (autoVerifyBrands.includes(brand)) {
-      const result = await autoVerify(brand, cardNumber, pin)
-
-      if (result.verified && result.balance !== undefined) {
-        if (result.balance >= declaredValue) {
-          await prisma.$transaction(async (tx) => {
-            await tx.giftCard.update({
-              where: { id: giftCard.id },
-              data: {
-                status: 'AVAILABLE',
-                balance: result.balance,
-                verifiedAt: new Date()
-              }
-            })
-
-            if (giftCard.listing) {
-              await tx.listing.update({
-                where: { id: giftCard.listing.id },
-                data: { status: 'ACTIVE' }
-              })
-            }
-          })
-
-          res.status(201).json({
-            giftCard: { ...giftCard, status: 'AVAILABLE', balance: result.balance },
-            message: 'Card verified and listed successfully!'
-          })
-          return
-        } else {
-          await prisma.giftCard.update({
-            where: { id: giftCard.id },
-            data: { status: 'FAILED' }
-          })
-
-          res.status(201).json({
-            giftCard: { ...giftCard, status: 'FAILED' },
-            message: 'Card rejected — the balance did not match the declared value.'
-          })
-          return
-        }
-      }
-    }
-
     res.status(201).json({
       giftCard,
       message: 'Gift card submitted successfully. Verification in progress.'
