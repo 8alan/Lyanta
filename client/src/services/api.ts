@@ -26,7 +26,8 @@ export function useApi() {
   if (!res.ok) throw new Error(data.error || 'Request failed')
   return data
 }
-  
+
+
   
   return {
     submitGiftCard: (payload: {
@@ -131,9 +132,26 @@ export function useApi() {
         }).then(res => res.json())
       )
     },
-
+    
     submitReview: (tradeId: string, payload: { rating: number; comment?: string }) =>
      request('POST', `/api/trades/${tradeId}/review`, payload),
+  
+      contactSupport: async (data: {
+      name: string
+      email: string
+      subject: string
+      message: string
+      reportedUser?: string
+    }) => {
+      const res = await fetch(`${BASE_URL}/api/support/contact`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      })
+      if (!res.ok) throw new Error((await res.json()).error)
+      return res.json()
+    }
+  
   }
       
 }
