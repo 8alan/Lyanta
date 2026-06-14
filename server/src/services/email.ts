@@ -112,6 +112,33 @@ export async function sendCardSoldEmail(
   })
 }
 
+export async function sendContactEmail(
+  name: string,
+  email: string,
+  subject: string,
+  message: string,
+  reportedUser?: string
+) {
+  await resend.emails.send({
+    from: FROM_EMAIL,
+    to: 'notifications@myriapods.com',
+    replyTo: email,
+    subject: `[Lantana Support] ${subject}`,
+    html: `
+      <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto; padding: 32px;">
+        <h2 style="font-size: 20px; font-weight: 600; color: #1a1a2e;">New Support Message</h2>
+        <div style="background: #f8f7f4; border: 1px solid #e2e0db; padding: 16px; margin: 24px 0;">
+          <p style="margin: 0 0 8px; font-size: 14px; color: #1a1a2e;"><strong>Name:</strong> ${name}</p>
+          <p style="margin: 0 0 8px; font-size: 14px; color: #1a1a2e;"><strong>Email:</strong> ${email}</p>
+          <p style="margin: 0 0 8px; font-size: 14px; color: #1a1a2e;"><strong>Subject:</strong> ${subject}</p>
+          ${reportedUser ? `<p style="margin: 0 0 8px; font-size: 14px; color: #e53e3e;"><strong>Reported User:</strong> @${reportedUser}</p>` : ''}
+          <p style="margin: 0; font-size: 14px; color: #1a1a2e;"><strong>Message:</strong><br/>${message}</p>
+        </div>
+      </div>
+    `
+  })
+}
+
 export async function sendCardDetailsEmail(
   buyerEmail: string,
   buyerName: string,

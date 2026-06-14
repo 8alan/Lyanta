@@ -12,6 +12,7 @@ import adminRouter from './routes/admin.js'
 import tradesRouter from './routes/trades.js'
 import { requireAuth } from './middleware/auth.js'
 import profileRouter from './routes/profile.js'
+import supportRouter from './routes/support.js'
 
 dotenv.config()
 
@@ -97,6 +98,7 @@ app.use('/api/listings', listingsRouter)
 app.use('/api/admin', adminRouter)
 app.use('/api/trades', tradesRouter)
 app.use('/api/profile', profileRouter)
+app.use('/api/support', supportRouter)
 
 
 app.listen(PORT, () => {
