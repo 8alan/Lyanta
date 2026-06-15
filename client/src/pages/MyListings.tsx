@@ -35,7 +35,7 @@ export default function MyListings() {
       .then(data => setListings(data.listings))
       .catch(console.error)
       .finally(() => setLoading(false))
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const handleCancel = async (id: string) => {
@@ -61,47 +61,61 @@ export default function MyListings() {
   }
 
   const statusColor: Record<string, string> = {
-    PENDING_VERIFICATION: 'text-[#7a7a9a]',
-    ACTIVE: 'text-green-600',
+    PENDING_VERIFICATION: 'text-[#7c6992]',
+    ACTIVE: 'text-[#2e7d32]',
     RESERVED: 'text-yellow-600',
-    COMPLETED: 'text-[#1a1a2e]',
+    COMPLETED: 'text-[#2e1a47]',
     CANCELLED: 'text-red-500',
   }
 
   return (
-    <div className="min-h-screen bg-[#f8f7f4] text-[#1a1a2e]">
-      <nav className="flex items-center justify-between px-8 py-5 border-b border-[#e2e0db] bg-white">
-        <button onClick={() => navigate('/dashboard')} className="text-xl font-semibold tracking-tight">
+    <div className="min-h-screen bg-[#F6F3F9] text-[#2e1a47]">
+
+      {/* ── Nav ── */}
+      <nav className="flex items-center justify-between px-4 sm:px-8 py-5 border-b border-[#E3DFEF] bg-white shadow-sm">
+        <button
+          onClick={() => navigate('/dashboard')}
+          className="font-display text-xl text-[#2e1a47] tracking-tight"
+        >
           Lantana
         </button>
         <button
           onClick={() => navigate('/dashboard')}
-          className="text-sm text-[#4a4a6a] hover:text-[#1a1a2e] transition-colors"
+          className="text-sm text-[#7c6992] hover:text-[#2e1a47] transition-colors font-medium"
         >
           ← Back to dashboard
         </button>
       </nav>
 
-      <div className="max-w-4xl mx-auto px-8 py-12">
+      <div className="max-w-4xl mx-auto px-4 sm:px-8 py-12">
+
+        {/* Header */}
         <div className="mb-10">
-          <p className="text-xs uppercase tracking-widest text-[#7a7a9a] mb-2">Account</p>
-          <h1 className="text-3xl font-semibold text-[#1a1a2e]">My listings</h1>
+          <p className="text-xs uppercase tracking-widest text-[#7c6992] mb-2 font-semibold">
+            Account
+          </p>
+          <h1 className="text-3xl font-light text-[#2e1a47]">My listings</h1>
         </div>
 
+        {/* Loading */}
         {loading ? (
-          <div className="bg-white border border-[#e2e0db] p-8 text-center">
-            <p className="text-sm text-[#7a7a9a]">Loading...</p>
+          <div className="bg-white border border-[#E3DFEF] rounded-2xl p-10 text-center shadow-sm">
+            <p className="text-sm text-[#7c6992]">Loading...</p>
           </div>
+
+        /* Empty */
         ) : listings.length === 0 ? (
-          <div className="bg-white border border-[#e2e0db] p-8 text-center">
-            <p className="text-sm text-[#7a7a9a] mb-4">You haven't listed any cards yet.</p>
+          <div className="bg-white border border-[#E3DFEF] rounded-2xl p-10 text-center shadow-sm">
+            <p className="text-sm text-[#7c6992] mb-4">You haven't listed any cards yet.</p>
             <button
               onClick={() => navigate('/submit')}
-              className="text-sm bg-[#1a1a2e] text-white px-6 py-2 hover:bg-[#2d2d4e] transition-colors"
+              className="text-sm bg-[#2e1a47] text-white px-6 py-2.5 rounded-full hover:bg-[#72569C] transition-colors font-semibold"
             >
               Submit a card
             </button>
           </div>
+
+        /* Listings */
         ) : (
           <div className="space-y-4">
             {listings.map(listing => {
@@ -109,36 +123,46 @@ export default function MyListings() {
               const pendingBids = listing.bids.filter(b => b.status === 'PENDING')
 
               return (
-                <div key={listing.id} className="bg-white border border-[#e2e0db] p-6">
-                  <div className="flex gap-4">
+                <div
+                  key={listing.id}
+                  className="bg-white border border-[#E3DFEF] rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow"
+                >
+                  <div className="flex gap-4 flex-col sm:flex-row">
+
+                    {/* Brand image */}
                     <img
                       src={image ?? ''}
                       alt={listing.giftCard.brand}
-                      className="w-24 h-16 object-cover shrink-0"
+                      className="w-full sm:w-24 h-20 sm:h-16 object-cover rounded-xl shrink-0"
                     />
-                    <div className="flex-1">
-                      <div className="flex items-start justify-between">
+
+                    <div className="flex-1 min-w-0">
+
+                      {/* Top row */}
+                      <div className="flex items-start justify-between gap-4 flex-wrap">
                         <div>
-                          <p className="text-sm font-semibold text-[#1a1a2e]">
+                          <p className="text-sm font-semibold text-[#2e1a47]">
                             {listing.giftCard.brand} — ${listing.giftCard.faceValue.toFixed(2)}
                           </p>
-                          <p className={`text-xs mt-1 ${statusColor[listing.status] ?? 'text-[#7a7a9a]'}`}>
+                          <p className={`text-xs mt-1 font-medium ${statusColor[listing.status] ?? 'text-[#7c6992]'}`}>
                             {statusLabel[listing.status] ?? listing.status}
                           </p>
                         </div>
-                        <div className="flex gap-2">
+
+                        {/* Action buttons */}
+                        <div className="flex gap-2 shrink-0">
                           {(listing.status === 'ACTIVE' || listing.status === 'PENDING_VERIFICATION') && (
                             <>
                               <button
                                 onClick={() => navigate(`/edit-listing/${listing.id}`)}
-                                className="text-xs border border-[#e2e0db] px-3 py-1 text-[#4a4a6a] hover:border-[#1a1a2e] hover:text-[#1a1a2e] transition-colors"
+                                className="text-xs border border-[#AFABC9] px-3 py-1.5 rounded-lg text-[#7c6992] hover:border-[#2e1a47] hover:text-[#2e1a47] transition-colors font-medium"
                               >
                                 Edit
                               </button>
                               <button
                                 onClick={() => handleCancel(listing.id)}
                                 disabled={cancellingId === listing.id}
-                                className="text-xs border border-red-200 px-3 py-1 text-red-500 hover:bg-red-50 transition-colors disabled:opacity-50"
+                                className="text-xs border border-red-200 px-3 py-1.5 rounded-lg text-red-500 hover:bg-red-50 transition-colors disabled:opacity-50 font-medium"
                               >
                                 {cancellingId === listing.id ? 'Cancelling...' : 'Cancel'}
                               </button>
@@ -147,67 +171,81 @@ export default function MyListings() {
                         </div>
                       </div>
 
-                      <div className="flex gap-4 mt-3 text-xs text-[#7a7a9a]">
+                      {/* Pricing details */}
+                      <div className="flex flex-wrap gap-2 mt-3">
                         {listing.buyNowPrice && (
-                          <span>Buy now: ${listing.buyNowPrice.toFixed(2)}</span>
+                          <span className="text-xs bg-[#F6F3F9] border border-[#E3DFEF] rounded-full px-2.5 py-1 text-[#2e1a47] font-medium">
+                            Buy ${listing.buyNowPrice.toFixed(2)}
+                          </span>
                         )}
                         {listing.minAcceptPrice && (
-                          <span>Min bid: ${listing.minAcceptPrice.toFixed(2)}</span>
+                          <span className="text-xs bg-[#F6F3F9] border border-[#E3DFEF] rounded-full px-2.5 py-1 text-[#2e1a47] font-medium">
+                            Min bid ${listing.minAcceptPrice.toFixed(2)}
+                          </span>
                         )}
                         {listing.acceptsExchange && (
-                          <span>Accepts exchange</span>
+                          <span className="text-xs bg-[#F6F3F9] border border-[#E3DFEF] rounded-full px-2.5 py-1 text-[#2e1a47] font-medium">
+                            Trade
+                          </span>
                         )}
                       </div>
 
+                      {/* Pending bids */}
                       {pendingBids.length > 0 && (
-                        <div className="mt-3 p-3 bg-[#f8f7f4] border border-[#e2e0db]">
-                          <p className="text-xs font-semibold text-[#1a1a2e] mb-2">
+                        <div className="mt-4 p-4 bg-[#F6F3F9] border border-[#E3DFEF] rounded-xl">
+                          <p className="text-xs font-semibold text-[#2e1a47] mb-3 uppercase tracking-widest">
                             {pendingBids.length} pending bid{pendingBids.length > 1 ? 's' : ''}
                           </p>
-                          {pendingBids.map(bid => (
-                            <div key={bid.id} className="flex items-center justify-between text-xs text-[#4a4a6a] py-1">
-                              <span>
-                                {bid.bidType === 'CASH'
-                                  ? `Cash offer: $${bid.cashAmount?.toFixed(2)}`
-                                  : 'Exchange offer'}
-                              </span>
-                              <div className="flex gap-2">
-                                <button
-                                  onClick={() => api.acceptBid(listing.id, bid.id).then(() => {
-                                    setListings(prev => prev.map(l =>
-                                      l.id === listing.id
-                                        ? {
-                                            ...l,
-                                            status: 'RESERVED',
-                                            bids: l.bids.map(b =>
-                                              b.id === bid.id ? { ...b, status: 'ACCEPTED' } : { ...b, status: 'REJECTED' }
-                                            )
-                                          }
-                                        : l
-                                    ))
-                                  })}
-                                  className="text-green-600 hover:text-green-700 font-semibold"
-                                >
-                                  Accept
-                                </button>
-                                <button
-                                  onClick={() => api.rejectBid(listing.id, bid.id).then(() => {
-                                    setListings(prev => prev.map(l => ({
-                                      ...l,
-                                      bids: l.bids.map(b =>
-                                        b.id === bid.id ? { ...b, status: 'REJECTED' } : b
-                                      )
-                                    })))
-                                  })}
-                                  className="text-red-500 hover:text-red-600 font-semibold"
-                                >
-                                  Reject
-                                </button>
+                          <div className="space-y-2">
+                            {pendingBids.map(bid => (
+                              <div
+                                key={bid.id}
+                                className="flex items-center justify-between text-xs text-[#7c6992] py-2 border-b border-[#E3DFEF] last:border-0 last:pb-0"
+                              >
+                                <span className="font-medium text-[#2e1a47]">
+                                  {bid.bidType === 'CASH'
+                                    ? `Cash offer: $${bid.cashAmount?.toFixed(2)}`
+                                    : 'Exchange offer'}
+                                </span>
+                                <div className="flex gap-3">
+                                  <button
+                                    onClick={() => api.acceptBid(listing.id, bid.id).then(() => {
+                                      setListings(prev => prev.map(l =>
+                                        l.id === listing.id
+                                          ? {
+                                              ...l,
+                                              status: 'RESERVED',
+                                              bids: l.bids.map(b =>
+                                                b.id === bid.id ? { ...b, status: 'ACCEPTED' } : { ...b, status: 'REJECTED' }
+                                              )
+                                            }
+                                          : l
+                                      ))
+                                    })}
+                                    className="text-[#2e7d32] hover:text-green-700 font-semibold"
+                                  >
+                                    Accept
+                                  </button>
+                                  <button
+                                    onClick={() => api.rejectBid(listing.id, bid.id).then(() => {
+                                      setListings(prev => prev.map(l => ({
+                                        ...l,
+                                        bids: l.bids.map(b =>
+                                          b.id === bid.id ? { ...b, status: 'REJECTED' } : b
+                                        )
+                                      })))
+                                    })}
+                                    className="text-red-500 hover:text-red-600 font-semibold"
+                                  >
+                                    Reject
+                                  </button>
+                                </div>
                               </div>
-                            </div>
-                          ))}
+                            ))}
+                          </div>
                         </div>
                       )}
+
                     </div>
                   </div>
                 </div>
