@@ -5,7 +5,6 @@ import { useApi } from '../services/api.ts'
 const FAQS = [
   {
     section: 'Buying',
-    icon: '🛒',
     questions: [
       {
         q: 'How do I purchase a gift card?',
@@ -23,7 +22,6 @@ const FAQS = [
   },
   {
     section: 'Selling',
-    icon: '🏷️',
     questions: [
       {
         q: 'How do I list a gift card for sale?',
@@ -41,7 +39,6 @@ const FAQS = [
   },
   {
     section: 'Account',
-    icon: '👤',
     questions: [
       {
         q: 'How do I verify my identity?',
@@ -59,7 +56,6 @@ const FAQS = [
   },
   {
     section: 'Report a User',
-    icon: '🚩',
     questions: [
       {
         q: 'How do I report a suspicious seller?',
@@ -115,46 +111,55 @@ export default function Help() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f8f7f4] text-[#1a1a2e]">
-      <nav className="flex items-center justify-between px-8 py-5 border-b border-[#e2e0db] bg-white">
-        <button onClick={() => navigate('/dashboard')} className="text-xl font-semibold tracking-tight">
+    <div className="min-h-screen bg-[#F6F3F9] text-[#2e1a47]">
+
+      {/* ── Nav ── */}
+      <nav className="flex items-center justify-between px-4 sm:px-8 py-5 border-b border-[#E3DFEF] bg-white shadow-sm">
+        <button
+          onClick={() => navigate('/dashboard')}
+          className="text-xl font-semibold tracking-tight text-[#2e1a47]"
+        >
           Lantana
         </button>
         <button
           onClick={() => navigate('/browse')}
-          className="text-sm text-[#4a4a6a] hover:text-[#1a1a2e] transition-colors"
+          className="text-sm text-[#7c6992] hover:text-[#2e1a47] transition-colors font-normal"
         >
           ← Back to browse
         </button>
       </nav>
 
-      <div className="max-w-3xl mx-auto px-8 py-12 space-y-12">
+      <div className="max-w-3xl mx-auto px-4 sm:px-8 py-12 space-y-12">
 
-        {/* Header */}
+        {/* ── Header ── */}
         <div>
-          <p className="text-xs uppercase tracking-widest text-[#7a7a9a] mb-2">Support</p>
-          <h1 className="text-3xl font-semibold">How can we help?</h1>
+          <p className="text-xs uppercase tracking-widest text-[#7c6992] mb-2">Support</p>
+          <h1 className="text-3xl font-light text-[#2e1a47]">How can we help?</h1>
         </div>
 
-        {/* FAQ Sections */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* ── FAQ Sections ── */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {FAQS.map(section => (
-            <div key={section.section} className="bg-white border border-[#e2e0db] p-6 space-y-3">
-              <div className="flex items-center gap-2 mb-4">
-                <span className="text-xl">{section.icon}</span>
-                <h2 className="text-sm font-semibold uppercase tracking-widest text-[#1a1a2e]">{section.section}</h2>
-              </div>
+            <div
+              key={section.section}
+              className="bg-white border border-[#E3DFEF] rounded-2xl p-6 space-y-3 shadow-sm"
+            >
+              <h2 className="text-xs font-semibold uppercase tracking-widest text-[#7c6992] mb-4">
+                {section.section}
+              </h2>
               {section.questions.map(item => (
-                <div key={item.q} className="border-b border-[#e2e0db] last:border-0 pb-3 last:pb-0">
+                <div key={item.q} className="border-b border-[#E3DFEF] last:border-0 pb-3 last:pb-0">
                   <button
                     onClick={() => setOpenQuestion(openQuestion === item.q ? null : item.q)}
-                    className="w-full text-left text-sm text-[#1a1a2e] flex justify-between items-start gap-2"
+                    className="w-full text-left text-sm text-[#2e1a47] flex justify-between items-start gap-2 font-normal"
                   >
                     <span>{item.q}</span>
-                    <span className="text-[#7a7a9a] shrink-0">{openQuestion === item.q ? '−' : '+'}</span>
+                    <span className="text-[#AFABC9] shrink-0 font-light">
+                      {openQuestion === item.q ? '−' : '+'}
+                    </span>
                   </button>
                   {openQuestion === item.q && (
-                    <p className="mt-2 text-sm text-[#4a4a6a] leading-relaxed">{item.a}</p>
+                    <p className="mt-2 text-sm text-[#7c6992] leading-relaxed">{item.a}</p>
                   )}
                 </div>
               ))}
@@ -162,47 +167,53 @@ export default function Help() {
           ))}
         </div>
 
-        {/* Contact Form */}
-        <div className="bg-white border border-[#e2e0db] p-8">
-          <h2 className="text-lg font-semibold mb-1">Contact us</h2>
-          <p className="text-sm text-[#7a7a9a] mb-6">We typically respond within 24 hours.</p>
+        {/* ── Contact Form ── */}
+        <div className="bg-white border border-[#E3DFEF] rounded-2xl p-8 shadow-sm">
+          <h2 className="text-xl font-light text-[#2e1a47] mb-1">Contact us</h2>
+          <p className="text-sm text-[#7c6992] mb-6">We typically respond within 24 hours.</p>
 
           {success ? (
-            <div className="bg-green-50 border border-green-200 p-4">
-              <p className="text-sm text-green-700">Your message has been sent. We'll get back to you shortly.</p>
+            <div className="bg-[#F6F3F9] border border-[#E3DFEF] rounded-xl p-4">
+              <p className="text-sm text-[#2e7d32]">Your message has been sent. We'll get back to you shortly.</p>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs uppercase tracking-widest text-[#7a7a9a] mb-2">Name</label>
+                  <label className="block text-xs uppercase tracking-widest text-[#7c6992] mb-2 font-semibold">
+                    Name
+                  </label>
                   <input
                     type="text"
                     value={name}
                     onChange={e => setName(e.target.value)}
                     required
-                    className="w-full bg-white border border-[#e2e0db] px-4 py-3 text-sm focus:outline-none focus:border-[#1a1a2e] transition-colors"
+                    className="w-full bg-white border border-[#E3DFEF] rounded-lg px-4 py-3 text-sm text-[#2e1a47] placeholder-[#AFABC9] focus:outline-none focus:border-[#72569C] focus:ring-1 focus:ring-[#72569C] transition-colors"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs uppercase tracking-widest text-[#7a7a9a] mb-2">Email</label>
+                  <label className="block text-xs uppercase tracking-widest text-[#7c6992] mb-2 font-semibold">
+                    Email
+                  </label>
                   <input
                     type="email"
                     value={email}
                     onChange={e => setEmail(e.target.value)}
                     required
-                    className="w-full bg-white border border-[#e2e0db] px-4 py-3 text-sm focus:outline-none focus:border-[#1a1a2e] transition-colors"
+                    className="w-full bg-white border border-[#E3DFEF] rounded-lg px-4 py-3 text-sm text-[#2e1a47] placeholder-[#AFABC9] focus:outline-none focus:border-[#72569C] focus:ring-1 focus:ring-[#72569C] transition-colors"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs uppercase tracking-widest text-[#7a7a9a] mb-2">Subject</label>
+                <label className="block text-xs uppercase tracking-widest text-[#7c6992] mb-2 font-semibold">
+                  Subject
+                </label>
                 <select
                   value={subject}
                   onChange={e => setSubject(e.target.value)}
                   required
-                  className="w-full bg-white border border-[#e2e0db] px-4 py-3 text-sm focus:outline-none focus:border-[#1a1a2e] transition-colors"
+                  className="w-full bg-white border border-[#E3DFEF] rounded-lg px-4 py-3 text-sm text-[#2e1a47] focus:outline-none focus:border-[#72569C] focus:ring-1 focus:ring-[#72569C] transition-colors"
                 >
                   <option value="">Select a subject</option>
                   {SUBJECTS.map(s => (
@@ -213,32 +224,36 @@ export default function Help() {
 
               {subject === 'Report a User' && (
                 <div>
-                  <label className="block text-xs uppercase tracking-widest text-[#7a7a9a] mb-2">Username to report</label>
+                  <label className="block text-xs uppercase tracking-widest text-[#7c6992] mb-2 font-semibold">
+                    Username to report
+                  </label>
                   <input
                     type="text"
                     value={reportedUser}
                     onChange={e => setReportedUser(e.target.value)}
                     placeholder="@username"
-                    className="w-full bg-white border border-[#e2e0db] px-4 py-3 text-sm focus:outline-none focus:border-[#1a1a2e] transition-colors"
+                    className="w-full bg-white border border-[#E3DFEF] rounded-lg px-4 py-3 text-sm text-[#2e1a47] placeholder-[#AFABC9] focus:outline-none focus:border-[#72569C] focus:ring-1 focus:ring-[#72569C] transition-colors"
                   />
                 </div>
               )}
 
               <div>
-                <label className="block text-xs uppercase tracking-widest text-[#7a7a9a] mb-2">Message</label>
+                <label className="block text-xs uppercase tracking-widest text-[#7c6992] mb-2 font-semibold">
+                  Message
+                </label>
                 <textarea
                   value={message}
                   onChange={e => setMessage(e.target.value)}
                   required
                   rows={5}
                   maxLength={2000}
-                  className="w-full bg-white border border-[#e2e0db] px-4 py-3 text-sm focus:outline-none focus:border-[#1a1a2e] transition-colors resize-none"
+                  className="w-full bg-white border border-[#E3DFEF] rounded-lg px-4 py-3 text-sm text-[#2e1a47] placeholder-[#AFABC9] focus:outline-none focus:border-[#72569C] focus:ring-1 focus:ring-[#72569C] transition-colors resize-none"
                 />
-                <p className="text-xs text-[#7a7a9a] mt-1 text-right">{message.length}/2000</p>
+                <p className="text-xs text-[#AFABC9] mt-1 text-right">{message.length}/2000</p>
               </div>
 
               {error && (
-                <div className="bg-red-50 border border-red-200 p-4">
+                <div className="bg-red-50 border border-red-200 rounded-lg px-4 py-3">
                   <p className="text-sm text-red-600">{error}</p>
                 </div>
               )}
@@ -246,7 +261,7 @@ export default function Help() {
               <button
                 type="submit"
                 disabled={submitting}
-                className="w-full bg-[#1a1a2e] text-white py-3 text-sm font-semibold hover:bg-[#2d2d4e] transition-colors disabled:opacity-50"
+                className="w-full bg-[#2e1a47] text-white py-3 text-sm font-normal rounded-lg hover:bg-[#72569C] transition-colors disabled:opacity-50"
               >
                 {submitting ? 'Sending...' : 'Send message'}
               </button>
