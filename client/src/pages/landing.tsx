@@ -86,12 +86,12 @@ export default function Landing() {
       <section className="relative bg-[#F6F3F9] py-8 overflow-hidden">
         {/* Left fade — very strong */}
         <div
-          className="absolute left-0 top-0 h-full w-64 z-10 pointer-events-none"
+          className="absolute left-0 top-0 h-full w-256 z-10 pointer-events-none"
           style={{ background: 'linear-gradient(to right, #F6F3F9 0%, #F6F3F9 30%, transparent 100%)' }}
         />
         {/* Right fade — very strong */}
         <div
-          className="absolute right-0 top-0 h-full w-64 z-10 pointer-events-none"
+          className="absolute right-0 top-0 h-full w-256 z-10 pointer-events-none"
           style={{ background: 'linear-gradient(to left, #F6F3F9 0%, #F6F3F9 30%, transparent 100%)' }}
         />
 
