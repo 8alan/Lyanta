@@ -30,8 +30,8 @@ export default {
         'float': '0 6px 24px rgba(0,0,0,0.02), 0 4px 16px rgba(0,0,0,0.02), 0 2px 8px rgba(0,0,0,0.03), 0 0 0 1px rgba(0,0,0,0.07)',
       },
       animation: {
-        scroll: 'scroll 30s linear infinite',
-        'scroll-reverse': 'scroll-reverse 30s linear infinite',
+        scroll: 'scroll 60s linear infinite',
+        'scroll-reverse': 'scroll-reverse 60s linear infinite',
       },
       keyframes: {
         scroll: {
