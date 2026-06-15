@@ -75,7 +75,7 @@ export default function MyListings() {
       <nav className="flex items-center justify-between px-4 sm:px-8 py-5 border-b border-[#E3DFEF] bg-white shadow-sm">
         <button
           onClick={() => navigate('/dashboard')}
-          className="font-display text-xl text-[#2e1a47] tracking-tight"
+          className="text-xl font-semibold tracking-tight text-[#2e1a47]"
         >
           Lantana
         </button>
