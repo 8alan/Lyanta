@@ -99,69 +99,79 @@ export default function MyTrades() {
 
   const statusColor: Record<string, string> = {
     PENDING: 'text-yellow-600',
-    COMPLETED: 'text-green-600',
+    COMPLETED: 'text-[#2e7d32]',
     FAILED: 'text-red-500',
     DISPUTED: 'text-red-500',
   }
 
+  // ── Claimed card view ──
   if (claimedCard) {
     return (
-      <div className="min-h-screen bg-[#f8f7f4] text-[#1a1a2e]">
-        <nav className="flex items-center justify-between px-8 py-5 border-b border-[#e2e0db] bg-white">
-          <button onClick={() => navigate('/dashboard')} className="text-xl font-semibold tracking-tight">
+      <div className="min-h-screen bg-[#F6F3F9] text-[#2e1a47]">
+
+        {/* Nav */}
+        <nav className="flex items-center justify-between px-4 sm:px-8 py-5 border-b border-[#E3DFEF] bg-white shadow-sm">
+          <button
+            onClick={() => navigate('/dashboard')}
+            className="font-display text-xl text-[#2e1a47] tracking-tight"
+          >
             Lantana
           </button>
         </nav>
-        <div className="max-w-2xl mx-auto px-8 py-24 text-center">
-          <p className="text-xs uppercase tracking-widest text-[#7a7a9a] mb-4">Card claimed</p>
-          <h1 className="text-3xl font-semibold text-[#1a1a2e] mb-4">Your card is ready.</h1>
-          <p className="text-sm text-[#4a4a6a] mb-8">
+
+        <div className="max-w-2xl mx-auto px-4 sm:px-8 py-24 text-center">
+          <p className="text-xs uppercase tracking-widest text-[#7c6992] mb-4">Card claimed</p>
+          <h1 className="text-3xl font-light text-[#2e1a47] mb-4">Your card is ready.</h1>
+          <p className="text-sm text-[#7c6992] mb-8 leading-relaxed">
             Save these details carefully. These details have also been sent to your email.
           </p>
-          <div className="bg-white border border-[#e2e0db] p-8 text-left space-y-4 mb-8">
+
+          <div className="bg-white border border-[#E3DFEF] rounded-2xl p-8 text-left space-y-4 mb-8 shadow-sm">
             <div className="flex justify-between text-sm">
-              <span className="text-[#7a7a9a]">Brand</span>
-              <span className="font-semibold">
+              <span className="text-[#AFABC9]">Brand</span>
+              <span className="font-normal text-[#2e1a47]">
                 {claimedCard.brand === 'Other' && claimedCard.description
                   ? claimedCard.description
                   : claimedCard.brand}
               </span>
             </div>
             <div className="flex justify-between text-sm">
-              <span className="text-[#7a7a9a]">Face value</span>
-              <span className="font-semibold">${claimedCard.faceValue.toFixed(2)}</span>
+              <span className="text-[#AFABC9]">Face value</span>
+              <span className="font-normal text-[#2e1a47]">${claimedCard.faceValue.toFixed(2)}</span>
             </div>
-            <div className="border-t border-[#e2e0db] pt-4 flex justify-between text-sm items-center">
-              <span className="text-[#7a7a9a]">Card Number</span>
+            <div className="border-t border-[#E3DFEF] pt-4 flex justify-between text-sm items-center">
+              <span className="text-[#AFABC9]">Card Number</span>
               <div className="flex items-center gap-2">
-                <span className="font-semibold font-mono">{claimedCard.cardNumber}</span>
+                <span className="font-normal font-mono text-[#2e1a47]">{claimedCard.cardNumber}</span>
                 <button
                   onClick={() => navigator.clipboard.writeText(claimedCard.cardNumber)}
                   title="Copy card number"
-                  className="text-[#7a7a9a] hover:text-[#1a1a2e] transition-colors"
+                  className="text-[#AFABC9] hover:text-[#2e1a47] transition-colors"
                 >
                   📋
                 </button>
               </div>
             </div>
             <div className="flex justify-between text-sm items-center">
-              <span className="text-[#7a7a9a]">PIN</span>
+              <span className="text-[#AFABC9]">PIN</span>
               <div className="flex items-center gap-2">
-                <span className="font-semibold font-mono">{claimedCard.pin}</span>
+                <span className="font-normal font-mono text-[#2e1a47]">{claimedCard.pin}</span>
                 <button
                   onClick={() => navigator.clipboard.writeText(claimedCard.pin)}
                   title="Copy PIN"
-                  className="text-[#7a7a9a] hover:text-[#1a1a2e] transition-colors"
+                  className="text-[#AFABC9] hover:text-[#2e1a47] transition-colors"
                 >
                   📋
                 </button>
               </div>
             </div>
           </div>
-          <p className="text-xs text-[#7a7a9a] mb-8">
+
+          <p className="text-xs text-[#AFABC9] mb-8 leading-relaxed">
             These details will not be shown again on Lantana for security reasons.
           </p>
-          <div className="flex gap-3 justify-center">
+
+          <div className="flex gap-3 justify-center flex-wrap">
             <button
               onClick={() => {
                 const text = [
@@ -178,13 +188,13 @@ export default function MyTrades() {
                 a.click()
                 URL.revokeObjectURL(url)
               }}
-              className="border border-[#e2e0db] text-[#4a4a6a] px-6 py-3 text-sm hover:border-[#1a1a2e] hover:text-[#1a1a2e] transition-colors"
+              className="border border-[#AFABC9] text-[#7c6992] px-6 py-3 text-sm rounded-lg hover:border-[#2e1a47] hover:text-[#2e1a47] transition-colors font-normal"
             >
               ↓ Download details
             </button>
             <button
               onClick={() => { setClaimedCard(null); navigate('/dashboard') }}
-              className="bg-[#1a1a2e] text-white px-8 py-3 text-sm hover:bg-[#2d2d4e] transition-colors"
+              className="bg-[#2e1a47] text-white px-8 py-3 text-sm rounded-lg hover:bg-[#72569C] transition-colors font-normal"
             >
               Back to dashboard
             </button>
@@ -194,41 +204,54 @@ export default function MyTrades() {
     )
   }
 
+  // ── Main trades view ──
   return (
-    <div className="min-h-screen bg-[#f8f7f4] text-[#1a1a2e]">
-      <nav className="flex items-center justify-between px-8 py-5 border-b border-[#e2e0db] bg-white">
-        <button onClick={() => navigate('/dashboard')} className="text-xl font-semibold tracking-tight">
+    <div className="min-h-screen bg-[#F6F3F9] text-[#2e1a47]">
+
+      {/* Nav */}
+      <nav className="flex items-center justify-between px-4 sm:px-8 py-5 border-b border-[#E3DFEF] bg-white shadow-sm">
+        <button
+          onClick={() => navigate('/dashboard')}
+          className="font-display text-xl text-[#2e1a47] tracking-tight"
+        >
           Lantana
         </button>
         <button
           onClick={() => navigate('/dashboard')}
-          className="text-sm text-[#4a4a6a] hover:text-[#1a1a2e] transition-colors"
+          className="text-sm text-[#7c6992] hover:text-[#2e1a47] transition-colors font-normal"
         >
           ← Back to dashboard
         </button>
       </nav>
 
-      <div className="max-w-4xl mx-auto px-8 py-12">
+      <div className="max-w-4xl mx-auto px-4 sm:px-8 py-12">
+
+        {/* Header */}
         <div className="mb-10">
-          <p className="text-xs uppercase tracking-widest text-[#7a7a9a] mb-2">Account</p>
-          <h1 className="text-3xl font-semibold text-[#1a1a2e]">My trades</h1>
-          <p className="text-sm text-[#4a4a6a] mt-2">Cards you have purchased or traded for.</p>
+          <p className="text-xs uppercase tracking-widest text-[#7c6992] mb-2">Account</p>
+          <h1 className="text-3xl font-light text-[#2e1a47]">My trades</h1>
+          <p className="text-sm text-[#7c6992] mt-2">Cards you have purchased or traded for.</p>
         </div>
 
+        {/* Loading */}
         {loading ? (
-          <div className="bg-white border border-[#e2e0db] p-8 text-center">
-            <p className="text-sm text-[#7a7a9a]">Loading...</p>
+          <div className="bg-white border border-[#E3DFEF] rounded-2xl p-10 text-center shadow-sm">
+            <p className="text-sm text-[#7c6992]">Loading...</p>
           </div>
+
+        /* Empty */
         ) : trades.length === 0 ? (
-          <div className="bg-white border border-[#e2e0db] p-8 text-center">
-            <p className="text-sm text-[#7a7a9a] mb-4">You haven't made any trades yet.</p>
+          <div className="bg-white border border-[#E3DFEF] rounded-2xl p-10 text-center shadow-sm">
+            <p className="text-sm text-[#7c6992] mb-4">You haven't made any trades yet.</p>
             <button
               onClick={() => navigate('/browse')}
-              className="text-sm bg-[#1a1a2e] text-white px-6 py-2 hover:bg-[#2d2d4e] transition-colors"
+              className="text-sm bg-[#2e1a47] text-white px-6 py-2.5 rounded-full hover:bg-[#72569C] transition-colors font-normal"
             >
               Browse cards
             </button>
           </div>
+
+        /* Trades list */
         ) : (
           <div className="space-y-4">
             {trades.map(trade => {
@@ -240,39 +263,47 @@ export default function MyTrades() {
               const isReviewing = reviewingId === trade.id
 
               return (
-                <div key={trade.id} className="bg-white border border-[#e2e0db] p-6">
-                  <div className="flex gap-4">
+                <div
+                  key={trade.id}
+                  className="bg-white border border-[#E3DFEF] rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow"
+                >
+                  <div className="flex gap-4 flex-col sm:flex-row">
+
+                    {/* Brand image */}
                     <img
                       src={image ?? ''}
                       alt={trade.listing.giftCard.brand}
-                      className="w-24 h-16 object-cover shrink-0"
+                      className="w-full sm:w-24 h-20 sm:h-16 object-cover rounded-xl shrink-0"
                     />
-                    <div className="flex-1">
-                      <div className="flex items-start justify-between">
+
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between gap-4 flex-wrap">
                         <div>
-                          <p className="text-sm font-semibold text-[#1a1a2e]">
+                          <p className="text-sm font-normal text-[#2e1a47]">
                             {cardName} — ${trade.listing.giftCard.faceValue.toFixed(2)}
                           </p>
-                          <p className="text-xs text-[#7a7a9a] mt-1">From @{seller}</p>
-                          <p className={`text-xs mt-1 ${statusColor[trade.status] ?? 'text-[#7a7a9a]'}`}>
+                          <p className="text-xs text-[#AFABC9] mt-1">From @{seller}</p>
+                          <p className={`text-xs mt-1 font-normal ${statusColor[trade.status] ?? 'text-[#7c6992]'}`}>
                             {statusLabel[trade.status] ?? trade.status}
                           </p>
                           {trade.finalPrice && (
-                            <p className="text-xs text-[#7a7a9a] mt-1">Paid: ${trade.finalPrice.toFixed(2)}</p>
+                            <p className="text-xs text-[#AFABC9] mt-1">Paid: ${trade.finalPrice.toFixed(2)}</p>
                           )}
                         </div>
-                        <div className="flex flex-col items-end gap-2">
+
+                        {/* Action buttons */}
+                        <div className="flex flex-col items-end gap-2 shrink-0">
                           {trade.status === 'PENDING' && !trade.listing.giftCard.revealed && (
                             <button
                               onClick={() => handleClaim(trade.listingId)}
                               disabled={claimingId === trade.listingId}
-                              className="text-sm bg-[#1a1a2e] text-white px-4 py-2 hover:bg-[#2d2d4e] transition-colors disabled:opacity-50"
+                              className="text-sm bg-[#2e1a47] text-white px-4 py-2 rounded-lg hover:bg-[#72569C] transition-colors disabled:opacity-50 font-normal"
                             >
                               {claimingId === trade.listingId ? 'Claiming...' : 'Claim card'}
                             </button>
                           )}
                           {trade.listing.giftCard.revealed && (
-                            <span className="text-xs text-[#7a7a9a] border border-[#e2e0db] px-3 py-1">
+                            <span className="text-xs text-[#AFABC9] border border-[#E3DFEF] rounded-lg px-3 py-1">
                               Card details sent to email
                             </span>
                           )}
@@ -284,21 +315,22 @@ export default function MyTrades() {
                                 setComment('')
                                 setReviewError('')
                               }}
-                              className="text-xs border border-[#e2e0db] px-3 py-1 text-[#4a4a6a] hover:border-[#1a1a2e] hover:text-[#1a1a2e] transition-colors"
+                              className="text-xs border border-[#AFABC9] px-3 py-1.5 rounded-lg text-[#7c6992] hover:border-[#2e1a47] hover:text-[#2e1a47] transition-colors font-normal"
                             >
                               {isReviewing ? 'Cancel' : 'Leave a review'}
                             </button>
                           )}
                           {trade.status === 'COMPLETED' && trade.hasReviewed && (
-                            <span className="text-xs text-green-600">Review left ✓</span>
+                            <span className="text-xs text-[#2e7d32]">Review left ✓</span>
                           )}
                         </div>
                       </div>
 
                       {/* Inline review form */}
                       {isReviewing && (
-                        <div className="mt-4 pt-4 border-t border-[#e2e0db] space-y-3">
-                          <p className="text-xs uppercase tracking-widest text-[#7a7a9a]">Rate this trade</p>
+                        <div className="mt-4 pt-4 border-t border-[#E3DFEF] space-y-3">
+                          <p className="text-xs uppercase tracking-widest text-[#7c6992]">Rate this trade</p>
+
                           {/* Star rating */}
                           <div className="flex gap-1">
                             {[1, 2, 3, 4, 5].map(star => (
@@ -306,27 +338,34 @@ export default function MyTrades() {
                                 key={star}
                                 onClick={() => setRating(star)}
                                 className={`text-2xl transition-colors ${
-                                  star <= rating ? 'text-yellow-400' : 'text-[#e2e0db]'
+                                  star <= rating ? 'text-yellow-400' : 'text-[#E3DFEF]'
                                 }`}
                               >
                                 ★
                               </button>
                             ))}
                           </div>
+
                           <textarea
                             value={comment}
                             onChange={e => setComment(e.target.value)}
                             placeholder="Leave a comment (optional)"
                             maxLength={300}
                             rows={3}
-                            className="w-full bg-white border border-[#e2e0db] px-4 py-3 text-sm text-[#1a1a2e] placeholder-[#b0b0c0] focus:outline-none focus:border-[#1a1a2e] transition-colors resize-none"
+                            className="w-full bg-white border border-[#E3DFEF] rounded-lg px-4 py-3 text-sm text-[#2e1a47] placeholder-[#AFABC9] focus:outline-none focus:border-[#72569C] focus:ring-1 focus:ring-[#72569C] transition-colors resize-none font-normal"
                           />
-                          <p className="text-xs text-[#7a7a9a] text-right">{comment.length}/300</p>
-                          {reviewError && <p className="text-xs text-red-600">{reviewError}</p>}
+                          <p className="text-xs text-[#AFABC9] text-right">{comment.length}/300</p>
+
+                          {reviewError && (
+                            <p className="text-xs text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+                              {reviewError}
+                            </p>
+                          )}
+
                           <button
                             onClick={() => handleSubmitReview(trade.id)}
                             disabled={submittingReview}
-                            className="text-sm bg-[#1a1a2e] text-white px-4 py-2 hover:bg-[#2d2d4e] transition-colors disabled:opacity-50"
+                            className="text-sm bg-[#2e1a47] text-white px-4 py-2 rounded-lg hover:bg-[#72569C] transition-colors disabled:opacity-50 font-normal"
                           >
                             {submittingReview ? 'Submitting...' : 'Submit review'}
                           </button>
