@@ -86,22 +86,47 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ── Scrolling brands ── */}
-      <section className="border-y border-[#E3DFEF] bg-white py-6 overflow-hidden">
-        <div className="flex gap-4 animate-scroll w-max">
-          {[...SUPPORTED_BRANDS, ...SUPPORTED_BRANDS].map((brand, i) => {
-            const image = getBrandImage(brand)
-            return (
-              <div
-                key={`${brand}-${i}`}
-                className="shrink-0 w-36 h-20 border border-[#E3DFEF] rounded-2xl overflow-hidden shadow-sm"
-              >
-                <img src={image ?? ''} alt={brand} className="w-full h-full object-cover" />
-              </div>
-            )
-          })}
-        </div>
-      </section>
+      {/* ── Scrolling brands — dual row with fade ── */}
+        <section className="border-y border-[#E3DFEF] bg-white py-6 overflow-hidden relative">
+          {/* Left fade */}
+          <div className="absolute left-0 top-0 h-full w-24 z-10 pointer-events-none"
+            style={{ background: 'linear-gradient(to right, white 0%, transparent 100%)' }}
+          />
+          {/* Right fade */}
+          <div className="absolute right-0 top-0 h-full w-24 z-10 pointer-events-none"
+            style={{ background: 'linear-gradient(to left, white 0%, transparent 100%)' }}
+          />
+
+          {/* Row 1 — left to right */}
+          <div className="flex gap-4 animate-scroll w-max mb-4">
+            {[...SUPPORTED_BRANDS, ...SUPPORTED_BRANDS].map((brand, i) => {
+              const image = getBrandImage(brand)
+              return (
+                <div
+                  key={`row1-${brand}-${i}`}
+                  className="shrink-0 w-36 h-20 border border-[#E3DFEF] rounded-2xl overflow-hidden shadow-sm"
+                >
+                  <img src={image ?? ''} alt={brand} className="w-full h-full object-cover" />
+                </div>
+              )
+            })}
+          </div>
+
+          {/* Row 2 — right to left */}
+          <div className="flex gap-4 animate-scroll-reverse w-max">
+            {[...SUPPORTED_BRANDS, ...SUPPORTED_BRANDS].reverse().map((brand, i) => {
+              const image = getBrandImage(brand)
+              return (
+                <div
+                  key={`row2-${brand}-${i}`}
+                  className="shrink-0 w-36 h-20 border border-[#E3DFEF] rounded-2xl overflow-hidden shadow-sm"
+                >
+                  <img src={image ?? ''} alt={brand} className="w-full h-full object-cover" />
+                </div>
+              )
+            })}
+          </div>
+        </section>
 
       {/* ── How it works ── */}
       <section className="py-20 px-4 sm:px-8">
