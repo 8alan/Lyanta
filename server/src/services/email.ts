@@ -5,7 +5,7 @@ import path from 'path'
 dotenv.config({ path: path.resolve(process.cwd(), '.env') })
 
 const resend = new Resend(process.env.RESEND_API_KEY)
-const FROM_EMAIL = 'Lantana <notifications@myriapods.com>'
+const FROM_EMAIL = 'Lantana <jousuealan@gmail.com>'
 
 export async function sendBidReceivedEmail(
   sellerEmail: string,
@@ -121,7 +121,7 @@ export async function sendContactEmail(
 ) {
   await resend.emails.send({
     from: FROM_EMAIL,
-    to: 'notifications@myriapods.com',
+    to: 'jousuealan@gmail.com',
     replyTo: email,
     subject: `[Lantana Support] ${subject}`,
     html: `
