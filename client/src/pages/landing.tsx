@@ -84,15 +84,21 @@ export default function Landing() {
 
       {/* ── Scrolling brands — dual row with fade ── */}
       <section className="relative bg-[#F6F3F9] py-8 overflow-hidden">
-        {/* Left fade — very strong */}
+        {/* Left fade */}
         <div
-          className="absolute left-0 top-0 h-full w-256 z-10 pointer-events-none"
-          style={{ background: 'linear-gradient(to right, #F6F3F9 0%, #F6F3F9 30%, transparent 100%)' }}
+          className="absolute left-0 top-0 h-full z-10 pointer-events-none"
+          style={{ 
+            width: '200px',
+            background: 'linear-gradient(to right, #F6F3F9 0%, #F6F3F9 20%, transparent 100%)' 
+          }}
         />
-        {/* Right fade — very strong */}
+        {/* Right fade */}
         <div
-          className="absolute right-0 top-0 h-full w-256 z-10 pointer-events-none"
-          style={{ background: 'linear-gradient(to left, #F6F3F9 0%, #F6F3F9 30%, transparent 100%)' }}
+          className="absolute right-0 top-0 h-full z-10 pointer-events-none"
+          style={{ 
+            width: '200px',
+            background: 'linear-gradient(to left, #F6F3F9 0%, #F6F3F9 20%, transparent 100%)' 
+          }}
         />
 
         {/* Row 1 — left to right */}
