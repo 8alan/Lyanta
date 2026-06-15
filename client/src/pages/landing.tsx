@@ -88,7 +88,7 @@ export default function Landing() {
         <div
           className="absolute left-0 top-0 h-full z-10 pointer-events-none"
           style={{ 
-            width: '200px',
+            width: '400px',
             background: 'linear-gradient(to right, #F6F3F9 0%, #F6F3F9 20%, transparent 100%)' 
           }}
         />
@@ -96,7 +96,7 @@ export default function Landing() {
         <div
           className="absolute right-0 top-0 h-full z-10 pointer-events-none"
           style={{ 
-            width: '200px',
+            width: '400px',
             background: 'linear-gradient(to left, #F6F3F9 0%, #F6F3F9 20%, transparent 100%)' 
           }}
         />
