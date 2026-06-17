@@ -80,7 +80,72 @@ router.post('/create', requireAuth, async (req: Request, res: Response) => {
     res.status(500).json({ error: 'Internal server error' })
   }
 })
-  
+
+// Get earnings for the past 90 days
+  router.get('/my/earnings', requireAuth, async (req: Request, res: Response) => {
+    try {
+      const clerkId = req.userId!
+
+      const user = await prisma.user.findUnique({ where: { clerkId } })
+      if (!user) {
+        res.status(404).json({ error: 'User not found' })
+        return
+      }
+
+      const ninetyDaysAgo = new Date()
+      ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90)
+
+      const trades = await prisma.trade.findMany({
+        where: {
+          sellerId: user.id,
+          status: 'COMPLETED',
+          tradeType: 'CASH',
+          createdAt: { gte: ninetyDaysAgo }
+        }
+      })
+
+      const total = trades.reduce((sum, t) => sum + (t.finalPrice ?? 0), 0)
+
+      res.json({ total })
+    } catch (error) {
+      console.error(error)
+      res.status(500).json({ error: 'Internal server error' })
+    }
+  })
+
+  // Get top selling card brands
+  router.get('/my/top-cards', async (req: Request, res: Response) => {
+    try {
+      const trades = await prisma.trade.findMany({
+        where: { status: 'COMPLETED' },
+        include: {
+          listing: {
+            include: {
+              giftCard: { select: { brand: true } }
+            }
+          }
+        }
+      })
+
+      const brandCounts: Record<string, number> = {}
+      for (const trade of trades) {
+        const brand = trade.listing.giftCard.brand
+        brandCounts[brand] = (brandCounts[brand] ?? 0) + 1
+      }
+
+      const topCards = Object.entries(brandCounts)
+        .map(([brand, count]) => ({ brand, count }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 5)
+
+      res.json({ topCards })
+    } catch (error) {
+      console.error(error)
+      res.status(500).json({ error: 'Internal server error' })
+    }
+  })
+
+
 // Edit a listing
 router.patch('/:id', requireAuth, async (req: Request, res: Response) => {
   try {
@@ -617,5 +682,4 @@ router.post('/:id/bids/:bidId/reject', requireAuth, async (req: Request, res: Re
       res.status(500).json({ error: 'Internal server error' })
     }
 })
-
 export default router
