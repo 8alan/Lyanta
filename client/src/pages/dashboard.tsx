@@ -12,27 +12,58 @@ interface GiftCard {
   createdAt: string
 }
 
+interface Listing {
+  id: string
+  buyNowPrice: number | null
+  minAcceptPrice: number | null
+  status: string
+  giftCard: {
+    brand: string
+    faceValue: number
+  }
+  createdAt: string
+}
+
+interface TopCard {
+  brand: string
+  count: number
+}
+
 export default function Dashboard() {
   const { user } = useUser()
   const navigate = useNavigate()
   const api = useApi()
   const { setBalance } = useStore()
+  const [activeTab, setActiveTab] = useState<'overview' | 'active' | 'pending' | 'trades'>('overview')
   const [cards, setCards] = useState<GiftCard[]>([])
+  const [listings, setListings] = useState<Listing[]>([])
+  const [earnings90, setEarnings90] = useState<number>(0)
+  const [topCards, setTopCards] = useState<TopCard[]>([])
   const [loading, setLoading] = useState(true)
 
   const hour = new Date().getHours()
   const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening'
 
   useEffect(() => {
-    api.getMyCards()
-      .then(data => setCards(data.giftCards))
-      .catch(console.error)
-      .finally(() => setLoading(false))
-    api.getBalance()
-      .then(data => setBalance(data.balance))
-      .catch(console.error)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    Promise.all([
+      api.getMyCards(),
+      api.getMyListings(),
+      api.getBalance(),
+      api.getMyEarnings(),
+      api.getTopCards(),
+    ]).then(([cardsData, listingsData, balanceData, earningsData, topCardsData]) => {
+      setCards(cardsData.giftCards)
+      setListings(listingsData.listings)
+      setBalance(balanceData.balance)
+      setEarnings90(earningsData.total ?? 0)
+      setTopCards(topCardsData.topCards ?? [])
+    }).catch(console.error)
+    .finally(() => setLoading(false))
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  const activeListings = listings.filter(l => l.status === 'ACTIVE')
+  const pendingCards = cards.filter(c => c.status === 'PENDING' || c.status === 'FAILED')
 
   const statusLabel: Record<string, string> = {
     PENDING: 'Pending verification',
@@ -53,6 +84,8 @@ export default function Dashboard() {
     FLAGGED: 'text-red-600',
     FAILED: 'text-red-600',
   }
+
+  const maxCount = topCards.length > 0 ? Math.max(...topCards.map(c => c.count)) : 1
 
   return (
     <div className="min-h-screen bg-[#F6F3F9] text-[#2e1a47]">
@@ -79,15 +112,12 @@ export default function Dashboard() {
         </div>
       </nav>
 
-      {/* ── Main content ── */}
       <div className="max-w-4xl mx-auto px-8 py-12">
 
-        {/* Header row */}
+        {/* Header */}
         <div className="flex items-center justify-between mb-10">
           <div>
-            <p className="text-xs uppercase tracking-widest text-[#7c6992] mb-1 font-semibold">
-              Dashboard
-            </p>
+            <p className="text-xs uppercase tracking-widest text-[#7c6992] mb-1 font-semibold">Dashboard</p>
             <h1 className="text-3xl font-light text-[#2e1a47]">
               {greeting}, {user?.firstName ?? 'there'}.
             </h1>
@@ -100,92 +130,238 @@ export default function Dashboard() {
           </button>
         </div>
 
-        {/* Tab buttons */}
-        <div className="flex gap-3 mb-10 flex-wrap">
+        {/* Tabs */}
+        <div className="flex gap-2 mb-10 flex-wrap">
           {[
-            { label: 'My Listings', path: '/my-listings' },
-            { label: 'My Trades', path: '/my-trades' },
-            { label: 'Browse Cards', path: '/browse' },
-          ].map(({ label, path }) => (
+            { label: 'Overview', key: 'overview' },
+            { label: 'Active Listings', key: 'active' },
+            { label: 'Pending Listings', key: 'pending' },
+            { label: 'My Trades', key: 'trades' },
+          ].map(({ label, key }) => (
             <button
-              key={label}
-              onClick={() => navigate(path)}
-              className="text-sm border border-[#AFABC9] bg-white px-5 py-2 text-[#7c6992] rounded-lg hover:border-[#2e1a47] hover:text-[#2e1a47] hover:bg-[#F6F3F9] transition-colors font-medium"
+              key={key}
+              onClick={() => {
+                if (key === 'trades') navigate('/my-trades')
+                else if (key === 'active') navigate('/my-listings')
+                else if (key === 'pending') navigate('/pending-listings')
+                else setActiveTab(key as typeof activeTab)
+              }}
+              className={`text-sm border px-5 py-2 rounded-lg font-medium transition-colors ${
+                activeTab === key
+                  ? 'bg-[#2e1a47] text-white border-[#2e1a47]'
+                  : 'border-[#AFABC9] bg-white text-[#7c6992] hover:border-[#2e1a47] hover:text-[#2e1a47] hover:bg-[#F6F3F9]'
+              }`}
             >
               {label}
             </button>
           ))}
         </div>
 
-        {/* My Cards section */}
-        <div>
-          <div className="flex items-center justify-between mb-4">
-            <p className="text-xs uppercase tracking-widest text-[#7c6992] font-semibold">
-              My Cards
-            </p>
-            <button
-              onClick={() => navigate('/submit')}
-              className="text-xs text-[#72569C] hover:text-[#2e1a47] transition-colors font-medium"
-            >
-              Submit new →
-            </button>
-          </div>
+        {/* ── Overview Tab ── */}
+        {activeTab === 'overview' && (
+          <div className="space-y-8">
 
-          <div className="bg-white border border-[#E3DFEF] rounded-2xl overflow-hidden shadow-sm">
-            {loading ? (
-              <div className="p-10 text-center">
-                <p className="text-sm text-[#7c6992]">Loading...</p>
+            {/* Earnings + Stats */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="bg-[#2e1a47] rounded-2xl p-6 shadow-sm">
+                <p className="text-xs uppercase tracking-widest text-[#AFABC9] mb-2 font-semibold">Earnings (90 days)</p>
+                <p className="text-4xl font-light text-white">${earnings90.toFixed(2)}</p>
               </div>
-            ) : cards.length === 0 ? (
-              <div className="p-10 text-center">
-                <p className="text-sm text-[#7c6992] mb-4">No cards submitted yet.</p>
-                <button
-                  onClick={() => navigate('/submit')}
-                  className="text-sm bg-[#2e1a47] text-white px-6 py-2.5 rounded-lg hover:bg-[#72569C] transition-colors font-semibold"
-                >
-                  Submit your first card
-                </button>
+              <div className="bg-white border border-[#E3DFEF] rounded-2xl p-6 shadow-sm">
+                <p className="text-xs uppercase tracking-widest text-[#7c6992] mb-2 font-semibold">Active Listings</p>
+                <p className="text-4xl font-light text-[#2e1a47]">{activeListings.length}</p>
               </div>
-            ) : (
-              cards.map((card, i) => (
-                <div
-                  key={card.id}
-                  className={`group flex items-center justify-between px-6 py-4 hover:bg-[#F6F3F9] transition-colors ${
-                    i !== cards.length - 1 ? 'border-b border-[#E3DFEF]' : ''
-                  }`}
-                >
-                  <div>
-                    <p className="text-sm font-semibold text-[#2e1a47]">{card.brand} Gift Card</p>
-                    <p className="text-xs text-[#AFABC9]">
-                      {new Date(card.createdAt).toLocaleDateString()}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-4">
-                    <div className="text-right">
-                      <p className="text-sm font-semibold text-[#2e1a47]">
-                        ${card.faceValue.toFixed(2)}
-                      </p>
-                      <p className={`text-xs ${statusColor[card.status] ?? 'text-[#7c6992]'}`}>
-                        {statusLabel[card.status] ?? card.status}
-                      </p>
-                    </div>
-                    {(card.status === 'PENDING' || card.status === 'AVAILABLE') && (
-                      <button
-                        onClick={async () => {
-                          await api.deleteGiftCard(card.id)
-                          setCards(prev => prev.filter(c => c.id !== card.id))
-                        }}
-                        className="text-xs text-red-500 hover:text-red-700 transition-colors opacity-0 group-hover:opacity-100"
-                      >
-                        Delete
-                      </button>
-                    )}
-                  </div>
+              <div className="bg-white border border-[#E3DFEF] rounded-2xl p-6 shadow-sm">
+                <p className="text-xs uppercase tracking-widest text-[#7c6992] mb-2 font-semibold">Pending Cards</p>
+                <p className="text-4xl font-light text-[#2e1a47]">{pendingCards.length}</p>
+              </div>
+            </div>
+
+            {/* Active listings preview */}
+            <div>
+              <div className="bg-white border border-[#E3DFEF] rounded-2xl shadow-sm">
+                <div className="flex items-center justify-between p-6 pb-2">
+                  <p className="text-xs uppercase tracking-widest text-[#7c6992] font-semibold">Active Listings</p>
+                  <button
+                    onClick={() => setActiveTab('active')}
+                    className="text-xs text-[#72569C] hover:text-[#2e1a47] transition-colors font-medium"
+                  >
+                    View all →
+                  </button>
                 </div>
-              ))
-            )}
+              {loading ? (
+                  <div className="p-10 text-center">
+                    <p className="text-sm text-[#7c6992]">Loading...</p>
+                  </div>
+                ) : activeListings.length === 0 ? (
+                  <div className="p-10 text-center">
+                    <p className="text-sm text-[#7c6992] mb-4">No active listings yet.</p>
+                    <button
+                      onClick={() => navigate('/submit')}
+                      className="text-sm bg-[#2e1a47] text-white px-6 py-2.5 rounded-lg hover:bg-[#72569C] transition-colors font-semibold"
+                    >
+                      Submit a card
+                    </button>
+                  </div>
+                ) : (
+                  activeListings.slice(0, 3).map((listing, i) => (
+                    <div
+                      key={listing.id}
+                      className={`flex items-center justify-between px-6 py-4 hover:bg-[#F6F3F9] transition-colors ${
+                        i !== Math.min(activeListings.length, 3) - 1 ? 'border-b border-[#E3DFEF]' : ''
+                      }`}
+                    >
+                      <div>
+                        <p className="text-sm font-semibold text-[#2e1a47]">{listing.giftCard.brand} Gift Card</p>
+                        <p className="text-xs text-[#AFABC9]">{new Date(listing.createdAt).toLocaleDateString()}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm font-semibold text-[#2e1a47]">
+                          ${listing.buyNowPrice?.toFixed(2) ?? '—'}
+                        </p>
+                        <p className="text-xs text-[#2e7d32]">Active</p>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+
+            {/* Highest Demand */}
+            <div className="bg-white border border-[#E3DFEF] rounded-2xl p-6 shadow-sm">
+              <p className="text-xs uppercase tracking-widest text-[#7c6992] mb-6 font-semibold">Highest Demand</p>
+              {topCards.length === 0 ? (
+                <div className="text-center py-8">
+                  <p className="text-sm text-[#AFABC9]">No sales data yet — this will populate as cards are sold.</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {topCards.slice(0, 5).map(card => (
+                    <div key={card.brand} className="flex items-center gap-4">
+                      <p className="text-sm text-[#2e1a47] w-28 shrink-0 font-medium">{card.brand}</p>
+                      <div className="flex-1 bg-[#F6F3F9] rounded-full h-2">
+                        <div
+                          className="bg-[#72569C] h-2 rounded-full transition-all"
+                          style={{ width: `${(card.count / maxCount) * 100}%` }}
+                        />
+                      </div>
+                      <p className="text-xs text-[#7c6992] w-8 text-right">{card.count}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
           </div>
-        </div>
+        )}
+
+        {/* ── Active Listings Tab ── */}
+        {activeTab === 'active' && (
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <p className="text-xs uppercase tracking-widest text-[#7c6992] font-semibold">Active Listings</p>
+            </div>
+            <div className="bg-white border border-[#E3DFEF] rounded-2xl overflow-hidden shadow-sm">
+              {loading ? (
+                <div className="p-10 text-center">
+                  <p className="text-sm text-[#7c6992]">Loading...</p>
+                </div>
+              ) : activeListings.length === 0 ? (
+                <div className="p-10 text-center">
+                  <p className="text-sm text-[#7c6992] mb-4">No active listings yet.</p>
+                  <button
+                    onClick={() => navigate('/submit')}
+                    className="text-sm bg-[#2e1a47] text-white px-6 py-2.5 rounded-lg hover:bg-[#72569C] transition-colors font-semibold"
+                  >
+                    Submit a card
+                  </button>
+                </div>
+              ) : (
+                activeListings.map((listing, i) => (
+                  <div
+                    key={listing.id}
+                    className={`group flex items-center justify-between px-6 py-4 hover:bg-[#F6F3F9] transition-colors ${
+                      i !== activeListings.length - 1 ? 'border-b border-[#E3DFEF]' : ''
+                    }`}
+                  >
+                    <div>
+                      <p className="text-sm font-semibold text-[#2e1a47]">{listing.giftCard.brand} Gift Card</p>
+                      <p className="text-xs text-[#AFABC9]">{new Date(listing.createdAt).toLocaleDateString()}</p>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <div className="text-right">
+                        <p className="text-sm font-semibold text-[#2e1a47]">
+                          ${listing.buyNowPrice?.toFixed(2) ?? '—'}
+                        </p>
+                        <p className="text-xs text-[#2e7d32]">Active</p>
+                      </div>
+                      <button
+                        onClick={() => navigate('/my-listings')}
+                        className="text-xs text-[#72569C] hover:text-[#2e1a47] transition-colors opacity-0 group-hover:opacity-100 font-medium"
+                      >
+                        Edit →
+                      </button>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* ── Pending Listings Tab ── */}
+        {activeTab === 'pending' && (
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <p className="text-xs uppercase tracking-widest text-[#7c6992] font-semibold">Pending Cards</p>
+            </div>
+            <div className="bg-white border border-[#E3DFEF] rounded-2xl overflow-hidden shadow-sm">
+              {loading ? (
+                <div className="p-10 text-center">
+                  <p className="text-sm text-[#7c6992]">Loading...</p>
+                </div>
+              ) : pendingCards.length === 0 ? (
+                <div className="p-10 text-center">
+                  <p className="text-sm text-[#7c6992]">No pending cards.</p>
+                </div>
+              ) : (
+                pendingCards.map((card, i) => (
+                  <div
+                    key={card.id}
+                    className={`group flex items-center justify-between px-6 py-4 hover:bg-[#F6F3F9] transition-colors ${
+                      i !== pendingCards.length - 1 ? 'border-b border-[#E3DFEF]' : ''
+                    }`}
+                  >
+                    <div>
+                      <p className="text-sm font-semibold text-[#2e1a47]">{card.brand} Gift Card</p>
+                      <p className="text-xs text-[#AFABC9]">{new Date(card.createdAt).toLocaleDateString()}</p>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <div className="text-right">
+                        <p className="text-sm font-semibold text-[#2e1a47]">${card.faceValue.toFixed(2)}</p>
+                        <p className={`text-xs ${statusColor[card.status] ?? 'text-[#7c6992]'}`}>
+                          {statusLabel[card.status] ?? card.status}
+                        </p>
+                      </div>
+                      {(card.status === 'PENDING' || card.status === 'FAILED') && (
+                        <button
+                          onClick={async () => {
+                            await api.deleteGiftCard(card.id)
+                            setCards(prev => prev.filter(c => c.id !== card.id))
+                          }}
+                          className="text-xs text-red-500 hover:text-red-700 transition-colors opacity-0 group-hover:opacity-100"
+                        >
+                          Delete
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        )}
+
       </div>
     </div>
   )

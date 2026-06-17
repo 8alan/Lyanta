@@ -31,54 +31,41 @@ export default function Landing() {
       </div>
 
       {/* ── Hero — Dark rounded block only ── */}
-      <section className="px-3 pt-2 pb-8">
-        <div className="px-3 -mt-16 relative z-0">
-          <div className="bg-[#2e1a47] rounded-3xl px-8 sm:px-16 pt-36 pb-32 shadow-[0_6px_24px_rgba(46,26,71,0.25)]">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
-              <div>
-                <h1 className="font-display text-5xl sm:text-6xl font-normal leading-[1.05] text-white mb-6">
-                  Don't let your value sit.
-                </h1>
-                <p className="text-base text-[#AFABC9] leading-relaxed mb-10 max-w-md">
-                  Buy, sell, and trade gift cards directly with real people.
-                  Set your own price, place bids, and put your cards to work.
-                </p>
-                <div className="flex gap-3 flex-wrap">
-                  <SignUpButton mode="modal">
-                    <button className="bg-white text-[#2e1a47] px-7 py-3 text-sm font-semibold rounded-full hover:bg-[#F6F3F9] transition-colors shadow-sm">
-                      Start exchanging
-                    </button>
-                  </SignUpButton>
-                  <button
-                    onClick={() => navigate('/browse')}
-                    className="border border-[#ffffff40] text-white px-7 py-3 text-sm font-semibold rounded-full hover:bg-[#ffffff1a] transition-colors"
-                  >
-                    Browse listings
-                  </button>
-                </div>
-              </div>
-
-              {/* Stat cards */}
-              <div className="grid grid-cols-2 gap-4">
-                {[
-                  { value: 'Dozens', label: 'Supported brands' },
-                  { value: '0%',     label: 'Cash advance fees' },
-                  { value: 'P2P',    label: 'Direct trades' },
-                  { value: 'Fast',   label: 'Verified payouts' },
-                ].map(({ value, label }) => (
-                  <div
-                    key={label}
-                    className="bg-[#ffffff0d] border border-[#ffffff1a] rounded-2xl p-8 hover:bg-[#ffffff1a] transition-colors"
-                  >
-                    <p className="font-display text-4xl font-normal text-white mb-1">{value}</p>
-                    <p className="text-xs uppercase tracking-widest text-[#AFABC9] font-semibold">{label}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
+<section className="px-3 pt-2 pb-8">
+  <div className="px-3 -mt-16 relative z-0">
+    <div
+      className="bg-[#2e1a47] rounded-3xl shadow-[0_6px_24px_rgba(46,26,71,0.25)]"
+      style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', padding: '8rem 2rem 4rem' }}
+    >
+      <div className="flex flex-col items-center justify-center text-center max-w-3xl mx-auto">
+          <h1
+          className="font-display font-normal text-white tracking-tight mb-6 uppercase"
+          style={{ fontSize: 'clamp(3rem, 6vw, 6rem)', letterSpacing: '-0.02em', lineHeight: '90%' }}
+        >
+          <span className="block">Stop letting your</span>
+          <span className="block">money go to waste</span>
+        </h1>
+          <p className="text-lg font-semibold text-white leading-relaxed max-w-lg">
+          Buy, sell, and trade gift cards directly with real people.<br/>
+          Set your own price, place bids, and put your cards to work.
+        </p>
+        <div className="flex gap-3 flex-wrap justify-center mt-10">
+          <SignUpButton mode="modal">
+            <button className="bg-white text-[#2e1a47] px-6 py-2.5 text-sm font-bold rounded-xl hover:bg-[#F6F3F9] transition-colors shadow-sm">
+              Start exchanging
+            </button>
+          </SignUpButton>
+          <button
+            onClick={() => navigate('/browse')}
+            className="bg-[#4a3566] text-white px-6 py-2.5 text-sm font-semibold rounded-xl hover:bg-[#5a4178] transition-colors"
+          >
+            Browse listings
+          </button>
         </div>
-      </section>
+      </div>
+    </div>
+  </div>
+</section>
 
       {/* ── Scrolling brands ── */}
       <section className="relative bg-[#F6F3F9] py-8 overflow-hidden">
@@ -240,7 +227,10 @@ export default function Landing() {
               <ul className="space-y-3">
                 {['About us', 'Blog', 'Careers', 'Contact us'].map(link => (
                   <li key={link}>
-                    <button className="text-sm text-[#7c6992] hover:text-[#2e1a47] transition-colors text-left">
+                    <button
+                      onClick={() => link === 'Contact us' ? navigate('/help') : undefined}
+                      className="text-sm text-[#7c6992] hover:text-[#2e1a47] transition-colors text-left"
+                    >
                       {link}
                     </button>
                   </li>
@@ -252,20 +242,28 @@ export default function Landing() {
               <ul className="space-y-3">
                 {['Privacy policy', 'Terms of service', 'Cookie policy', 'Security'].map(link => (
                   <li key={link}>
-                    <button className="text-sm text-[#7c6992] hover:text-[#2e1a47] transition-colors text-left">
+                    <button
+                      onClick={() => link === 'Privacy policy' ? navigate('/privacy-policy') : undefined}
+                      className="text-sm text-[#7c6992] hover:text-[#2e1a47] transition-colors text-left"
+                    >
                       {link}
                     </button>
                   </li>
                 ))}
               </ul>
-            </div>
+              </div>
           </div>
           <div className="border-t border-[#E3DFEF] pt-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <span className="text-xs text-[#AFABC9]">© 2026 Lantana. Secure. Straightforward. Fast.</span>
             <div className="flex items-center gap-6">
-              <button className="text-xs text-[#AFABC9] hover:text-[#7c6992] transition-colors">Privacy</button>
+              <button onClick={() => navigate('/privacy-policy')} className="text-xs text-[#AFABC9] hover:text-[#7c6992] transition-colors">Privacy</button>
               <button className="text-xs text-[#AFABC9] hover:text-[#7c6992] transition-colors">Terms</button>
-              <button className="text-xs text-[#AFABC9] hover:text-[#7c6992] transition-colors">Contact</button>
+              <button
+                onClick={() => navigate('/help')}
+                className="text-xs text-[#AFABC9] hover:text-[#7c6992] transition-colors"
+              >
+                Contact
+              </button>
             </div>
           </div>
         </div>

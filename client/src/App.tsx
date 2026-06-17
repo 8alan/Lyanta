@@ -15,6 +15,9 @@ import MyTrades from './pages/MyTrades.tsx'
 import Profile from './pages/Profile.tsx'
 import PublicProfile from './pages/PublicProfile.tsx'
 import Help from './pages/Help.tsx'
+import PendingListings from './pages/PendingListings.tsx'
+import PrivacyPolicy from './pages/PrivacyPolicy.tsx'
+
 
 function App() {
   const { isSignedIn, isLoaded } = useAuth()
@@ -38,6 +41,8 @@ function App() {
       <Route path="/profile" element={isSignedIn ? <Profile /> : <Navigate to="/" />} />
       <Route path="/profile/:username" element={<PublicProfile />} />
       <Route path="/help" element={<Help />} />
+      <Route path="/pending-listings" element={<PendingListings />} />
+      <Route path="/privacy-policy" element={<PrivacyPolicy />} />
     </Routes>
   )
 }

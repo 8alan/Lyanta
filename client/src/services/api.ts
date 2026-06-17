@@ -150,8 +150,22 @@ export function useApi() {
       })
       if (!res.ok) throw new Error((await res.json()).error)
       return res.json()
+    },
+
+    getMyEarnings: async () => {
+      const res = await fetch(`${BASE_URL}/api/listings/my/earnings`, {
+        headers: { Authorization: `Bearer ${await getToken()}` }
+      })
+      if (!res.ok) throw new Error((await res.json()).error)
+      return res.json()
+    },
+
+    getTopCards: async () => {
+      const res = await fetch(`${BASE_URL}/api/listings/my/top-cards`)
+      if (!res.ok) throw new Error((await res.json()).error)
+      return res.json()
     }
-  
+    
   }
       
 }

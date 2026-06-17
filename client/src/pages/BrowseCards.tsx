@@ -30,36 +30,67 @@ const POPULAR_BRANDS = [
   'Best Buy', 'Steam', 'Starbucks', 'DoorDash', 'Uber'
 ]
 
+const SORT_OPTIONS = [
+  { value: 'default',    label: 'Popular' },
+  { value: 'price-asc',  label: 'Price ↑' },
+  { value: 'price-desc', label: 'Price ↓' },
+  { value: 'discount',   label: 'Best deal' },
+] as const
+
+type SortBy = typeof SORT_OPTIONS[number]['value']
+
+const BRAND_CATEGORIES: Record<string, string[]> = {
+  'Gaming': ['Steam', 'Blizzard', 'Roblox', 'Valorant', 'Google Play'],
+  'Restaurants': ['DoorDash', 'Chipotle', 'Starbucks', 'Taco Bell', 'Uber'],
+  'Retail': ['Amazon', 'Best Buy', 'Sephora', 'Lululemon', 'Macys', 'Kohls', 'Lowes', 'IKEA', 'Staples', 'H&M', 'Abercrombie', 'Banana Republic', 'Pink', 'Nautica', 'Lego'],
+}
+
 export default function BrowseCards() {
   const navigate = useNavigate()
   const api = useApi()
   const [listings, setListings] = useState<Listing[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedBrand, setSelectedBrand] = useState<string | null>(null)
+  const [activeCategory, setActiveCategory] = useState<string | null>(null)
+  const [expandedCategory, setExpandedCategory] = useState<string | null>(null)
   const [search, setSearch] = useState('')
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [sortBy, setSortBy] = useState<SortBy>('default')
   const { user } = useUser()
   const { isSignedIn } = useAuth()
 
   useEffect(() => {
-    api.getActiveListings(selectedBrand ?? undefined)
+    api.getActiveListings()
       .then(data => setListings(data.listings))
       .catch(console.error)
       .finally(() => setLoading(false))
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedBrand])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
-  const filtered = search
-    ? listings.filter(l => l.giftCard.brand.toLowerCase().includes(search.toLowerCase()))
-    : listings
+  const filtered = listings.filter(l => {
+    const matchesSearch = search
+      ? l.giftCard.brand.toLowerCase().includes(search.toLowerCase())
+      : true
+    const matchesBrand = selectedBrand
+      ? l.giftCard.brand === selectedBrand
+      : true
+    return matchesSearch && matchesBrand
+  })
 
   const sorted = [...filtered].sort((a, b) => {
-    const aPopular = POPULAR_BRANDS.indexOf(a.giftCard.brand)
-    const bPopular = POPULAR_BRANDS.indexOf(b.giftCard.brand)
-    if (aPopular === -1 && bPopular === -1) return 0
-    if (aPopular === -1) return 1
-    if (bPopular === -1) return -1
-    return aPopular - bPopular
+    if (sortBy === 'price-asc') return (a.buyNowPrice ?? Infinity) - (b.buyNowPrice ?? Infinity)
+    if (sortBy === 'price-desc') return (b.buyNowPrice ?? -Infinity) - (a.buyNowPrice ?? -Infinity)
+    if (sortBy === 'discount') {
+      const aD = a.buyNowPrice ? (a.giftCard.faceValue - a.buyNowPrice) / a.giftCard.faceValue : 0
+      const bD = b.buyNowPrice ? (b.giftCard.faceValue - b.buyNowPrice) / b.giftCard.faceValue : 0
+      return bD - aD
+    }
+    const aP = POPULAR_BRANDS.indexOf(a.giftCard.brand)
+    const bP = POPULAR_BRANDS.indexOf(b.giftCard.brand)
+    if (aP === -1 && bP === -1) return 0
+    if (aP === -1) return 1
+    if (bP === -1) return -1
+    return aP - bP
   })
 
   return (
@@ -69,12 +100,11 @@ export default function BrowseCards() {
       <nav className="flex items-center justify-between px-4 sm:px-8 py-5 border-b border-[#E3DFEF] bg-white shadow-sm">
         <button
           onClick={() => navigate('/dashboard')}
-          className="text-xl font-semibold tracking-tight text-[#2e1a47]"
+          className="font-display text-xl text-[#2e1a47] tracking-tight"
         >
           Lantana
         </button>
         <div className="flex items-center gap-3">
-          {/* Mobile sidebar toggle */}
           <button
             className="md:hidden text-sm text-[#7c6992] border border-[#E3DFEF] px-3 py-1.5 rounded-lg hover:border-[#2e1a47] transition-colors"
             onClick={() => setSidebarOpen(!sidebarOpen)}
@@ -83,7 +113,7 @@ export default function BrowseCards() {
           </button>
           <button
             onClick={() => navigate('/dashboard')}
-            className="hidden sm:block text-sm text-[#7c6992] hover:text-[#2e1a47] transition-colors font-medium"
+            className="hidden sm:block text-sm text-[#7c6992] hover:text-[#2e1a47] transition-colors font-normal"
           >
             ← Back to dashboard
           </button>
@@ -104,9 +134,9 @@ export default function BrowseCards() {
         </div>
       )}
 
-      <div className="flex relative">
+      <div className="flex relative min-h-screen">
 
-        {/* ── Sidebar — mobile overlay ── */}
+        {/* ── Sidebar mobile overlay ── */}
         {sidebarOpen && (
           <div
             className="fixed inset-0 bg-black/30 z-20 md:hidden"
@@ -116,15 +146,14 @@ export default function BrowseCards() {
 
         {/* ── Sidebar ── */}
         <div className={`
-          fixed md:static top-0 left-0 h-full md:h-auto z-30 md:z-auto
+          fixed md:static top-0 left-0 self-stretch z-30 md:z-auto
           w-64 md:w-56 border-r border-[#E3DFEF] bg-white px-4 py-8 shrink-0
           transform transition-transform duration-200
           ${sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
-          overflow-y-auto md:max-h-[calc(100vh-73px)] md:sticky md:top-0
+          overflow-y-auto md:sticky md:top-0 md:max-h-screen
         `}>
-          {/* Mobile close */}
-          <div className="flex items-center justify-between mb-4 md:block">
-            <p className="text-xs uppercase tracking-widest text-[#7c6992] font-semibold">
+          <div className="flex items-center justify-between mb-6 md:block">
+            <p className="text-xs uppercase tracking-widest text-[#7c6992] font-semibold mb-0 md:mb-4">
               Browse by brand
             </p>
             <button
@@ -136,36 +165,91 @@ export default function BrowseCards() {
           </div>
 
           <div className="space-y-1">
+
+            {/* ── All Cards ── */}
             <button
-              onClick={() => { setSelectedBrand(null); setSidebarOpen(false) }}
-              className={`w-full text-left text-sm px-3 py-2 rounded-lg transition-colors ${
-                selectedBrand === null
-                  ? 'bg-[#2e1a47] text-white font-semibold'
+              onClick={() => {
+                setSelectedBrand(null)
+                setActiveCategory('All Cards')
+                setExpandedCategory(prev => prev === 'All Cards' ? null : 'All Cards')
+              }}
+              className={`w-full text-left text-sm px-3 py-2 rounded-lg font-medium ${
+                activeCategory === 'All Cards' || activeCategory === null
+                  ? 'bg-[#2e1a47] text-white'
                   : 'text-[#7c6992] hover:bg-[#F6F3F9] hover:text-[#2e1a47]'
               }`}
             >
-              All cards
+              All Cards
             </button>
-            {SUPPORTED_BRANDS.sort().map(brand => (
-              <button
-                key={brand}
-                onClick={() => { setSelectedBrand(brand); setSidebarOpen(false) }}
-                className={`w-full text-left text-sm px-3 py-2 rounded-lg transition-colors ${
-                  selectedBrand === brand
-                    ? 'bg-[#2e1a47] text-white font-semibold'
-                    : 'text-[#7c6992] hover:bg-[#F6F3F9] hover:text-[#2e1a47]'
-                }`}
-              >
-                {brand}
-              </button>
-            ))}
+
+            {expandedCategory === 'All Cards' && (
+              <div className="mt-1 ml-2 space-y-0.5">
+                {SUPPORTED_BRANDS.filter(b => b !== 'Other').sort().map(brand => (
+                  <button
+                    key={brand}
+                    onClick={() => { setSelectedBrand(brand); setSidebarOpen(false) }}
+                    className={`w-full text-left text-sm px-3 py-1.5 rounded-lg transition-colors ${
+                      selectedBrand === brand
+                        ? 'bg-[#72569C] text-white font-semibold'
+                        : 'text-[#7c6992] hover:bg-[#F6F3F9] hover:text-[#2e1a47]'
+                    }`}
+                  >
+                    {brand}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {/* ── Category dropdowns ── */}
+            {(['Gaming', 'Restaurants', 'Retail'] as const).map(category => {
+              const brands = BRAND_CATEGORIES[category] ?? []
+              const availableBrands = brands.filter(b => SUPPORTED_BRANDS.includes(b))
+              const isActive = activeCategory === category
+              const isExpanded = expandedCategory === category
+
+              return (
+                <div key={category}>
+                  <button
+                    onClick={() => {
+                      setActiveCategory(category)
+                      setExpandedCategory(prev => prev === category ? null : category)
+                    }}
+                    className={`w-full text-left text-sm px-3 py-2 rounded-lg font-medium ${
+                      isActive
+                        ? 'bg-[#2e1a47] text-white'
+                        : 'text-[#7c6992] hover:bg-[#F6F3F9] hover:text-[#2e1a47]'
+                    }`}
+                  >
+                    {category}
+                  </button>
+
+                  {isExpanded && (
+                    <div className="mt-1 ml-2 space-y-0.5">
+                      {availableBrands.map(brand => (
+                        <button
+                          key={brand}
+                          onClick={() => { setSelectedBrand(brand); setSidebarOpen(false) }}
+                          className={`w-full text-left text-sm px-3 py-1.5 rounded-lg transition-colors ${
+                            selectedBrand === brand
+                              ? 'bg-[#72569C] text-white font-semibold'
+                              : 'text-[#7c6992] hover:bg-[#F6F3F9] hover:text-[#2e1a47]'
+                          }`}
+                        >
+                          {brand}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )
+            })}
           </div>
         </div>
 
         {/* ── Main content ── */}
         <div className="flex-1 px-4 sm:px-8 py-8 min-w-0">
 
-          {/* Header + Search */}
+          {/* ── Header row ── */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
             <div>
               <p className="text-xs uppercase tracking-widest text-[#7c6992] mb-1 font-semibold">
@@ -175,23 +259,42 @@ export default function BrowseCards() {
                 {selectedBrand ? `${selectedBrand} gift cards` : 'All gift cards'}
               </h1>
             </div>
-            <input
-              type="text"
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              placeholder="Search brands..."
-              className="bg-white border border-[#E3DFEF] rounded-lg px-4 py-2 text-sm text-[#2e1a47] placeholder-[#AFABC9] focus:outline-none focus:border-[#72569C] focus:ring-1 focus:ring-[#72569C] transition-colors w-full sm:w-56"
-            />
+
+            <div className="flex items-center gap-3 flex-wrap sm:flex-nowrap">
+              <div className="bg-white border border-[#E3DFEF] rounded-xl p-1 flex gap-1 shadow-sm">
+                {SORT_OPTIONS.map(opt => (
+                  <button
+                    key={opt.value}
+                    onClick={() => setSortBy(opt.value)}
+                    className={`text-xs font-semibold px-3 py-1.5 rounded-lg transition-all whitespace-nowrap ${
+                      sortBy === opt.value
+                        ? 'bg-[#2e1a47] text-white shadow-sm'
+                        : 'text-[#7c6992] hover:text-[#2e1a47] hover:bg-[#F6F3F9]'
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+
+              <input
+                type="text"
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                placeholder="Search brands..."
+                className="bg-white border border-[#E3DFEF] rounded-lg px-4 py-2 text-sm text-[#2e1a47] placeholder-[#AFABC9] focus:outline-none focus:border-[#72569C] focus:ring-1 focus:ring-[#72569C] transition-colors w-full sm:w-48"
+              />
+            </div>
           </div>
 
-          {/* Listings Grid */}
+          {/* ── Listings Grid ── */}
           {loading ? (
             <div className="bg-white border border-[#E3DFEF] rounded-2xl p-10 text-center shadow-sm">
               <p className="text-sm text-[#7c6992]">Loading...</p>
             </div>
           ) : sorted.length === 0 ? (
             <div className="bg-white border border-[#E3DFEF] rounded-2xl p-10 text-center shadow-sm">
-              <p className="text-sm text-[#7c6992]">No cards available right now. Check back soon.</p>
+              <p className="text-sm text-[#7c6992]">No cards available in this category right now.</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -208,7 +311,6 @@ export default function BrowseCards() {
                     onClick={() => navigate(`/listing/${listing.id}`)}
                     className="bg-white border border-[#E3DFEF] rounded-2xl overflow-hidden hover:border-[#72569C] hover:shadow-md transition-all cursor-pointer"
                   >
-                    {/* Card Image */}
                     <div className="relative">
                       <img
                         src={image ?? ''}
@@ -222,7 +324,6 @@ export default function BrowseCards() {
                       )}
                     </div>
 
-                    {/* Card Info */}
                     <div className="p-4">
                       <div className="flex items-start justify-between mb-3">
                         <div>

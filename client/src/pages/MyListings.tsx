@@ -32,7 +32,7 @@ export default function MyListings() {
 
   useEffect(() => {
     api.getMyListings()
-      .then(data => setListings(data.listings))
+      .then(data => setListings(data.listings.filter((l: Listing) => l.status === 'ACTIVE')))
       .catch(console.error)
       .finally(() => setLoading(false))
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -42,30 +42,12 @@ export default function MyListings() {
     setCancellingId(id)
     try {
       await api.cancelListing(id)
-      setListings(prev => prev.map(l =>
-        l.id === id ? { ...l, status: 'CANCELLED' } : l
-      ))
+      setListings(prev => prev.filter(l => l.id !== id))
     } catch (err) {
       console.error(err)
     } finally {
       setCancellingId(null)
     }
-  }
-
-  const statusLabel: Record<string, string> = {
-    PENDING_VERIFICATION: 'Pending verification',
-    ACTIVE: 'Active',
-    RESERVED: 'Reserved',
-    COMPLETED: 'Sold',
-    CANCELLED: 'Cancelled',
-  }
-
-  const statusColor: Record<string, string> = {
-    PENDING_VERIFICATION: 'text-[#7c6992]',
-    ACTIVE: 'text-[#2e7d32]',
-    RESERVED: 'text-yellow-600',
-    COMPLETED: 'text-[#2e1a47]',
-    CANCELLED: 'text-red-500',
   }
 
   return (
@@ -94,7 +76,7 @@ export default function MyListings() {
           <p className="text-xs uppercase tracking-widest text-[#7c6992] mb-2 font-semibold">
             Account
           </p>
-          <h1 className="text-3xl font-light text-[#2e1a47]">My listings</h1>
+          <h1 className="text-3xl font-light text-[#2e1a47]">Active Listings</h1>
         </div>
 
         {/* Loading */}
@@ -106,7 +88,7 @@ export default function MyListings() {
         /* Empty */
         ) : listings.length === 0 ? (
           <div className="bg-white border border-[#E3DFEF] rounded-2xl p-10 text-center shadow-sm">
-            <p className="text-sm text-[#7c6992] mb-4">You haven't listed any cards yet.</p>
+            <p className="text-sm text-[#7c6992] mb-4">You have no active listings.</p>
             <button
               onClick={() => navigate('/submit')}
               className="text-sm bg-[#2e1a47] text-white px-6 py-2.5 rounded-full hover:bg-[#72569C] transition-colors font-semibold"
@@ -144,30 +126,24 @@ export default function MyListings() {
                           <p className="text-sm font-semibold text-[#2e1a47]">
                             {listing.giftCard.brand} — ${listing.giftCard.faceValue.toFixed(2)}
                           </p>
-                          <p className={`text-xs mt-1 font-medium ${statusColor[listing.status] ?? 'text-[#7c6992]'}`}>
-                            {statusLabel[listing.status] ?? listing.status}
-                          </p>
+                          <p className="text-xs mt-1 font-medium text-[#2e7d32]">Active</p>
                         </div>
 
                         {/* Action buttons */}
                         <div className="flex gap-2 shrink-0">
-                          {(listing.status === 'ACTIVE' || listing.status === 'PENDING_VERIFICATION') && (
-                            <>
-                              <button
-                                onClick={() => navigate(`/edit-listing/${listing.id}`)}
-                                className="text-xs border border-[#AFABC9] px-3 py-1.5 rounded-lg text-[#7c6992] hover:border-[#2e1a47] hover:text-[#2e1a47] transition-colors font-medium"
-                              >
-                                Edit
-                              </button>
-                              <button
-                                onClick={() => handleCancel(listing.id)}
-                                disabled={cancellingId === listing.id}
-                                className="text-xs border border-red-200 px-3 py-1.5 rounded-lg text-red-500 hover:bg-red-50 transition-colors disabled:opacity-50 font-medium"
-                              >
-                                {cancellingId === listing.id ? 'Cancelling...' : 'Cancel'}
-                              </button>
-                            </>
-                          )}
+                          <button
+                            onClick={() => navigate(`/edit-listing/${listing.id}`)}
+                            className="text-xs border border-[#AFABC9] px-3 py-1.5 rounded-lg text-[#7c6992] hover:border-[#2e1a47] hover:text-[#2e1a47] transition-colors font-medium"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => handleCancel(listing.id)}
+                            disabled={cancellingId === listing.id}
+                            className="text-xs border border-red-200 px-3 py-1.5 rounded-lg text-red-500 hover:bg-red-50 transition-colors disabled:opacity-50 font-medium"
+                          >
+                            {cancellingId === listing.id ? 'Cancelling...' : 'Cancel'}
+                          </button>
                         </div>
                       </div>
 
