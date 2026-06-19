@@ -164,7 +164,9 @@ export function useApi() {
       const res = await fetch(`${BASE_URL}/api/listings/my/top-cards`)
       if (!res.ok) throw new Error((await res.json()).error)
       return res.json()
-    }
+    },
+
+    verifyIdentity: () => request('POST', '/api/stripe/verify-identity', {}),
     
   }
       

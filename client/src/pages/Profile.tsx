@@ -93,6 +93,8 @@ export default function Profile() {
   const [error, setError] = useState('')
   const [bioError, setBioError] = useState('')
   const [success, setSuccess] = useState('')
+  const [verifying, setVerifying] = useState(false)
+  const [verifyError, setVerifyError] = useState('')
 
   useEffect(() => {
     Promise.all([
@@ -160,6 +162,19 @@ export default function Profile() {
     }
   }
 
+    const handleVerifyIdentity = async () => {
+    setVerifying(true)
+    setVerifyError('')
+    try {
+      const data = await api.verifyIdentity()
+      window.location.href = data.url
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Something went wrong'
+      setVerifyError(message)
+    } finally {
+      setVerifying(false)
+    }
+  }
   const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
@@ -464,13 +479,15 @@ export default function Profile() {
                   ? 'Your identity has been verified. A badge appears on your listings.'
                   : 'Verify your identity with a government-issued ID to build trust with buyers and sellers.'}
               </p>
+              {verifyError && <p className="text-xs text-red-600 mt-2">{verifyError}</p>}
             </div>
             {!profile?.isVerified && (
               <button
-                className="text-sm bg-[#1a1a2e] text-white px-4 py-2 hover:bg-[#2d2d4e] transition-colors shrink-0"
-                onClick={() => alert('Identity verification coming soon.')}
+                onClick={handleVerifyIdentity}
+                disabled={verifying}
+                className="text-sm bg-[#1a1a2e] text-white px-4 py-2 hover:bg-[#2d2d4e] transition-colors shrink-0 disabled:opacity-50"
               >
-                Get verified
+                {verifying ? 'Loading...' : 'Get verified'}
               </button>
             )}
           </div>
