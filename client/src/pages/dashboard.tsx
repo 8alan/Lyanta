@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react'
 import { useApi } from '../services/api.ts'
 import { useStore } from '../store/useStore.ts'
 import { getBrandImage } from '../services/brandImages.ts'
-import { useUser } from '@clerk/react'
+import { UserButton, useUser } from '@clerk/react'
 interface GiftCard {
   id: string
   brand: string
@@ -108,15 +108,26 @@ export default function Dashboard() {
           >
             Browse
           </button>
-          <button onClick={() => navigate('/profile')} className="shrink-0">
+          <div className="relative">
+            <div className="opacity-0 absolute inset-0 z-10 w-8 h-8">
+              <UserButton>
+                <UserButton.MenuItems>
+                  <UserButton.Action
+                    label="My Profile"
+                    labelIcon={<span style={{ fontSize: '14px' }}>👤</span>}
+                    onClick={() => navigate('/profile')}
+                  />
+                </UserButton.MenuItems>
+              </UserButton>
+            </div>
             {avatarUrl ? (
-              <img src={avatarUrl} alt="Profile" className="w-8 h-8 rounded-full object-cover border border-[#E3DFEF]" />
+              <img src={avatarUrl} alt="Profile" className="w-8 h-8 rounded-full object-cover border border-[#E3DFEF] pointer-events-none" />
             ) : (
-              <div className="w-8 h-8 rounded-full bg-[#E3DFEF] flex items-center justify-center text-sm font-semibold text-[#7c6992]">
+              <div className="w-8 h-8 rounded-full bg-[#E3DFEF] flex items-center justify-center text-sm font-semibold text-[#7c6992] pointer-events-none">
                 {user?.firstName?.[0]?.toUpperCase() ?? '?'}
               </div>
             )}
-          </button>
+          </div>
         </div>
       </nav>
 
