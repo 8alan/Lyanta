@@ -25,6 +25,8 @@ interface Listing {
   user: {
     username: string | null
     name: string | null
+    avatarUrl: string | null
+    isVerified: boolean
     avgRating: number | null
     reviewCount: number
   }
@@ -258,23 +260,41 @@ export default function ListingDetail() {
             {/* Seller */}
             <div className="bg-white border border-[#E3DFEF] rounded-2xl p-6 shadow-[0_2px_3px_rgba(0,0,0,0.06),0_0_0_1px_rgba(0,0,0,0.06)]">
               <p className="text-xs uppercase tracking-widest text-[#7c6992] mb-4">Seller</p>
-              <div className="flex items-center justify-between">
-                {listing.user.username ? (
-                  <button
-                    onClick={() => navigate(`/profile/${listing.user.username}`)}
-                    className="text-sm font-semibold text-[#2e1a47] hover:text-[#72569C] transition-colors"
-                  >
-                    @{seller}
-                  </button>
+              <div className="flex items-center gap-3">
+                {listing.user.avatarUrl ? (
+                  <img
+                    src={listing.user.avatarUrl}
+                    alt={seller}
+                    className="w-10 h-10 rounded-full object-cover border border-[#E3DFEF]"
+                  />
                 ) : (
-                  <span className="text-sm font-semibold text-[#2e1a47]">{seller}</span>
-                )}
-                {listing.user.avgRating !== null && listing.user.reviewCount > 0 && (
-                  <div className="flex items-center gap-1.5">
-                    <StarDisplay avg={listing.user.avgRating} />
-                    <span className="text-xs text-[#AFABC9]">({listing.user.reviewCount})</span>
+                  <div className="w-10 h-10 rounded-full bg-[#E3DFEF] flex items-center justify-center text-sm font-semibold text-[#7c6992]">
+                    {seller[0]?.toUpperCase()}
                   </div>
                 )}
+                <div>
+                  <div className="flex items-center gap-1.5">
+                    {listing.user.username ? (
+                      <button
+                        onClick={() => navigate(`/profile/${listing.user.username}`)}
+                        className="text-sm font-semibold text-[#2e1a47] hover:text-[#72569C] transition-colors"
+                      >
+                        @{seller}
+                      </button>
+                    ) : (
+                      <span className="text-sm font-semibold text-[#2e1a47]">{seller}</span>
+                    )}
+                    {listing.user.isVerified && (
+                      <img src="/verification-badge.png" alt="Verified" className="w-4 h-4" />
+                    )}
+                  </div>
+                  {listing.user.avgRating !== null && listing.user.reviewCount > 0 && (
+                    <div className="flex items-center gap-1 mt-0.5">
+                      <StarDisplay avg={listing.user.avgRating} />
+                      <span className="text-xs text-[#AFABC9]">({listing.user.reviewCount})</span>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -319,7 +339,6 @@ export default function ListingDetail() {
                 <div className="bg-white border border-[#E3DFEF] rounded-2xl p-6 shadow-[0_2px_3px_rgba(0,0,0,0.06),0_0_0_1px_rgba(0,0,0,0.06)]">
                   <p className="text-xs uppercase tracking-widest text-[#7c6992] mb-4">Make an offer</p>
 
-                  {/* Bid type toggle */}
                   <div className="grid grid-cols-2 gap-2 mb-5">
                     <button
                       type="button"
