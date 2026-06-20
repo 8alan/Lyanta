@@ -23,6 +23,7 @@ export default function CreateListing() {
   const [marketRate, setMarketRate] = useState<number>(0.90)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [listingCompleted, setListingCompleted] = useState(false)
 
   useEffect(() => {
     if (!giftCardId) {
@@ -39,6 +40,33 @@ export default function CreateListing() {
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (!listingCompleted) {
+        e.preventDefault()
+        e.returnValue = ''
+      }
+    }
+    window.addEventListener('beforeunload', handleBeforeUnload)
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload)
+  }, [listingCompleted])
+
+  const handleExit = async () => {
+    if (listingCompleted) {
+      navigate('/dashboard')
+      return
+    }
+    const confirmed = window.confirm('Are you sure? Your card submission will be deleted if you leave.')
+    if (confirmed) {
+      try {
+        await api.deleteGiftCard(giftCardId)
+      } catch (err) {
+        console.error(err)
+      }
+      navigate('/dashboard')
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -59,6 +87,7 @@ export default function CreateListing() {
         preferredBrand: preferredBrands,
         preferredMinValue: preferredMinValue ? parseFloat(preferredMinValue) : undefined,
       })
+      setListingCompleted(true)
       navigate('/dashboard')
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Something went wrong'
@@ -75,16 +104,10 @@ export default function CreateListing() {
 
       {/* Nav */}
       <nav className="flex items-center justify-between px-8 py-5 border-b border-[#E3DFEF] bg-white shadow-sm">
-        <button
-          onClick={() => navigate('/dashboard')}
-          className="text-xl font-semibold tracking-tight text-[#2e1a47]"
-        >
+        <button onClick={handleExit} className="text-xl font-semibold tracking-tight text-[#2e1a47]">
           Lantana
         </button>
-        <button
-          onClick={() => navigate('/dashboard')}
-          className="text-sm text-[#7c6992] hover:text-[#2e1a47] transition-colors font-medium"
-        >
+        <button onClick={handleExit} className="text-sm text-[#7c6992] hover:text-[#2e1a47] transition-colors font-medium">
           ← Back to dashboard
         </button>
       </nav>
