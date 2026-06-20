@@ -121,9 +121,7 @@ export default function PublicProfile() {
                   {profile.username ? `@${profile.username}` : profile.name}
                 </p>
                 {profile.isVerified && (
-                  <span className="text-xs bg-[#F6F3F9] text-[#72569C] border border-[#AFABC9] px-2 py-0.5 rounded-full font-semibold">
-                    ✓ Verified
-                  </span>
+                  <img src="/verification-badge.png" alt="Verified" className="w-5 h-5" />
                 )}
               </div>
 

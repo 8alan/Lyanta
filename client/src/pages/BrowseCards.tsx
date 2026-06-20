@@ -22,6 +22,8 @@ interface Listing {
     username: string | null
     name: string | null
     clerkId: string
+    avatarUrl: string | null
+    verification: { status: string } | null
   }
 }
 
@@ -325,18 +327,25 @@ export default function BrowseCards() {
                     </div>
 
                     <div className="p-4">
-                      <div className="flex items-start justify-between mb-3">
-                        <div>
-                          <p className="text-sm font-semibold text-[#2e1a47]">
-                            {listing.giftCard.brand === 'Other' && listing.giftCard.description
-                              ? listing.giftCard.description
-                              : listing.giftCard.brand}
-                          </p>
-                          <p className="text-xs text-[#AFABC9] mt-0.5">@{seller}</p>
-                        </div>
-                        <p className="text-xs text-[#AFABC9] line-through">
-                          ${listing.giftCard.faceValue.toFixed(2)}
+                      <div>
+                        <p className="text-sm font-semibold text-[#2e1a47]">
+                          {listing.giftCard.brand === 'Other' && listing.giftCard.description
+                            ? listing.giftCard.description
+                            : listing.giftCard.brand}
                         </p>
+                        <div className="flex items-center gap-1.5 mt-0.5">
+                          {listing.user.avatarUrl ? (
+                            <img src={listing.user.avatarUrl} alt={seller} className="w-4 h-4 rounded-full object-cover" />
+                          ) : (
+                            <div className="w-4 h-4 rounded-full bg-[#E3DFEF] flex items-center justify-center text-[9px] text-[#7c6992] font-semibold">
+                              {seller[0]?.toUpperCase()}
+                            </div>
+                          )}
+                          <p className="text-xs text-[#AFABC9]">@{seller}</p>
+                          {listing.user.verification?.status === 'APPROVED' && (
+                            <img src="/verification-badge.png" alt="Verified" className="w-4 h-4" />
+                          )}
+                        </div>
                       </div>
 
                       <div className="flex flex-wrap gap-2 mb-4">
