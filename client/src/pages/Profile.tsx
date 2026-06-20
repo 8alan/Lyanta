@@ -261,7 +261,7 @@ export default function Profile() {
               <div className="flex items-center gap-2 mb-1 flex-wrap">
                 <p className="text-sm text-[#AFABC9]">{profile?.username ? `@${profile.username}` : 'No username set'}</p>
                 {profile?.isVerified && (
-                  <img src="/verification-badge.png" alt="Verified" className="w-5 h-5" />
+                  <img src="/verification-badge.png" alt="Verified" className="w-4 h-4" />
                 )}
               </div>
               {profile?.reviews && profile.reviews.length > 0 && (

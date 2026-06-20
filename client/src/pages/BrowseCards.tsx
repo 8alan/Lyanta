@@ -326,14 +326,16 @@ export default function BrowseCards() {
                       )}
                     </div>
 
-                    <div className="p-4">
+                      <div className="p-4 flex flex-col gap-3">
+
+                      {/* Brand + seller */}
                       <div>
-                        <p className="text-sm font-semibold text-[#2e1a47]">
+                        <p className="text-sm font-semibold text-[#2e1a47] mb-1.5">
                           {listing.giftCard.brand === 'Other' && listing.giftCard.description
                             ? listing.giftCard.description
-                            : listing.giftCard.brand}
+                            : `${listing.giftCard.brand} Gift Card`}
                         </p>
-                        <div className="flex items-center gap-1.5 mt-0.5">
+                        <div className="flex items-center gap-1.5">
                           {listing.user.avatarUrl ? (
                             <img src={listing.user.avatarUrl} alt={seller} className="w-4 h-4 rounded-full object-cover" />
                           ) : (
@@ -343,29 +345,36 @@ export default function BrowseCards() {
                           )}
                           <p className="text-xs text-[#AFABC9]">@{seller}</p>
                           {listing.user.verification?.status === 'APPROVED' && (
-                            <img src="/verification-badge.png" alt="Verified" className="w-4 h-4" />
+                            <img src="/verification-badge.png" alt="Verified" className="w-3.5 h-3.5" />
                           )}
                         </div>
                       </div>
 
-                      <div className="flex flex-wrap gap-2 mb-4">
-                        {listing.buyNowPrice && (
-                          <span className="text-xs bg-[#F6F3F9] border border-[#E3DFEF] rounded-full px-2.5 py-1 text-[#2e1a47] font-medium">
-                            Buy ${listing.buyNowPrice.toFixed(2)}
-                          </span>
-                        )}
-                        {listing.acceptsExchange && (
-                          <span className="text-xs bg-[#F6F3F9] border border-[#E3DFEF] rounded-full px-2.5 py-1 text-[#2e1a47] font-medium">
-                            Trade
-                          </span>
-                        )}
-                        {listing.minAcceptPrice && (
-                          <span className="text-xs bg-[#F6F3F9] border border-[#E3DFEF] rounded-full px-2.5 py-1 text-[#2e1a47] font-medium">
-                            Bids from ${listing.minAcceptPrice.toFixed(2)}
-                          </span>
-                        )}
+                      {/* Face value + price pills */}
+                      <div>
+                        <p className="text-xs text-[#AFABC9] mb-2">
+                          Face value ${listing.giftCard.faceValue.toFixed(2)}
+                        </p>
+                        <div className="flex flex-wrap gap-1.5">
+                          {listing.buyNowPrice && (
+                            <span className="text-xs bg-[#F6F3F9] border border-[#E3DFEF] rounded-full px-2.5 py-1 text-[#2e1a47] font-medium">
+                              Buy ${listing.buyNowPrice.toFixed(2)}
+                            </span>
+                          )}
+                          {listing.minAcceptPrice && (
+                            <span className="text-xs bg-[#F6F3F9] border border-[#E3DFEF] rounded-full px-2.5 py-1 text-[#2e1a47] font-medium">
+                              Bids from ${listing.minAcceptPrice.toFixed(2)}
+                            </span>
+                          )}
+                          {listing.acceptsExchange && (
+                            <span className="text-xs bg-[#F6F3F9] border border-[#E3DFEF] rounded-full px-2.5 py-1 text-[#2e1a47] font-medium">
+                              Trade
+                            </span>
+                          )}
+                        </div>
                       </div>
 
+                      {/* CTA */}
                       <button
                         onClick={(e) => {
                           e.stopPropagation()
@@ -376,6 +385,7 @@ export default function BrowseCards() {
                       >
                         {listing.user.clerkId === user?.id ? 'Your listing' : 'View listing'}
                       </button>
+
                     </div>
                   </div>
                 )
