@@ -34,7 +34,8 @@ interface Listing {
 export default function PendingListings() {
   const navigate = useNavigate()
   const api = useApi()
-  const [pendingCards, setPendingCards] = useState<GiftCard[]>([])
+  const [submittedCards, setSubmittedCards] = useState<GiftCard[]>([])
+  const [failedCards, setFailedCards] = useState<GiftCard[]>([])
   const [pendingListings, setPendingListings] = useState<Listing[]>([])
   const [loading, setLoading] = useState(true)
   const [cancellingId, setCancellingId] = useState<string | null>(null)
@@ -44,7 +45,8 @@ export default function PendingListings() {
       api.getMyCards(),
       api.getMyListings(),
     ]).then(([cardsData, listingsData]) => {
-      setPendingCards(cardsData.giftCards.filter((c: GiftCard) => c.status === 'PENDING' || c.status === 'FAILED'))
+      setSubmittedCards(cardsData.giftCards.filter((c: GiftCard) => c.status === 'PENDING'))
+      setFailedCards(cardsData.giftCards.filter((c: GiftCard) => c.status === 'FAILED'))
       setPendingListings(listingsData.listings.filter((l: Listing) => l.status === 'PENDING_VERIFICATION'))
     }).catch(console.error)
     .finally(() => setLoading(false))
@@ -63,15 +65,7 @@ export default function PendingListings() {
     }
   }
 
-  const cardStatusLabel: Record<string, string> = {
-    PENDING: 'Awaiting verification',
-    FAILED: 'Verification failed',
-  }
-
-  const cardStatusColor: Record<string, string> = {
-    PENDING: 'text-[#7c6992]',
-    FAILED: 'text-red-500',
-  }
+  const isEmpty = submittedCards.length === 0 && failedCards.length === 0 && pendingListings.length === 0
 
   return (
     <div className="min-h-screen bg-[#F6F3F9] text-[#2e1a47]">
@@ -105,7 +99,7 @@ export default function PendingListings() {
           <div className="bg-white border border-[#E3DFEF] rounded-2xl p-10 text-center shadow-sm">
             <p className="text-sm text-[#7c6992]">Loading...</p>
           </div>
-        ) : pendingCards.length === 0 && pendingListings.length === 0 ? (
+        ) : isEmpty ? (
           <div className="bg-white border border-[#E3DFEF] rounded-2xl p-10 text-center shadow-sm">
             <p className="text-sm text-[#7c6992] mb-4">No pending listings.</p>
             <button
@@ -118,7 +112,7 @@ export default function PendingListings() {
         ) : (
           <div className="space-y-8">
 
-            {/* Pending Listings (submitted but awaiting admin verification) */}
+            {/* Awaiting Verification Listings */}
             {pendingListings.length > 0 && (
               <div>
                 <p className="text-xs uppercase tracking-widest text-[#7c6992] font-semibold mb-4">Awaiting Verification</p>
@@ -126,10 +120,7 @@ export default function PendingListings() {
                   {pendingListings.map(listing => {
                     const image = getBrandImage(listing.giftCard.brand)
                     return (
-                      <div
-                        key={listing.id}
-                        className="bg-white border border-[#E3DFEF] rounded-2xl p-6 shadow-sm"
-                      >
+                      <div key={listing.id} className="bg-white border border-[#E3DFEF] rounded-2xl p-6 shadow-sm">
                         <div className="flex gap-4 flex-col sm:flex-row">
                           <img
                             src={image ?? ''}
@@ -178,34 +169,58 @@ export default function PendingListings() {
               </div>
             )}
 
-            {/* Unsubmitted / Failed Cards */}
-            {pendingCards.length > 0 && (
+            {/* Submitted Cards — Awaiting verification */}
+            {submittedCards.length > 0 && (
               <div>
                 <p className="text-xs uppercase tracking-widest text-[#7c6992] font-semibold mb-4">Submitted Cards</p>
                 <div className="bg-white border border-[#E3DFEF] rounded-2xl overflow-hidden shadow-sm">
-                  {pendingCards.map((card, i) => {
+                  {submittedCards.map((card, i) => {
                     const image = getBrandImage(card.brand)
                     return (
                       <div
                         key={card.id}
                         className={`flex items-center gap-4 px-6 py-4 hover:bg-[#F6F3F9] transition-colors ${
-                          i !== pendingCards.length - 1 ? 'border-b border-[#E3DFEF]' : ''
+                          i !== submittedCards.length - 1 ? 'border-b border-[#E3DFEF]' : ''
                         }`}
                       >
-                        <img
-                          src={image ?? ''}
-                          alt={card.brand}
-                          className="w-12 h-8 object-cover rounded-lg shrink-0"
-                        />
+                        <img src={image ?? ''} alt={card.brand} className="w-12 h-8 object-cover rounded-lg shrink-0" />
                         <div className="flex-1">
                           <p className="text-sm font-semibold text-[#2e1a47]">{card.brand} Gift Card</p>
                           <p className="text-xs text-[#AFABC9]">{new Date(card.createdAt).toLocaleDateString()}</p>
                         </div>
                         <div className="text-right">
                           <p className="text-sm font-semibold text-[#2e1a47]">${card.faceValue.toFixed(2)}</p>
-                          <p className={`text-xs font-medium ${cardStatusColor[card.status] ?? 'text-[#7c6992]'}`}>
-                            {cardStatusLabel[card.status] ?? card.status}
-                          </p>
+                          <p className="text-xs font-medium text-[#7c6992]">Awaiting verification</p>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Failed Cards */}
+            {failedCards.length > 0 && (
+              <div>
+                <p className="text-xs uppercase tracking-widest text-[#7c6992] font-semibold mb-4">Verification Failed</p>
+                <div className="bg-white border border-[#E3DFEF] rounded-2xl overflow-hidden shadow-sm">
+                  {failedCards.map((card, i) => {
+                    const image = getBrandImage(card.brand)
+                    return (
+                      <div
+                        key={card.id}
+                        className={`flex items-center gap-4 px-6 py-4 hover:bg-[#F6F3F9] transition-colors ${
+                          i !== failedCards.length - 1 ? 'border-b border-[#E3DFEF]' : ''
+                        }`}
+                      >
+                        <img src={image ?? ''} alt={card.brand} className="w-12 h-8 object-cover rounded-lg shrink-0" />
+                        <div className="flex-1">
+                          <p className="text-sm font-semibold text-[#2e1a47]">{card.brand} Gift Card</p>
+                          <p className="text-xs text-[#AFABC9]">{new Date(card.createdAt).toLocaleDateString()}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-sm font-semibold text-[#2e1a47]">${card.faceValue.toFixed(2)}</p>
+                          <p className="text-xs font-medium text-red-500">Verification failed</p>
                         </div>
                       </div>
                     )
