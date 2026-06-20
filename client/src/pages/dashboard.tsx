@@ -34,13 +34,13 @@ export default function Dashboard() {
   const { user } = useUser()
   const navigate = useNavigate()
   const api = useApi()
-  const { setBalance } = useStore()
+  const { setBalance, listings: cachedListings, setListings, cards: cachedCards, setCards, earnings90: cachedEarnings, setEarnings90, topCards: cachedTopCards, setTopCards } = useStore()
   const [activeTab, setActiveTab] = useState<'overview' | 'active' | 'pending' | 'trades'>('overview')
-  const [cards, setCards] = useState<GiftCard[]>([])
-  const [listings, setListings] = useState<Listing[]>([])
-  const [earnings90, setEarnings90] = useState<number>(0)
-  const [topCards, setTopCards] = useState<TopCard[]>([])
-  const [loading, setLoading] = useState(true)
+  const [localCards, setLocalCards] = useState<GiftCard[]>(cachedCards)
+  const [localListings, setLocalListings] = useState<Listing[]>(cachedListings)
+  const [localEarnings, setLocalEarnings] = useState<number>(cachedEarnings)
+  const [localTopCards, setLocalTopCards] = useState<TopCard[]>(cachedTopCards)
+  const [loading, setLoading] = useState(cachedListings.length === 0)
 
   const hour = new Date().getHours()
   const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening'
@@ -53,18 +53,22 @@ export default function Dashboard() {
       api.getMyEarnings(),
       api.getTopCards(),
     ]).then(([cardsData, listingsData, balanceData, earningsData, topCardsData]) => {
+      setLocalCards(cardsData.giftCards)
       setCards(cardsData.giftCards)
+      setLocalListings(listingsData.listings)
       setListings(listingsData.listings)
       setBalance(balanceData.balance)
+      setLocalEarnings(earningsData.total ?? 0)
       setEarnings90(earningsData.total ?? 0)
+      setLocalTopCards(topCardsData.topCards ?? [])
       setTopCards(topCardsData.topCards ?? [])
     }).catch(console.error)
     .finally(() => setLoading(false))
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const activeListings = listings.filter(l => l.status === 'ACTIVE')
-  const pendingCards = cards.filter(c => c.status === 'PENDING' || c.status === 'FAILED')
+  const activeListings = localListings.filter(l => l.status === 'ACTIVE')
+  const pendingCards = localCards.filter(c => c.status === 'PENDING' || c.status === 'FAILED')
 
   const statusLabel: Record<string, string> = {
     PENDING: 'Pending verification',
@@ -86,7 +90,7 @@ export default function Dashboard() {
     FAILED: 'text-red-600',
   }
 
-  const maxCount = topCards.length > 0 ? Math.max(...topCards.map(c => c.count)) : 1
+  const maxCount = localTopCards.length > 0 ? Math.max(...localTopCards.map(c => c.count)) : 1
 
   return (
     <div className="min-h-screen bg-[#F6F3F9] text-[#2e1a47]">
@@ -166,7 +170,7 @@ export default function Dashboard() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="bg-[#2e1a47] rounded-2xl p-6 shadow-sm">
                 <p className="text-xs uppercase tracking-widest text-[#AFABC9] mb-2 font-semibold">Earnings (90 days)</p>
-                <p className="text-4xl font-light text-white">${earnings90.toFixed(2)}</p>
+                <p className="text-4xl font-light text-white">${localEarnings.toFixed(2)}</p>
               </div>
               <div className="bg-white border border-[#E3DFEF] rounded-2xl p-6 shadow-sm">
                 <p className="text-xs uppercase tracking-widest text-[#7c6992] mb-2 font-semibold">Active Listings</p>
@@ -245,13 +249,13 @@ export default function Dashboard() {
             {/* Highest Demand */}
             <div className="bg-white border border-[#E3DFEF] rounded-2xl p-6 shadow-sm">
               <p className="text-xs uppercase tracking-widest text-[#7c6992] mb-6 font-semibold">Highest Demand</p>
-              {topCards.length === 0 ? (
+              {localTopCards.length === 0 ? (
                 <div className="text-center py-8">
                   <p className="text-sm text-[#AFABC9]">No sales data yet — this will populate as cards are sold.</p>
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {topCards.slice(0, 5).map(card => (
+                  {localTopCards.slice(0, 5).map(card => (
                     <div key={card.brand} className="flex items-center gap-4">
                       <p className="text-sm text-[#2e1a47] w-28 shrink-0 font-medium">{card.brand}</p>
                       <div className="flex-1 bg-[#F6F3F9] rounded-full h-2">
@@ -362,7 +366,8 @@ export default function Dashboard() {
                         <button
                           onClick={async () => {
                             await api.deleteGiftCard(card.id)
-                            setCards(prev => prev.filter(c => c.id !== card.id))
+                            setLocalCards(prev => prev.filter(c => c.id !== card.id))
+                            setCards(localCards.filter(c => c.id !== card.id))
                           }}
                           className="text-xs text-red-500 hover:text-red-700 transition-colors opacity-0 group-hover:opacity-100"
                         >
