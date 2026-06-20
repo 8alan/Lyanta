@@ -424,6 +424,7 @@ router.get('/mine', requireAuth, async (req: Request, res: Response) => {
 })
 
 // Get a single listing
+// Get a single listing
 router.get('/:id', async (req: Request, res: Response) => {
   try {
     const id = req.params.id as string
@@ -435,6 +436,8 @@ router.get('/:id', async (req: Request, res: Response) => {
           select: {
             username: true,
             name: true,
+            avatarUrl: true,
+            verification: { select: { status: true } },
             reviewsReceived: { select: { rating: true } }
           }
         },
@@ -458,6 +461,8 @@ router.get('/:id', async (req: Request, res: Response) => {
         user: {
           username: listing.user.username,
           name: listing.user.name,
+          avatarUrl: listing.user.avatarUrl,
+          isVerified: listing.user.verification?.status === 'APPROVED',
           avgRating,
           reviewCount: reviews.length
         }
