@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import { useApi } from '../services/api.ts'
 import { useStore } from '../store/useStore.ts'
+import { getBrandImage } from '../services/brandImages.ts'
 
 interface GiftCard {
   id: string
@@ -179,22 +180,23 @@ export default function Dashboard() {
 
             {/* Active listings preview */}
             <div>
-              <div className="bg-white border border-[#E3DFEF] rounded-2xl shadow-sm">
-                <div className="flex items-center justify-between p-6 pb-2">
+              <div className="bg-white border border-[#E3DFEF] rounded-2xl shadow-sm p-6">
+                <div className="flex items-center justify-between mb-4">
                   <p className="text-xs uppercase tracking-widest text-[#7c6992] font-semibold">Active Listings</p>
                   <button
-                    onClick={() => setActiveTab('active')}
+                    onClick={() => navigate('/my-listings')}
                     className="text-xs text-[#72569C] hover:text-[#2e1a47] transition-colors font-medium"
                   >
                     View all →
                   </button>
                 </div>
-              {loading ? (
-                  <div className="p-10 text-center">
+
+                {loading ? (
+                  <div className="py-8 text-center">
                     <p className="text-sm text-[#7c6992]">Loading...</p>
                   </div>
                 ) : activeListings.length === 0 ? (
-                  <div className="p-10 text-center">
+                  <div className="py-8 text-center">
                     <p className="text-sm text-[#7c6992] mb-4">No active listings yet.</p>
                     <button
                       onClick={() => navigate('/submit')}
@@ -204,25 +206,38 @@ export default function Dashboard() {
                     </button>
                   </div>
                 ) : (
-                  activeListings.slice(0, 3).map((listing, i) => (
-                    <div
-                      key={listing.id}
-                      className={`flex items-center justify-between px-6 py-4 hover:bg-[#F6F3F9] transition-colors ${
-                        i !== Math.min(activeListings.length, 3) - 1 ? 'border-b border-[#E3DFEF]' : ''
-                      }`}
-                    >
-                      <div>
-                        <p className="text-sm font-semibold text-[#2e1a47]">{listing.giftCard.brand} Gift Card</p>
-                        <p className="text-xs text-[#AFABC9]">{new Date(listing.createdAt).toLocaleDateString()}</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-sm font-semibold text-[#2e1a47]">
-                          ${listing.buyNowPrice?.toFixed(2) ?? '—'}
-                        </p>
-                        <p className="text-xs text-[#2e7d32]">Active</p>
-                      </div>
-                    </div>
-                  ))
+                  <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1" style={{ scrollbarWidth: 'none' }}>
+                    {activeListings.map(listing => {
+                      const image = getBrandImage(listing.giftCard.brand)
+                      return (
+                        <div
+                          key={listing.id}
+                          onClick={() => navigate(`/listing/${listing.id}`)}
+                          className="shrink-0 w-36 border border-[#E3DFEF] rounded-xl overflow-hidden cursor-pointer hover:border-[#72569C] hover:shadow-md transition-all bg-[#F6F3F9]"
+                        >
+                          <div className="w-full h-20 overflow-hidden bg-[#E3DFEF]">
+                            {image ? (
+                              <img src={image} alt={listing.giftCard.brand} className="w-full h-full object-cover" />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center">
+                                <span className="text-xs text-[#AFABC9] font-medium text-center px-2">{listing.giftCard.brand}</span>
+                              </div>
+                            )}
+                          </div>
+                          <div className="p-3">
+                            <p className="text-xs font-semibold text-[#2e1a47] truncate">{listing.giftCard.brand}</p>
+                            <p className="text-xs text-[#AFABC9] mb-1">Face ${listing.giftCard.faceValue.toFixed(2)}</p>
+                            <p className="text-sm font-semibold text-[#2e1a47]">
+                              {listing.buyNowPrice ? `$${listing.buyNowPrice.toFixed(2)}` : '—'}
+                            </p>
+                            <span className="inline-block mt-1 text-[10px] font-semibold uppercase tracking-wide text-[#72569C] bg-[#EDE9F6] px-1.5 py-0.5 rounded-full">
+                              Active
+                            </span>
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
                 )}
               </div>
             </div>
