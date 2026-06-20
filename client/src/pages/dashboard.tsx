@@ -1,10 +1,9 @@
-import { UserButton, useUser } from '@clerk/react'
 import { useNavigate } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import { useApi } from '../services/api.ts'
 import { useStore } from '../store/useStore.ts'
 import { getBrandImage } from '../services/brandImages.ts'
-
+import { useUser } from '@clerk/react'
 interface GiftCard {
   id: string
   brand: string
@@ -41,7 +40,7 @@ export default function Dashboard() {
   const [localEarnings, setLocalEarnings] = useState<number>(cachedEarnings)
   const [localTopCards, setLocalTopCards] = useState<TopCard[]>(cachedTopCards)
   const [loading, setLoading] = useState(cachedListings.length === 0)
-
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
   const hour = new Date().getHours()
   const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening'
 
@@ -52,7 +51,8 @@ export default function Dashboard() {
       api.getBalance(),
       api.getMyEarnings(),
       api.getTopCards(),
-    ]).then(([cardsData, listingsData, balanceData, earningsData, topCardsData]) => {
+      api.getMyProfile(),
+    ]).then(([cardsData, listingsData, balanceData, earningsData, topCardsData, profileData]) => {
       setLocalCards(cardsData.giftCards)
       setCards(cardsData.giftCards)
       setLocalListings(listingsData.listings)
@@ -62,6 +62,7 @@ export default function Dashboard() {
       setEarnings90(earningsData.total ?? 0)
       setLocalTopCards(topCardsData.topCards ?? [])
       setTopCards(topCardsData.topCards ?? [])
+      setAvatarUrl(profileData.profile.avatarUrl ?? null)
     }).catch(console.error)
     .finally(() => setLoading(false))
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -105,15 +106,15 @@ export default function Dashboard() {
           >
             Browse
           </button>
-          <UserButton>
-            <UserButton.MenuItems>
-              <UserButton.Action
-                label="My Profile"
-                labelIcon={<span style={{ fontSize: '14px' }}>👤</span>}
-                onClick={() => navigate('/profile')}
-              />
-            </UserButton.MenuItems>
-          </UserButton>
+          <button onClick={() => navigate('/profile')} className="shrink-0">
+            {avatarUrl ? (
+              <img src={avatarUrl} alt="Profile" className="w-8 h-8 rounded-full object-cover border border-[#E3DFEF]" />
+            ) : (
+              <div className="w-8 h-8 rounded-full bg-[#E3DFEF] flex items-center justify-center text-sm font-semibold text-[#7c6992]">
+                {user?.firstName?.[0]?.toUpperCase() ?? '?'}
+              </div>
+            )}
+          </button>
         </div>
       </nav>
 
