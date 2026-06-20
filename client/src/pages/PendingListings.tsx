@@ -34,7 +34,6 @@ interface Listing {
 export default function PendingListings() {
   const navigate = useNavigate()
   const api = useApi()
-  const [submittedCards, setSubmittedCards] = useState<GiftCard[]>([])
   const [failedCards, setFailedCards] = useState<GiftCard[]>([])
   const [pendingListings, setPendingListings] = useState<Listing[]>([])
   const [loading, setLoading] = useState(true)
@@ -45,7 +44,6 @@ export default function PendingListings() {
       api.getMyCards(),
       api.getMyListings(),
     ]).then(([cardsData, listingsData]) => {
-      setSubmittedCards(cardsData.giftCards.filter((c: GiftCard) => c.status === 'PENDING'))
       setFailedCards(cardsData.giftCards.filter((c: GiftCard) => c.status === 'FAILED'))
       setPendingListings(listingsData.listings.filter((l: Listing) => l.status === 'PENDING_VERIFICATION'))
     }).catch(console.error)
@@ -65,7 +63,7 @@ export default function PendingListings() {
     }
   }
 
-  const isEmpty = submittedCards.length === 0 && failedCards.length === 0 && pendingListings.length === 0
+  const isEmpty = failedCards.length === 0 && pendingListings.length === 0
 
   return (
     <div className="min-h-screen bg-[#F6F3F9] text-[#2e1a47]">
@@ -112,7 +110,7 @@ export default function PendingListings() {
         ) : (
           <div className="space-y-8">
 
-            {/* Awaiting Verification Listings */}
+            {/* Awaiting Verification */}
             {pendingListings.length > 0 && (
               <div>
                 <p className="text-xs uppercase tracking-widest text-[#7c6992] font-semibold mb-4">Awaiting Verification</p>
@@ -169,58 +167,40 @@ export default function PendingListings() {
               </div>
             )}
 
-            {/* Submitted Cards — Awaiting verification */}
-            {submittedCards.length > 0 && (
-              <div>
-                <p className="text-xs uppercase tracking-widest text-[#7c6992] font-semibold mb-4">Submitted Cards</p>
-                <div className="bg-white border border-[#E3DFEF] rounded-2xl overflow-hidden shadow-sm">
-                  {submittedCards.map((card, i) => {
-                    const image = getBrandImage(card.brand)
-                    return (
-                      <div
-                        key={card.id}
-                        className={`flex items-center gap-4 px-6 py-4 hover:bg-[#F6F3F9] transition-colors ${
-                          i !== submittedCards.length - 1 ? 'border-b border-[#E3DFEF]' : ''
-                        }`}
-                      >
-                        <img src={image ?? ''} alt={card.brand} className="w-12 h-8 object-cover rounded-lg shrink-0" />
-                        <div className="flex-1">
-                          <p className="text-sm font-semibold text-[#2e1a47]">{card.brand} Gift Card</p>
-                          <p className="text-xs text-[#AFABC9]">{new Date(card.createdAt).toLocaleDateString()}</p>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-sm font-semibold text-[#2e1a47]">${card.faceValue.toFixed(2)}</p>
-                          <p className="text-xs font-medium text-[#7c6992]">Awaiting verification</p>
-                        </div>
-                      </div>
-                    )
-                  })}
-                </div>
-              </div>
-            )}
-
-            {/* Failed Cards */}
+            {/* Verification Failed */}
             {failedCards.length > 0 && (
               <div>
                 <p className="text-xs uppercase tracking-widest text-[#7c6992] font-semibold mb-4">Verification Failed</p>
-                <div className="bg-white border border-[#E3DFEF] rounded-2xl overflow-hidden shadow-sm">
-                  {failedCards.map((card, i) => {
+                <div className="space-y-4">
+                  {failedCards.map(card => {
                     const image = getBrandImage(card.brand)
                     return (
-                      <div
-                        key={card.id}
-                        className={`flex items-center gap-4 px-6 py-4 hover:bg-[#F6F3F9] transition-colors ${
-                          i !== failedCards.length - 1 ? 'border-b border-[#E3DFEF]' : ''
-                        }`}
-                      >
-                        <img src={image ?? ''} alt={card.brand} className="w-12 h-8 object-cover rounded-lg shrink-0" />
-                        <div className="flex-1">
-                          <p className="text-sm font-semibold text-[#2e1a47]">{card.brand} Gift Card</p>
-                          <p className="text-xs text-[#AFABC9]">{new Date(card.createdAt).toLocaleDateString()}</p>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-sm font-semibold text-[#2e1a47]">${card.faceValue.toFixed(2)}</p>
-                          <p className="text-xs font-medium text-red-500">Verification failed</p>
+                      <div key={card.id} className="bg-white border border-red-100 rounded-2xl p-6 shadow-sm">
+                        <div className="flex gap-4 flex-col sm:flex-row">
+                          <img
+                            src={image ?? ''}
+                            alt={card.brand}
+                            className="w-full sm:w-24 h-20 sm:h-16 object-cover rounded-xl shrink-0"
+                          />
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-start justify-between gap-4 flex-wrap">
+                              <div>
+                                <p className="text-sm font-semibold text-[#2e1a47]">
+                                  {card.brand} — ${card.faceValue.toFixed(2)}
+                                </p>
+                                <p className="text-xs mt-1 font-medium text-red-500">Verification failed</p>
+                              </div>
+                              <button
+                                onClick={() => navigate('/submit')}
+                                className="text-xs border border-[#E3DFEF] px-3 py-1.5 rounded-lg text-[#7c6992] hover:border-[#2e1a47] hover:text-[#2e1a47] transition-colors font-medium"
+                              >
+                                Resubmit
+                              </button>
+                            </div>
+                            <p className="text-xs text-[#AFABC9] mt-2">
+                              Submitted {new Date(card.createdAt).toLocaleDateString()}
+                            </p>
+                          </div>
                         </div>
                       </div>
                     )
