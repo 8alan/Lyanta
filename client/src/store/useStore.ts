@@ -37,6 +37,8 @@ interface Store {
   setEarnings90: (earnings: number) => void
   topCards: TopCard[]
   setTopCards: (topCards: TopCard[]) => void
+  avatarUrl: string | null
+  setAvatarUrl: (avatarUrl: string | null) => void
 }
 
 export const useStore = create<Store>()(
@@ -52,6 +54,8 @@ export const useStore = create<Store>()(
       setEarnings90: (earnings90) => set({ earnings90 }),
       topCards: [],
       setTopCards: (topCards) => set({ topCards }),
+      avatarUrl: null,
+      setAvatarUrl: (avatarUrl) => set({ avatarUrl }),
     }),
     {
       name: 'lantana-store',
