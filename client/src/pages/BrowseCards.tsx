@@ -329,49 +329,49 @@ export default function BrowseCards() {
                       <div className="p-4 flex flex-col gap-3">
 
                       {/* Brand + seller */}
-                      <div>
-                        <p className="text-sm font-semibold text-[#2e1a47] mb-1.5">
-                          {listing.giftCard.brand === 'Other' && listing.giftCard.description
-                            ? listing.giftCard.description
-                            : `${listing.giftCard.brand} Gift Card`}
-                        </p>
-                        <div className="flex items-center gap-1.5">
-                          {listing.user.avatarUrl ? (
-                            <img src={listing.user.avatarUrl} alt={seller} className="w-4 h-4 rounded-full object-cover" />
-                          ) : (
-                            <div className="w-4 h-4 rounded-full bg-[#E3DFEF] flex items-center justify-center text-[9px] text-[#7c6992] font-semibold">
-                              {seller[0]?.toUpperCase()}
-                            </div>
-                          )}
-                          <p className="text-xs text-[#AFABC9]">@{seller}</p>
-                          {listing.user.verification?.status === 'APPROVED' && (
-                            <img src="/verification-badge.png" alt="Verified" className="w-3.5 h-3.5" />
-                          )}
+                      <div className="flex items-start justify-between gap-2">
+                        <div>
+                          <p className="text-sm font-semibold text-[#2e1a47] mb-1.5">
+                            {listing.giftCard.brand === 'Other' && listing.giftCard.description
+                              ? listing.giftCard.description
+                              : `${listing.giftCard.brand} Gift Card`}
+                          </p>
+                          <div className="flex items-center gap-1.5">
+                            {listing.user.avatarUrl ? (
+                              <img src={listing.user.avatarUrl} alt={seller} className="w-4 h-4 rounded-full object-cover" />
+                            ) : (
+                              <div className="w-4 h-4 rounded-full bg-[#E3DFEF] flex items-center justify-center text-[9px] text-[#7c6992] font-semibold">
+                                {seller[0]?.toUpperCase()}
+                              </div>
+                            )}
+                            <p className="text-xs text-[#AFABC9]">@{seller}</p>
+                            {listing.user.verification?.status === 'APPROVED' && (
+                              <img src="/verification-badge.png" alt="Verified" className="w-3 h-3" />
+                            )}
+                          </div>
+                        </div>
+                        <div className="text-right shrink-0">
+                          <p className="text-sm font-semibold text-[#2e1a47]">
+                            {listing.buyNowPrice ? `$${listing.buyNowPrice.toFixed(2)}` : '—'}
+                          </p>
+                          <p className="text-xs text-[#AFABC9] mt-0.5">
+                            of ${listing.giftCard.faceValue.toFixed(2)}
+                          </p>
                         </div>
                       </div>
 
-                      {/* Face value + price pills */}
-                      <div>
-                        <p className="text-xs text-[#AFABC9] mb-2">
-                          Face value ${listing.giftCard.faceValue.toFixed(2)}
-                        </p>
-                        <div className="flex flex-wrap gap-1.5">
-                          {listing.buyNowPrice && (
-                            <span className="text-xs bg-[#F6F3F9] border border-[#E3DFEF] rounded-full px-2.5 py-1 text-[#2e1a47] font-medium">
-                              Buy ${listing.buyNowPrice.toFixed(2)}
-                            </span>
-                          )}
-                          {listing.minAcceptPrice && (
-                            <span className="text-xs bg-[#F6F3F9] border border-[#E3DFEF] rounded-full px-2.5 py-1 text-[#2e1a47] font-medium">
-                              Bids from ${listing.minAcceptPrice.toFixed(2)}
-                            </span>
-                          )}
-                          {listing.acceptsExchange && (
-                            <span className="text-xs bg-[#F6F3F9] border border-[#E3DFEF] rounded-full px-2.5 py-1 text-[#2e1a47] font-medium">
-                              Trade
-                            </span>
-                          )}
-                        </div>
+                      {/* Pills */}
+                      <div className="flex flex-wrap gap-1.5">
+                        {listing.minAcceptPrice && (
+                          <span className="text-xs bg-[#F6F3F9] border border-[#E3DFEF] rounded-full px-2.5 py-1 text-[#2e1a47] font-medium">
+                            Bids from ${listing.minAcceptPrice.toFixed(2)}
+                          </span>
+                        )}
+                        {listing.acceptsExchange && (
+                          <span className="text-xs bg-[#F6F3F9] border border-[#E3DFEF] rounded-full px-2.5 py-1 text-[#2e1a47] font-medium">
+                            Trade
+                          </span>
+                        )}
                       </div>
 
                       {/* CTA */}
