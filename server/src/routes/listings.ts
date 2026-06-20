@@ -336,7 +336,15 @@ router.get('/active', async (req: Request, res: Response) => {
       },
       include: {
         giftCard: { select: { brand: true, faceValue: true, description: true } },
-        user: { select: { username: true, name: true, clerkId: true } }
+        user: {
+          select: {
+            username: true,
+            name: true,
+            clerkId: true,
+            avatarUrl: true,
+            verification: { select: { status: true } }
+          }
+        }
       },
       orderBy: { createdAt: 'desc' }
     })
