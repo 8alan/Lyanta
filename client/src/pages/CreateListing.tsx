@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useApi } from '../services/api.ts'
+import { getBrandImage } from '../services/brandImages.ts'
 
 const SUPPORTED_BRANDS = [
   'Amazon', 'Visa', 'Mastercard', 'Target', 'Walmart',
@@ -67,35 +68,58 @@ export default function CreateListing() {
     }
   }
 
+  const brandImage = getBrandImage(brand)
+
   return (
-    <div className="min-h-screen bg-[#f8f7f4] text-[#1a1a2e]">
-      <nav className="flex items-center justify-between px-8 py-5 border-b border-[#e2e0db] bg-white">
-        <button onClick={() => navigate('/dashboard')} className="text-xl font-semibold tracking-tight">
+    <div className="min-h-screen bg-[#F6F3F9] text-[#2e1a47]">
+
+      {/* Nav */}
+      <nav className="flex items-center justify-between px-8 py-5 border-b border-[#E3DFEF] bg-white shadow-sm">
+        <button
+          onClick={() => navigate('/dashboard')}
+          className="text-xl font-semibold tracking-tight text-[#2e1a47]"
+        >
           Lantana
         </button>
         <button
           onClick={() => navigate('/dashboard')}
-          className="text-sm text-[#4a4a6a] hover:text-[#1a1a2e] transition-colors"
+          className="text-sm text-[#7c6992] hover:text-[#2e1a47] transition-colors font-medium"
         >
           ← Back to dashboard
         </button>
       </nav>
 
-      <div className="max-w-2xl mx-auto px-8 py-12">
+      <div className="max-w-2xl mx-auto px-4 sm:px-8 py-12">
+
+        {/* Page heading */}
         <div className="mb-10">
-          <p className="text-xs uppercase tracking-widest text-[#7a7a9a] mb-2">Marketplace</p>
-          <h1 className="text-3xl font-semibold text-[#1a1a2e]">List your card</h1>
-          <p className="text-sm text-[#4a4a6a] mt-2">
-            Your {brand} gift card worth ${faceValue?.toFixed(2)} has been submitted for verification.
-            Set your listing terms below.
-          </p>
+          <p className="text-xs uppercase tracking-widest text-[#7c6992] mb-2">Marketplace</p>
+          <h1 className="text-3xl font-light text-[#2e1a47]">List your card</h1>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-8">
+        {/* Card preview */}
+        <div className="bg-white border border-[#E3DFEF] rounded-2xl p-6 mb-6 shadow-[0_2px_3px_rgba(0,0,0,0.06),0_0_0_1px_rgba(0,0,0,0.06)] flex items-center gap-5">
+          <div className="w-20 h-14 rounded-xl overflow-hidden bg-[#E3DFEF] shrink-0">
+            {brandImage ? (
+              <img src={brandImage} alt={brand} className="w-full h-full object-cover" />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center">
+                <span className="text-xs text-[#AFABC9] font-medium text-center px-1">{brand}</span>
+              </div>
+            )}
+          </div>
+          <div>
+            <p className="text-sm font-semibold text-[#2e1a47]">{brand} Gift Card</p>
+            <p className="text-xs text-[#7c6992] mt-0.5">Face value: ${faceValue?.toFixed(2)}</p>
+            <p className="text-xs text-[#AFABC9] mt-0.5">Submitted for verification</p>
+          </div>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
 
           {/* Buy Now Price */}
-          <div>
-            <label className="block text-xs uppercase tracking-widest text-[#7a7a9a] mb-2">
+          <div className="bg-white border border-[#E3DFEF] rounded-2xl p-6 shadow-[0_2px_3px_rgba(0,0,0,0.06),0_0_0_1px_rgba(0,0,0,0.06)]">
+            <label className="block text-xs uppercase tracking-widest text-[#7c6992] mb-3">
               Buy now price ($)
             </label>
             <input
@@ -106,17 +130,17 @@ export default function CreateListing() {
               max={faceValue}
               step="0.01"
               placeholder="0.00"
-              className="w-full bg-white border border-[#e2e0db] px-4 py-3 text-sm text-[#1a1a2e] placeholder-[#b0b0c0] focus:outline-none focus:border-[#1a1a2e] transition-colors"
+              className="w-full bg-[#F6F3F9] border border-[#E3DFEF] rounded-xl px-4 py-3 text-sm text-[#2e1a47] placeholder-[#AFABC9] focus:outline-none focus:border-[#72569C] transition-colors"
             />
-            <p className="text-xs text-[#7a7a9a] mt-1">
+            <p className="text-xs text-[#AFABC9] mt-2">
               Market rate: {(marketRate * 100).toFixed(0)}% of face value (${(faceValue * marketRate).toFixed(2)})
             </p>
           </div>
 
           {/* Minimum Bid */}
-          <div>
-            <label className="block text-xs uppercase tracking-widest text-[#7a7a9a] mb-2">
-              Minimum bid ($) <span className="text-[#b0b0c0] normal-case">(optional)</span>
+          <div className="bg-white border border-[#E3DFEF] rounded-2xl p-6 shadow-[0_2px_3px_rgba(0,0,0,0.06),0_0_0_1px_rgba(0,0,0,0.06)]">
+            <label className="block text-xs uppercase tracking-widest text-[#7c6992] mb-3">
+              Minimum bid ($) <span className="text-[#AFABC9] normal-case font-normal">— optional</span>
             </label>
             <input
               type="number"
@@ -126,42 +150,42 @@ export default function CreateListing() {
               max={buyNowPrice || faceValue}
               step="0.01"
               placeholder="0.00"
-              className="w-full bg-white border border-[#e2e0db] px-4 py-3 text-sm text-[#1a1a2e] placeholder-[#b0b0c0] focus:outline-none focus:border-[#1a1a2e] transition-colors"
+              className="w-full bg-[#F6F3F9] border border-[#E3DFEF] rounded-xl px-4 py-3 text-sm text-[#2e1a47] placeholder-[#AFABC9] focus:outline-none focus:border-[#72569C] transition-colors"
             />
-            <p className="text-xs text-[#7a7a9a] mt-1">
+            <p className="text-xs text-[#AFABC9] mt-2">
               Bids below this amount will be automatically rejected
             </p>
           </div>
 
           {/* Accept Exchange */}
-          <div className="bg-white border border-[#e2e0db] p-6">
+          <div className="bg-white border border-[#E3DFEF] rounded-2xl p-6 shadow-[0_2px_3px_rgba(0,0,0,0.06),0_0_0_1px_rgba(0,0,0,0.06)]">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-semibold text-[#1a1a2e]">Accept card exchanges</p>
-                <p className="text-xs text-[#7a7a9a] mt-1">
+                <p className="text-sm font-semibold text-[#2e1a47]">Accept card exchanges</p>
+                <p className="text-xs text-[#7c6992] mt-1">
                   Allow buyers to offer their own gift card instead of cash
                 </p>
               </div>
               <button
                 type="button"
                 onClick={() => setAcceptsExchange(!acceptsExchange)}
-                className={`w-12 h-6 rounded-full transition-colors ${
-                  acceptsExchange ? 'bg-[#1a1a2e]' : 'bg-[#e2e0db]'
+                className={`w-12 h-6 rounded-full transition-colors shrink-0 ${
+                  acceptsExchange ? 'bg-[#2e1a47]' : 'bg-[#E3DFEF]'
                 }`}
               >
-                <div className={`w-5 h-5 bg-white rounded-full mx-auto transition-transform ${
+                <div className={`w-5 h-5 bg-white rounded-full mx-auto transition-transform shadow-sm ${
                   acceptsExchange ? 'translate-x-3' : '-translate-x-2'
                 }`} />
               </button>
             </div>
 
             {acceptsExchange && (
-              <div className="mt-6 space-y-4 pt-4 border-t border-[#e2e0db]">
+              <div className="mt-6 space-y-5 pt-5 border-t border-[#E3DFEF]">
                 <div>
-                  <label className="block text-xs uppercase tracking-widest text-[#7a7a9a] mb-2">
-                    Preferred brands <span className="text-[#b0b0c0] normal-case">(optional — select all that apply)</span>
+                  <label className="block text-xs uppercase tracking-widest text-[#7c6992] mb-3">
+                    Preferred brands <span className="text-[#AFABC9] normal-case font-normal">— optional</span>
                   </label>
-                  <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto border border-[#e2e0db] bg-white p-3">
+                  <div className="grid grid-cols-3 gap-2">
                     {SUPPORTED_BRANDS.filter(b => b !== brand).map(b => (
                       <button
                         key={b}
@@ -171,10 +195,10 @@ export default function CreateListing() {
                             prev.includes(b) ? prev.filter(x => x !== b) : [...prev, b]
                           )
                         }}
-                        className={`text-left text-sm px-3 py-2 border transition-colors ${
+                        className={`text-xs px-3 py-2 rounded-xl border font-medium transition-colors ${
                           preferredBrands.includes(b)
-                            ? 'bg-[#1a1a2e] text-white border-[#1a1a2e]'
-                            : 'bg-white text-[#1a1a2e] border-[#e2e0db] hover:border-[#1a1a2e]'
+                            ? 'bg-[#2e1a47] text-white border-[#2e1a47]'
+                            : 'bg-[#F6F3F9] text-[#7c6992] border-[#E3DFEF] hover:border-[#2e1a47] hover:text-[#2e1a47]'
                         }`}
                       >
                         {b}
@@ -182,14 +206,14 @@ export default function CreateListing() {
                     ))}
                   </div>
                   {preferredBrands.length > 0 && (
-                    <p className="text-xs text-[#7a7a9a] mt-1">
+                    <p className="text-xs text-[#7c6992] mt-2">
                       Selected: {preferredBrands.join(', ')}
                     </p>
                   )}
-                </div>                                          
+                </div>
                 <div>
-                  <label className="block text-xs uppercase tracking-widest text-[#7a7a9a] mb-2">
-                    Minimum card value ($) <span className="text-[#b0b0c0] normal-case">(optional)</span>
+                  <label className="block text-xs uppercase tracking-widest text-[#7c6992] mb-3">
+                    Minimum card value ($) <span className="text-[#AFABC9] normal-case font-normal">— optional</span>
                   </label>
                   <input
                     type="number"
@@ -198,7 +222,7 @@ export default function CreateListing() {
                     min="1"
                     step="0.01"
                     placeholder={faceValue?.toFixed(2)}
-                    className="w-full bg-white border border-[#e2e0db] px-4 py-3 text-sm text-[#1a1a2e] placeholder-[#b0b0c0] focus:outline-none focus:border-[#1a1a2e] transition-colors"
+                    className="w-full bg-[#F6F3F9] border border-[#E3DFEF] rounded-xl px-4 py-3 text-sm text-[#2e1a47] placeholder-[#AFABC9] focus:outline-none focus:border-[#72569C] transition-colors"
                   />
                 </div>
               </div>
@@ -206,35 +230,38 @@ export default function CreateListing() {
           </div>
 
           {/* Summary */}
-          <div className="bg-white border border-[#e2e0db] p-6 space-y-3">
+          <div className="bg-white border border-[#E3DFEF] rounded-2xl p-6 shadow-[0_2px_3px_rgba(0,0,0,0.06),0_0_0_1px_rgba(0,0,0,0.06)] space-y-3">
+            <p className="text-xs uppercase tracking-widest text-[#7c6992] mb-4">Summary</p>
             <div className="flex justify-between text-sm">
-              <span className="text-[#4a4a6a]">Card</span>
-              <span className="text-[#1a1a2e]">{brand} — ${faceValue?.toFixed(2)}</span>
+              <span className="text-[#7c6992]">Card</span>
+              <span className="font-medium text-[#2e1a47]">{brand} — ${faceValue?.toFixed(2)}</span>
             </div>
             {buyNowPrice && (
               <div className="flex justify-between text-sm">
-                <span className="text-[#4a4a6a]">Buy now price</span>
-                <span className="text-[#1a1a2e]">${parseFloat(buyNowPrice).toFixed(2)}</span>
+                <span className="text-[#7c6992]">Buy now price</span>
+                <span className="font-medium text-[#2e1a47]">${parseFloat(buyNowPrice).toFixed(2)}</span>
               </div>
             )}
             {minAcceptPrice && (
               <div className="flex justify-between text-sm">
-                <span className="text-[#4a4a6a]">Minimum bid</span>
-                <span className="text-[#1a1a2e]">${parseFloat(minAcceptPrice).toFixed(2)}</span>
+                <span className="text-[#7c6992]">Minimum bid</span>
+                <span className="font-medium text-[#2e1a47]">${parseFloat(minAcceptPrice).toFixed(2)}</span>
               </div>
             )}
             <div className="flex justify-between text-sm">
-              <span className="text-[#4a4a6a]">Accepts exchange</span>
-              <span className="text-[#1a1a2e]">{acceptsExchange ? 'Yes' : 'No'}</span>
+              <span className="text-[#7c6992]">Accepts exchange</span>
+              <span className="font-medium text-[#2e1a47]">{acceptsExchange ? 'Yes' : 'No'}</span>
             </div>
           </div>
 
-          {error && <p className="text-sm text-red-600">{error}</p>}
+          {error && (
+            <p className="text-sm text-red-500 px-1">{error}</p>
+          )}
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-[#1a1a2e] text-white py-3 text-sm font-semibold hover:bg-[#2d2d4e] transition-colors disabled:opacity-50"
+            className="w-full bg-[#2e1a47] text-white py-3.5 text-sm font-semibold rounded-xl hover:bg-[#72569C] transition-colors disabled:opacity-50"
           >
             {loading ? 'Listing...' : 'List card on marketplace'}
           </button>
