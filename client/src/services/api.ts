@@ -6,29 +6,49 @@ export function useApi() {
   const { getToken } = useAuth()
 
   const request = async (method: string, path: string, body?: object, requiresAuth = true) => {
-  const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    }
+
+    if (requiresAuth) {
+      const token = await getToken()
+      if (token) headers['Authorization'] = `Bearer ${token}`
+    }
+
+    try {
+      const res = await fetch(`${BASE_URL}${path}`, {
+        method,
+        headers,
+        ...(body ? { body: JSON.stringify(body) } : {}),
+      })
+
+      const data = await res.json()
+
+      if (!res.ok) {
+        if (res.status >= 500) {
+          throw new Error('Something went wrong on our end. Please try again.')
+        }
+        if (res.status === 404) {
+          throw new Error('The requested resource could not be found.')
+        }
+        if (res.status === 403) {
+          throw new Error("You don't have permission to do that.")
+        }
+        if (res.status === 401) {
+          throw new Error('Please sign in to continue.')
+        }
+        throw new Error(data.error || 'Something went wrong. Please try again.')
+      }
+
+      return data
+    } catch (err) {
+        if (err instanceof Error && err.message === 'Failed to fetch') {
+          throw new Error('Unable to connect. Please check your internet connection and try again.', { cause: err })
+        }
+        throw err
+      }
   }
 
-  if (requiresAuth) {
-    const token = await getToken()
-    console.log('Token being sent:', token ? token.substring(0, 20) + '...' : 'NULL')
-    if (token) headers['Authorization'] = `Bearer ${token}`
-  }
-
-  const res = await fetch(`${BASE_URL}${path}`, {
-    method,
-    headers,
-    ...(body ? { body: JSON.stringify(body) } : {}),
-  })
-
-  const data = await res.json()
-  if (!res.ok) throw new Error(data.error || 'Request failed')
-  return data
-}
-
-
-  
   return {
     submitGiftCard: (payload: {
       brand: string
@@ -58,14 +78,15 @@ export function useApi() {
 
     cancelListing: (id: string) =>
       request('POST', `/api/listings/${id}/cancel`, {}),
-        createListing: (payload: {
-          giftCardId: string
-          buyNowPrice?: number
-          minAcceptPrice?: number
-          acceptsExchange: boolean
-          preferredBrand?: string[]
-          preferredMinValue?: number
-        }) => request('POST', '/api/listings/create', payload),
+
+    createListing: (payload: {
+      giftCardId: string
+      buyNowPrice?: number
+      minAcceptPrice?: number
+      acceptsExchange: boolean
+      preferredBrand?: string[]
+      preferredMinValue?: number
+    }) => request('POST', '/api/listings/create', payload),
 
     deleteGiftCard: (id: string) =>
       request('DELETE', `/api/giftcards/${id}`),
@@ -90,7 +111,7 @@ export function useApi() {
 
     adminVerifyCard: (id: string, verifiedBalance?: number) =>
       request('POST', `/api/admin/gift-cards/${id}/verify`, { verifiedBalance }),
-    
+
     adminRejectCard: (id: string) =>
       request('POST', `/api/admin/gift-cards/${id}/reject`, {}),
 
@@ -108,13 +129,14 @@ export function useApi() {
 
     getCardDetails: (listingId: string) =>
       request('GET', `/api/listings/${listingId}/card-details`),
-    
+
     getMyTrades: () => request('GET', '/api/trades/mine'),
 
     getMyProfile: () => request('GET', '/api/profile/me'),
+
     updateUsername: (username: string) =>
       request('PATCH', '/api/profile/username', { username }),
-    
+
     getPublicProfile: (username: string) =>
       request('GET', `/api/profile/${username}`, undefined, false),
 
@@ -132,11 +154,11 @@ export function useApi() {
         }).then(res => res.json())
       )
     },
-    
+
     submitReview: (tradeId: string, payload: { rating: number; comment?: string }) =>
-     request('POST', `/api/trades/${tradeId}/review`, payload),
-  
-      contactSupport: async (data: {
+      request('POST', `/api/trades/${tradeId}/review`, payload),
+
+    contactSupport: async (data: {
       name: string
       email: string
       subject: string
@@ -167,7 +189,5 @@ export function useApi() {
     },
 
     verifyIdentity: () => request('POST', '/api/stripe/verify-identity', {}),
-    
   }
-      
 }
