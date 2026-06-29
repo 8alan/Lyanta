@@ -87,7 +87,7 @@ function infoRow(label: string, value: string): string {
   return `<p style="margin: 0 0 10px; font-size: 14px; color: #2e1a47;"><span style="color:#7c6992;">${label}</span> &nbsp;${value}</p>`
 }
 
-function ctaButton(text: string, href = 'https://lantana.app'): string {
+function ctaButton(text: string, href = 'https://myriapods.com'): string {
   return `
     <table cellpadding="0" cellspacing="0" style="margin-top: 28px;">
       <tr>
