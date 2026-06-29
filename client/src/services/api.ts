@@ -112,8 +112,8 @@ export function useApi() {
     adminVerifyCard: (id: string, verifiedBalance?: number) =>
       request('POST', `/api/admin/gift-cards/${id}/verify`, { verifiedBalance }),
 
-    adminRejectCard: (id: string) =>
-      request('POST', `/api/admin/gift-cards/${id}/reject`, {}),
+    adminRejectCard: (id: string, reason?: string) =>
+      request('POST', `/api/admin/gift-cards/${id}/reject`, { reason }),
 
     placeBid: (listingId: string, payload: {
       bidType: 'CASH' | 'EXCHANGE'

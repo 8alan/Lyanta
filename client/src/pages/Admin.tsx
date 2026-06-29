@@ -5,6 +5,15 @@ import { useApi } from '../services/api.ts'
 
 const ADMIN_CLERK_ID = 'user_3F481w6C6mRIvyVI1yr3dseubnS'
 
+const REJECTION_REASONS = [
+  'Card balance does not match declared value',
+  'Card number is invalid',
+  'Card has already been used or has zero balance',
+  'Card appears to be fraudulent',
+  'PIN is incorrect',
+  'Unsupported card type',
+]
+
 interface GiftCard {
   id: string
   brand: string
@@ -37,6 +46,9 @@ export default function Admin() {
   const [overview, setOverview] = useState<Overview | null>(null)
   const [loading, setLoading] = useState(true)
   const [actionLoading, setActionLoading] = useState<string | null>(null)
+  const [rejectingId, setRejectingId] = useState<string | null>(null)
+  const [rejectionReason, setRejectionReason] = useState('')
+  const [customReason, setCustomReason] = useState('')
 
   useEffect(() => {
     if (!user) return
@@ -69,10 +81,15 @@ export default function Admin() {
   }
 
   const handleReject = async (id: string) => {
+    const reason = rejectionReason === 'custom' ? customReason : rejectionReason
+    if (!reason) return
     setActionLoading(id)
     try {
-      await api.adminRejectCard(id)
+      await api.adminRejectCard(id, reason)
       setPendingCards(prev => prev.filter(c => c.id !== id))
+      setRejectingId(null)
+      setRejectionReason('')
+      setCustomReason('')
     } catch (err) {
       console.error(err)
     } finally {
@@ -179,7 +196,7 @@ export default function Admin() {
                         Verify
                       </button>
                       <button
-                        onClick={() => handleReject(card.id)}
+                        onClick={() => setRejectingId(rejectingId === card.id ? null : card.id)}
                         disabled={actionLoading === card.id}
                         className="text-sm bg-red-600 text-white px-4 py-2 hover:bg-red-700 transition-colors disabled:opacity-50"
                       >
@@ -187,6 +204,63 @@ export default function Admin() {
                       </button>
                     </div>
                   </div>
+
+                  {rejectingId === card.id && (
+                    <div className="mt-4 pt-4 border-t border-[#e2e0db] space-y-3">
+                      <p className="text-xs uppercase tracking-widest text-[#7a7a9a]">Select a reason</p>
+                      <div className="flex flex-wrap gap-2">
+                        {REJECTION_REASONS.map(reason => (
+                          <button
+                            key={reason}
+                            onClick={() => { setRejectionReason(reason); setCustomReason('') }}
+                            className={`text-xs px-3 py-1.5 border rounded-lg transition-colors ${
+                              rejectionReason === reason
+                                ? 'bg-red-600 text-white border-red-600'
+                                : 'bg-white text-[#4a4a6a] border-[#e2e0db] hover:border-red-400 hover:text-red-600'
+                            }`}
+                          >
+                            {reason}
+                          </button>
+                        ))}
+                        <button
+                          onClick={() => setRejectionReason('custom')}
+                          className={`text-xs px-3 py-1.5 border rounded-lg transition-colors ${
+                            rejectionReason === 'custom'
+                              ? 'bg-red-600 text-white border-red-600'
+                              : 'bg-white text-[#4a4a6a] border-[#e2e0db] hover:border-red-400 hover:text-red-600'
+                          }`}
+                        >
+                          Custom reason
+                        </button>
+                      </div>
+
+                      {rejectionReason === 'custom' && (
+                        <input
+                          type="text"
+                          value={customReason}
+                          onChange={e => setCustomReason(e.target.value)}
+                          placeholder="Enter rejection reason..."
+                          className="w-full bg-white border border-[#e2e0db] px-4 py-2 text-sm text-[#1a1a2e] focus:outline-none focus:border-[#1a1a2e] transition-colors"
+                        />
+                      )}
+
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => handleReject(card.id)}
+                          disabled={!rejectionReason || (rejectionReason === 'custom' && !customReason) || actionLoading === card.id}
+                          className="text-sm bg-red-600 text-white px-4 py-2 hover:bg-red-700 transition-colors disabled:opacity-50"
+                        >
+                          {actionLoading === card.id ? 'Rejecting...' : 'Confirm rejection'}
+                        </button>
+                        <button
+                          onClick={() => { setRejectingId(null); setRejectionReason(''); setCustomReason('') }}
+                          className="text-sm border border-[#e2e0db] px-4 py-2 text-[#4a4a6a] hover:border-[#1a1a2e] transition-colors"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
