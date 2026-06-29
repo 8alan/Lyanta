@@ -39,6 +39,36 @@ export async function sendBidReceivedEmail(
   })
 }
 
+export async function sendCardRejectedEmail(
+  userEmail: string,
+  userName: string,
+  brand: string,
+  faceValue: number,
+  reason: string
+) {
+  await resend.emails.send({
+    from: FROM_EMAIL,
+    to: userEmail,
+    subject: `Your ${brand} gift card could not be verified`,
+    html: `
+      <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto; padding: 32px;">
+        <h2 style="font-size: 20px; font-weight: 600; color: #1a1a2e;">Card verification failed</h2>
+        <p style="color: #4a4a6a; font-size: 14px;">
+          Hi ${userName ?? 'there'}, unfortunately your ${brand} gift card worth $${faceValue.toFixed(2)} could not be verified.
+        </p>
+        <div style="background: #fff5f5; border: 1px solid #fecaca; padding: 16px; margin: 24px 0;">
+          <p style="margin: 0; font-size: 14px; color: #1a1a2e;">
+            <strong>Reason:</strong> ${reason}
+          </p>
+        </div>
+        <p style="color: #4a4a6a; font-size: 14px;">
+          You can resubmit your card with corrected details from your dashboard.
+        </p>
+      </div>
+    `
+  })
+}
+
 export async function sendBidAcceptedEmail(
   buyerEmail: string,
   buyerName: string,

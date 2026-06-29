@@ -2,6 +2,7 @@ import { Router, Request, Response } from 'express'
 import { requireAuth } from '../middleware/auth.js'
 import prisma from '../db.js'
 import { decrypt } from '../services/encryption.js'
+import { sendCardRejectedEmail } from '../services/email.js'
 
 const router = Router()
 const ADMIN_CLERK_ID = 'user_3F481w6C6mRIvyVI1yr3dseubnS'
@@ -93,6 +94,16 @@ router.post('/gift-cards/:id/reject', requireAuth, requireAdmin, async (req: Req
     const id = req.params.id as string
     const { reason } = req.body
 
+    const giftCard = await prisma.giftCard.findUnique({
+      where: { id },
+      include: { user: true }
+    })
+
+    if (!giftCard) {
+      res.status(404).json({ error: 'Gift card not found' })
+      return
+    }
+
     await prisma.giftCard.update({
       where: { id },
       data: { status: 'FAILED', rejectionReason: reason ?? null }
@@ -102,6 +113,16 @@ router.post('/gift-cards/:id/reject', requireAuth, requireAdmin, async (req: Req
       where: { giftCardId: id },
       data: { status: 'CANCELLED' }
     })
+
+    if (giftCard.user?.email && reason) {
+      sendCardRejectedEmail(
+        giftCard.user.email,
+        giftCard.user.name ?? 'there',
+        giftCard.brand,
+        giftCard.faceValue,
+        reason
+      ).catch(console.error)
+    }
 
     res.json({ success: true })
   } catch (error) {
