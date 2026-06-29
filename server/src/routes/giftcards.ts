@@ -153,7 +153,7 @@ router.delete('/:id', requireAuth, async (req: Request, res: Response) => {
       return
     }
 
-    if (giftCard.status !== 'PENDING' && giftCard.status !== 'AVAILABLE') {
+    if (giftCard.status !== 'PENDING' && giftCard.status !== 'AVAILABLE' && giftCard.status !== 'FAILED') {
       res.status(400).json({ error: 'Only pending or unsold cards can be deleted' })
       return
     }
