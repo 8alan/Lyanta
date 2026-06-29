@@ -24,6 +24,7 @@ export default function CreateListing() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [listingCompleted, setListingCompleted] = useState(false)
+  const [hasMarketHistory, setHasMarketHistory] = useState(false)
 
   useEffect(() => {
     if (!giftCardId) {
@@ -34,7 +35,10 @@ export default function CreateListing() {
       api.getMarketRate(brand)
         .then(data => {
           setMarketRate(data.marketRate)
-          setBuyNowPrice((faceValue * data.marketRate).toFixed(2))
+          setHasMarketHistory(data.hasHistory)
+          if (data.hasHistory) {
+            setBuyNowPrice((faceValue * data.marketRate).toFixed(2))
+          }
         })
         .catch(console.error)
     }
@@ -98,7 +102,7 @@ export default function CreateListing() {
   }
 
   const brandImage = getBrandImage(brand)
-
+  
   return (
     <div className="min-h-screen bg-[#F6F3F9] text-[#2e1a47]">
 
@@ -155,9 +159,11 @@ export default function CreateListing() {
               placeholder="0.00"
               className="w-full bg-[#F6F3F9] border border-[#E3DFEF] rounded-xl px-4 py-3 text-sm text-[#2e1a47] placeholder-[#AFABC9] focus:outline-none focus:border-[#72569C] transition-colors"
             />
-            <p className="text-xs text-[#AFABC9] mt-2">
-              Market rate: {(marketRate * 100).toFixed(0)}% of face value (${(faceValue * marketRate).toFixed(2)})
-            </p>
+            {hasMarketHistory && (
+              <p className="text-xs text-[#AFABC9] mt-2">
+                Market rate: {(marketRate * 100).toFixed(0)}% of face value (${(faceValue * marketRate).toFixed(2)})
+              </p>
+            )}
           </div>
 
           {/* Minimum Bid */}
