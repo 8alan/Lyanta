@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useApi } from '../services/api.ts'
+import { useStore } from '../store/useStore.ts'
 import { getBrandImage } from '../services/brandImages.ts'
 
 interface Trade {
@@ -34,8 +35,9 @@ interface CardDetails {
 export default function MyTrades() {
   const navigate = useNavigate()
   const api = useApi()
-  const [trades, setTrades] = useState<Trade[]>([])
-  const [loading, setLoading] = useState(true)
+  const { trades: cachedTrades, setTrades } = useStore()
+  const [trades, setLocalTrades] = useState<Trade[]>(cachedTrades as unknown as Trade[])
+  const [loading, setLoading] = useState(cachedTrades.length === 0)
   const [claimingId, setClaimingId] = useState<string | null>(null)
   const [claimedCard, setClaimedCard] = useState<CardDetails | null>(null)
   const [reviewingId, setReviewingId] = useState<string | null>(null)
@@ -46,7 +48,10 @@ export default function MyTrades() {
 
   useEffect(() => {
     api.getMyTrades()
-      .then(data => setTrades(data.trades))
+      .then(data => {
+        setLocalTrades(data.trades)
+        setTrades(data.trades)
+      })
       .catch(console.error)
       .finally(() => setLoading(false))
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -57,7 +62,7 @@ export default function MyTrades() {
     try {
       const data = await api.getCardDetails(listingId)
       setClaimedCard(data.cardDetails)
-      setTrades(prev => prev.map(t =>
+      setLocalTrades(prev => prev.map(t =>
         t.listingId === listingId
           ? { ...t, status: 'COMPLETED', listing: { ...t.listing, giftCard: { ...t.listing.giftCard, revealed: true } } }
           : t
@@ -78,7 +83,7 @@ export default function MyTrades() {
     setReviewError('')
     try {
       await api.submitReview(tradeId, { rating, comment: comment || undefined })
-      setTrades(prev => prev.map(t => t.id === tradeId ? { ...t, hasReviewed: true } : t))
+      setLocalTrades(prev => prev.map(t => t.id === tradeId ? { ...t, hasReviewed: true } : t))
       setReviewingId(null)
       setRating(0)
       setComment('')
@@ -104,12 +109,9 @@ export default function MyTrades() {
     DISPUTED: 'text-red-500',
   }
 
-  // ── Claimed card view ──
   if (claimedCard) {
     return (
       <div className="min-h-screen bg-[#F6F3F9] text-[#2e1a47]">
-
-        {/* Nav */}
         <nav className="flex items-center justify-between px-4 sm:px-8 py-5 border-b border-[#E3DFEF] bg-white shadow-sm">
           <button
             onClick={() => navigate('/dashboard')}
@@ -204,11 +206,8 @@ export default function MyTrades() {
     )
   }
 
-  // ── Main trades view ──
   return (
     <div className="min-h-screen bg-[#F6F3F9] text-[#2e1a47]">
-
-      {/* Nav */}
       <nav className="flex items-center justify-between px-4 sm:px-8 py-5 border-b border-[#E3DFEF] bg-white shadow-sm">
         <button
           onClick={() => navigate('/dashboard')}
@@ -226,20 +225,16 @@ export default function MyTrades() {
 
       <div className="max-w-4xl mx-auto px-4 sm:px-8 py-12">
 
-        {/* Header */}
         <div className="mb-10">
           <p className="text-xs uppercase tracking-widest text-[#7c6992] mb-2">Account</p>
           <h1 className="text-3xl font-light text-[#2e1a47]">My trades</h1>
           <p className="text-sm text-[#7c6992] mt-2">Cards you have purchased or traded for.</p>
         </div>
 
-        {/* Loading */}
         {loading ? (
           <div className="bg-white border border-[#E3DFEF] rounded-2xl p-10 text-center shadow-sm">
             <p className="text-sm text-[#7c6992]">Loading...</p>
           </div>
-
-        /* Empty */
         ) : trades.length === 0 ? (
           <div className="bg-white border border-[#E3DFEF] rounded-2xl p-10 text-center shadow-sm">
             <p className="text-sm text-[#7c6992] mb-4">You haven't made any trades yet.</p>
@@ -250,8 +245,6 @@ export default function MyTrades() {
               Browse cards
             </button>
           </div>
-
-        /* Trades list */
         ) : (
           <div className="space-y-4">
             {trades.map(trade => {
@@ -268,8 +261,6 @@ export default function MyTrades() {
                   className="bg-white border border-[#E3DFEF] rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow"
                 >
                   <div className="flex gap-4 flex-col sm:flex-row">
-
-                    {/* Brand image */}
                     <img
                       src={image ?? ''}
                       alt={trade.listing.giftCard.brand}
@@ -291,7 +282,6 @@ export default function MyTrades() {
                           )}
                         </div>
 
-                        {/* Action buttons */}
                         <div className="flex flex-col items-end gap-2 shrink-0">
                           {trade.status === 'PENDING' && !trade.listing.giftCard.revealed && (
                             <button
@@ -326,12 +316,9 @@ export default function MyTrades() {
                         </div>
                       </div>
 
-                      {/* Inline review form */}
                       {isReviewing && (
                         <div className="mt-4 pt-4 border-t border-[#E3DFEF] space-y-3">
                           <p className="text-xs uppercase tracking-widest text-[#7c6992]">Rate this trade</p>
-
-                          {/* Star rating */}
                           <div className="flex gap-1">
                             {[1, 2, 3, 4, 5].map(star => (
                               <button
@@ -345,7 +332,6 @@ export default function MyTrades() {
                               </button>
                             ))}
                           </div>
-
                           <textarea
                             value={comment}
                             onChange={e => setComment(e.target.value)}
@@ -355,13 +341,11 @@ export default function MyTrades() {
                             className="w-full bg-white border border-[#E3DFEF] rounded-lg px-4 py-3 text-sm text-[#2e1a47] placeholder-[#AFABC9] focus:outline-none focus:border-[#72569C] focus:ring-1 focus:ring-[#72569C] transition-colors resize-none font-normal"
                           />
                           <p className="text-xs text-[#AFABC9] text-right">{comment.length}/300</p>
-
                           {reviewError && (
                             <p className="text-xs text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
                               {reviewError}
                             </p>
                           )}
-
                           <button
                             onClick={() => handleSubmitReview(trade.id)}
                             disabled={submittingReview}
