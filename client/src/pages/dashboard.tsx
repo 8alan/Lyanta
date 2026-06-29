@@ -136,7 +136,7 @@ export default function Dashboard() {
         </div>
       </nav>
 
-      <div className="max-w-4xl mx-auto px-8 py-12">
+      <div className="max-w-4xl mx-auto px-4 sm:px-8 py-12">
 
         {/* Header */}
         <div className="flex items-center justify-between mb-10">
