@@ -46,6 +46,7 @@ export default function PendingListings() {
   )
   const [loading, setLoading] = useState(cachedCards.length === 0 && cachedListings.length === 0)
   const [cancellingId, setCancellingId] = useState<string | null>(null)
+  const [showFailedHistory, setShowFailedHistory] = useState(false)
 
   useEffect(() => {
     Promise.all([
@@ -179,9 +180,21 @@ export default function PendingListings() {
             )}
 
             {/* Verification Failed */}
-              {failedCards.length > 0 && (
-                <div>
-                  <p className="text-xs uppercase tracking-widest text-[#7c6992] font-semibold mb-4">Verification Failed</p>
+            {failedCards.length > 0 && (
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <p className="text-xs uppercase tracking-widest text-[#7c6992] font-semibold">
+                    Verification Failed
+                  </p>
+                  <button
+                    onClick={() => setShowFailedHistory(prev => !prev)}
+                    className="text-xs text-[#72569C] hover:text-[#2e1a47] transition-colors font-medium"
+                  >
+                    {showFailedHistory ? 'Hide history' : `Show history (${failedCards.length})`}
+                  </button>
+                </div>
+
+                {showFailedHistory && (
                   <div className="space-y-4">
                     {failedCards.map(card => {
                       const image = getBrandImage(card.brand)
@@ -234,8 +247,9 @@ export default function PendingListings() {
                       )
                     })}
                   </div>
-                </div>
-              )}
+                )}
+              </div>
+            )}
 
           </div>
         )}
