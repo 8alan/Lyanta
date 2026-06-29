@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useApi } from '../services/api.ts'
+import { useStore } from '../store/useStore.ts'
 import { getBrandImage } from '../services/brandImages.ts'
 
 interface Listing {
@@ -26,13 +27,20 @@ interface Listing {
 export default function MyListings() {
   const navigate = useNavigate()
   const api = useApi()
-  const [listings, setListings] = useState<Listing[]>([])
-  const [loading, setLoading] = useState(true)
+  const { myListings: cachedListings, setMyListings } = useStore()
+  const [listings, setListings] = useState<Listing[]>(
+    cachedListings.filter(l => l.status === 'ACTIVE') as Listing[]
+  )
+  const [loading, setLoading] = useState(cachedListings.length === 0)
   const [cancellingId, setCancellingId] = useState<string | null>(null)
 
   useEffect(() => {
     api.getMyListings()
-      .then(data => setListings(data.listings.filter((l: Listing) => l.status === 'ACTIVE')))
+      .then(data => {
+        const active = data.listings.filter((l: Listing) => l.status === 'ACTIVE')
+        setListings(active)
+        setMyListings(data.listings)
+      })
       .catch(console.error)
       .finally(() => setLoading(false))
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -43,6 +51,7 @@ export default function MyListings() {
     try {
       await api.cancelListing(id)
       setListings(prev => prev.filter(l => l.id !== id))
+      setMyListings(cachedListings.filter(l => l.id !== id))
     } catch (err) {
       console.error(err)
     } finally {
@@ -79,13 +88,10 @@ export default function MyListings() {
           <h1 className="text-3xl font-light text-[#2e1a47]">Active Listings</h1>
         </div>
 
-        {/* Loading */}
         {loading ? (
           <div className="bg-white border border-[#E3DFEF] rounded-2xl p-10 text-center shadow-sm">
             <p className="text-sm text-[#7c6992]">Loading...</p>
           </div>
-
-        /* Empty */
         ) : listings.length === 0 ? (
           <div className="bg-white border border-[#E3DFEF] rounded-2xl p-10 text-center shadow-sm">
             <p className="text-sm text-[#7c6992] mb-4">You have no active listings.</p>
@@ -96,8 +102,6 @@ export default function MyListings() {
               Submit a card
             </button>
           </div>
-
-        /* Listings */
         ) : (
           <div className="space-y-4">
             {listings.map(listing => {
@@ -110,8 +114,6 @@ export default function MyListings() {
                   className="bg-white border border-[#E3DFEF] rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow"
                 >
                   <div className="flex gap-4 flex-col sm:flex-row">
-
-                    {/* Brand image */}
                     <img
                       src={image ?? ''}
                       alt={listing.giftCard.brand}
@@ -119,8 +121,6 @@ export default function MyListings() {
                     />
 
                     <div className="flex-1 min-w-0">
-
-                      {/* Top row */}
                       <div className="flex items-start justify-between gap-4 flex-wrap">
                         <div>
                           <p className="text-sm font-semibold text-[#2e1a47]">
@@ -129,7 +129,6 @@ export default function MyListings() {
                           <p className="text-xs mt-1 font-medium text-[#2e7d32]">Active</p>
                         </div>
 
-                        {/* Action buttons */}
                         <div className="flex gap-2 shrink-0">
                           <button
                             onClick={() => navigate(`/edit-listing/${listing.id}`)}
@@ -147,7 +146,6 @@ export default function MyListings() {
                         </div>
                       </div>
 
-                      {/* Pricing details */}
                       <div className="flex flex-wrap gap-2 mt-3">
                         {listing.buyNowPrice && (
                           <span className="text-xs bg-[#F6F3F9] border border-[#E3DFEF] rounded-full px-2.5 py-1 text-[#2e1a47] font-medium">
@@ -166,7 +164,6 @@ export default function MyListings() {
                         )}
                       </div>
 
-                      {/* Pending bids */}
                       {pendingBids.length > 0 && (
                         <div className="mt-4 p-4 bg-[#F6F3F9] border border-[#E3DFEF] rounded-xl">
                           <p className="text-xs font-semibold text-[#2e1a47] mb-3 uppercase tracking-widest">
@@ -221,7 +218,6 @@ export default function MyListings() {
                           </div>
                         </div>
                       )}
-
                     </div>
                   </div>
                 </div>

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useApi } from '../services/api.ts'
+import { useStore } from '../store/useStore.ts'
 import { getBrandImage } from '../services/brandImages.ts'
 
 interface GiftCard {
@@ -35,9 +36,15 @@ interface Listing {
 export default function PendingListings() {
   const navigate = useNavigate()
   const api = useApi()
-  const [failedCards, setFailedCards] = useState<GiftCard[]>([])
-  const [pendingListings, setPendingListings] = useState<Listing[]>([])
-  const [loading, setLoading] = useState(true)
+  const { cards: cachedCards, setCards, myListings: cachedListings, setMyListings } = useStore()
+
+  const [failedCards, setFailedCards] = useState<GiftCard[]>(
+    cachedCards.filter(c => c.status === 'FAILED') as GiftCard[]
+  )
+  const [pendingListings, setPendingListings] = useState<Listing[]>(
+    cachedListings.filter(l => l.status === 'PENDING_VERIFICATION') as Listing[]
+  )
+  const [loading, setLoading] = useState(cachedCards.length === 0 && cachedListings.length === 0)
   const [cancellingId, setCancellingId] = useState<string | null>(null)
 
   useEffect(() => {
@@ -46,7 +53,9 @@ export default function PendingListings() {
       api.getMyListings(),
     ]).then(([cardsData, listingsData]) => {
       setFailedCards(cardsData.giftCards.filter((c: GiftCard) => c.status === 'FAILED'))
+      setCards(cardsData.giftCards)
       setPendingListings(listingsData.listings.filter((l: Listing) => l.status === 'PENDING_VERIFICATION'))
+      setMyListings(listingsData.listings)
     }).catch(console.error)
     .finally(() => setLoading(false))
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -57,6 +66,7 @@ export default function PendingListings() {
     try {
       await api.cancelListing(id)
       setPendingListings(prev => prev.filter(l => l.id !== id))
+      setMyListings(cachedListings.filter(l => l.id !== id))
     } catch (err) {
       console.error(err)
     } finally {

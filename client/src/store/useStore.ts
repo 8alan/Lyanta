@@ -5,11 +5,19 @@ interface Listing {
   id: string
   buyNowPrice: number | null
   minAcceptPrice: number | null
+  acceptsExchange: boolean
   status: string
   giftCard: {
     brand: string
     faceValue: number
+    status?: string
   }
+  bids?: {
+    id: string
+    status: string
+    bidType: string
+    cashAmount: number | null
+  }[]
   createdAt: string
 }
 
@@ -19,11 +27,33 @@ interface GiftCard {
   faceValue: number
   status: string
   createdAt: string
+  rejectionReason?: string | null
 }
 
 interface TopCard {
   brand: string
   count: number
+}
+
+interface Trade {
+  id: string
+  status: string
+  tradeType: string
+  finalPrice: number | null
+  createdAt: string
+  listingId: string
+  hasReviewed: boolean
+  listing: {
+    id: string
+    giftCard: {
+      brand: string
+      faceValue: number
+      revealed: boolean
+      description: string | null
+    }
+  }
+  seller: { username: string | null; name: string | null }
+  buyer: { username: string | null; name: string | null }
 }
 
 interface Store {
@@ -39,6 +69,10 @@ interface Store {
   setTopCards: (topCards: TopCard[]) => void
   avatarUrl: string | null
   setAvatarUrl: (avatarUrl: string | null) => void
+  myListings: Listing[]
+  setMyListings: (listings: Listing[]) => void
+  trades: Trade[]
+  setTrades: (trades: Trade[]) => void
 }
 
 export const useStore = create<Store>()(
@@ -56,6 +90,10 @@ export const useStore = create<Store>()(
       setTopCards: (topCards) => set({ topCards }),
       avatarUrl: null,
       setAvatarUrl: (avatarUrl) => set({ avatarUrl }),
+      myListings: [],
+      setMyListings: (myListings) => set({ myListings }),
+      trades: [],
+      setTrades: (trades) => set({ trades }),
     }),
     {
       name: 'lantana-store',
