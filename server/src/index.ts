@@ -100,7 +100,6 @@ app.use('/api/trades', tradesRouter)
 app.use('/api/profile', profileRouter)
 app.use('/api/support', supportRouter)
 
-
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
 })

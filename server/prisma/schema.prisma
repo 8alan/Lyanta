@@ -52,6 +52,7 @@ model GiftCard {
   revealed    Boolean  @default(false)
   listing    Listing?
   autoVerified Boolean @default(false)
+  rejectionReason String?
 }
 
 model Listing {

@@ -91,10 +91,11 @@ router.post('/gift-cards/:id/verify', requireAuth, requireAdmin, async (req: Req
 router.post('/gift-cards/:id/reject', requireAuth, requireAdmin, async (req: Request, res: Response) => {
   try {
     const id = req.params.id as string
+    const { reason } = req.body
 
     await prisma.giftCard.update({
       where: { id },
-      data: { status: 'FAILED' }
+      data: { status: 'FAILED', rejectionReason: reason ?? null }
     })
 
     await prisma.listing.updateMany({
