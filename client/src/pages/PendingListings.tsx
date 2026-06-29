@@ -9,6 +9,7 @@ interface GiftCard {
   faceValue: number
   status: string
   createdAt: string
+  rejectionReason?: string | null
 }
 
 interface Listing {
@@ -189,6 +190,11 @@ export default function PendingListings() {
                                   {card.brand} — ${card.faceValue.toFixed(2)}
                                 </p>
                                 <p className="text-xs mt-1 font-medium text-red-500">Verification failed</p>
+                                {card.rejectionReason && (
+                                  <p className="text-xs mt-1 text-[#7c6992]">
+                                    <span className="font-semibold">Reason:</span> {card.rejectionReason}
+                                  </p>
+                                )}
                               </div>
                               <button
                                 onClick={() => navigate('/submit')}
