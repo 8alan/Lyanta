@@ -542,6 +542,16 @@ router.post('/:id/bid', requireAuth, async (req: Request, res: Response) => {
       return
     }
     
+    if (offeredCardId) {
+      const offeredCard = await prisma.giftCard.findFirst({
+        where: { id: offeredCardId, userId: user.id, status: 'AVAILABLE' }
+      })
+      if (!offeredCard) {
+        res.status(403).json({ error: 'You do not own this card or it is not available' })
+        return
+      }
+    }
+    
     const bid = await prisma.bid.create({
       data: {
         listingId: id,
@@ -671,7 +681,7 @@ router.post('/:id/bids/:bidId/reject', requireAuth, async (req: Request, res: Re
     }
 
     await prisma.bid.update({
-      where: { id: bidId as string },
+      where: { id: bidId as string, listingId: id as string },
       data: { status: 'REJECTED' }
     })
 

@@ -52,7 +52,7 @@ router.post('/submit', requireAuth, async (req: Request, res: Response) => {
     }
 
     const existing = await prisma.giftCard.findFirst({
-      where: { cardNumber, pin }
+      where: { cardNumber: encrypt(cardNumber), pin: encrypt(pin) }
     })
 
     if (existing) {
