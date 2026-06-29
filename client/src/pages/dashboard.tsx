@@ -99,8 +99,13 @@ export default function Dashboard() {
     <div className="min-h-screen bg-[#F6F3F9] text-[#2e1a47]">
 
       {/* ── Nav ── */}
-      <nav className="flex items-center justify-between px-8 py-5 border-b border-[#E3DFEF] bg-white shadow-sm">
-        <span className="text-xl font-semibold tracking-tight text-[#2e1a47]">Lantana</span>
+      <nav className="flex items-center justify-between px-4 sm:px-8 py-5 border-b border-[#E3DFEF] bg-white shadow-sm">
+        <button
+          onClick={() => navigate('/dashboard')}
+          className="text-xl font-semibold tracking-tight text-[#2e1a47]"
+        >
+          Lantana
+        </button>
         <div className="flex items-center gap-6">
           <button
             onClick={() => navigate('/browse')}
