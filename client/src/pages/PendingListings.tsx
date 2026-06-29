@@ -179,51 +179,63 @@ export default function PendingListings() {
             )}
 
             {/* Verification Failed */}
-            {failedCards.length > 0 && (
-              <div>
-                <p className="text-xs uppercase tracking-widest text-[#7c6992] font-semibold mb-4">Verification Failed</p>
-                <div className="space-y-4">
-                  {failedCards.map(card => {
-                    const image = getBrandImage(card.brand)
-                    return (
-                      <div key={card.id} className="bg-white border border-red-100 rounded-2xl p-6 shadow-sm">
-                        <div className="flex gap-4 flex-col sm:flex-row">
-                          <img
-                            src={image ?? ''}
-                            alt={card.brand}
-                            className="w-full sm:w-24 h-20 sm:h-16 object-cover rounded-xl shrink-0"
-                          />
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-start justify-between gap-4 flex-wrap">
-                              <div>
-                                <p className="text-sm font-semibold text-[#2e1a47]">
-                                  {card.brand} — ${card.faceValue.toFixed(2)}
-                                </p>
-                                <p className="text-xs mt-1 font-medium text-red-500">Verification failed</p>
-                                {card.rejectionReason && (
-                                  <p className="text-xs mt-1 text-[#7c6992]">
-                                    <span className="font-semibold">Reason:</span> {card.rejectionReason}
+              {failedCards.length > 0 && (
+                <div>
+                  <p className="text-xs uppercase tracking-widest text-[#7c6992] font-semibold mb-4">Verification Failed</p>
+                  <div className="space-y-4">
+                    {failedCards.map(card => {
+                      const image = getBrandImage(card.brand)
+                      return (
+                        <div key={card.id} className="bg-white border border-red-100 rounded-2xl p-6 shadow-sm">
+                          <div className="flex gap-4 flex-col sm:flex-row">
+                            <img
+                              src={image ?? ''}
+                              alt={card.brand}
+                              className="w-full sm:w-24 h-20 sm:h-16 object-cover rounded-xl shrink-0"
+                            />
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-start justify-between gap-4 flex-wrap">
+                                <div>
+                                  <p className="text-sm font-semibold text-[#2e1a47]">
+                                    {card.brand} — ${card.faceValue.toFixed(2)}
                                   </p>
-                                )}
+                                  <p className="text-xs mt-1 font-medium text-red-500">Verification failed</p>
+                                  {card.rejectionReason && (
+                                    <p className="text-xs mt-1 text-[#7c6992]">
+                                      <span className="font-semibold">Reason:</span> {card.rejectionReason}
+                                    </p>
+                                  )}
+                                </div>
+                                <div className="flex gap-2">
+                                  <button
+                                    onClick={() => navigate('/submit')}
+                                    className="text-xs border border-[#E3DFEF] px-3 py-1.5 rounded-lg text-[#7c6992] hover:border-[#2e1a47] hover:text-[#2e1a47] transition-colors font-medium"
+                                  >
+                                    Resubmit
+                                  </button>
+                                  <button
+                                    onClick={async () => {
+                                      await api.deleteGiftCard(card.id)
+                                      setFailedCards(prev => prev.filter(c => c.id !== card.id))
+                                      setCards(cachedCards.filter(c => c.id !== card.id))
+                                    }}
+                                    className="text-xs border border-red-200 px-3 py-1.5 rounded-lg text-red-500 hover:bg-red-50 transition-colors font-medium"
+                                  >
+                                    Delete
+                                  </button>
+                                </div>
                               </div>
-                              <button
-                                onClick={() => navigate('/submit')}
-                                className="text-xs border border-[#E3DFEF] px-3 py-1.5 rounded-lg text-[#7c6992] hover:border-[#2e1a47] hover:text-[#2e1a47] transition-colors font-medium"
-                              >
-                                Resubmit
-                              </button>
+                              <p className="text-xs text-[#AFABC9] mt-2">
+                                Submitted {new Date(card.createdAt).toLocaleDateString()}
+                              </p>
                             </div>
-                            <p className="text-xs text-[#AFABC9] mt-2">
-                              Submitted {new Date(card.createdAt).toLocaleDateString()}
-                            </p>
                           </div>
                         </div>
-                      </div>
-                    )
-                  })}
+                      )
+                    })}
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
 
           </div>
         )}
