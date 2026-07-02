@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useBlocker } from 'react-router-dom'
 import { useApi } from '../services/api.ts'
 import { SUPPORTED_BRANDS } from '../services/brandImages.ts'
 
@@ -15,9 +15,18 @@ export default function SubmitCard() {
   })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [isDirty, setIsDirty] = useState(false)
 
-  // const fee = form.declaredValue ? parseFloat(form.declaredValue) * 0.07 : 0
-  // const creditValue = form.declaredValue ? parseFloat(form.declaredValue) - fee : 0
+  const blocker = useBlocker(
+    ({ currentLocation, nextLocation }) =>
+      isDirty && currentLocation.pathname !== nextLocation.pathname
+  )
+
+  // Mark form dirty on any field change
+  const handleChange = (field: string, value: string) => {
+    setIsDirty(true)
+    setForm(prev => ({ ...prev, [field]: value }))
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -31,6 +40,7 @@ export default function SubmitCard() {
         declaredValue: parseFloat(form.declaredValue),
         description: form.description || undefined
       })
+      setIsDirty(false) // clear before navigating so blocker doesn't fire
       navigate('/create-listing', {
         state: {
           giftCardId: result.giftCard.id,
@@ -49,8 +59,34 @@ export default function SubmitCard() {
   return (
     <div className="min-h-screen bg-[#F6F3F9] text-[#2e1a47]">
 
+      {/* ── Leave confirmation dialog ── */}
+      {blocker.state === 'blocked' && (
+        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center">
+          <div className="bg-white rounded-2xl p-8 max-w-sm w-full mx-4 shadow-xl border border-[#E3DFEF]">
+            <h2 className="text-base font-semibold text-[#2e1a47] mb-2">Leave this page?</h2>
+            <p className="text-sm text-[#7c6992] mb-6">
+              Your card submission is still in progress. Changes won't be saved if you leave.
+            </p>
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => blocker.reset()}
+                className="text-sm px-4 py-2 rounded-lg border border-[#E3DFEF] text-[#7c6992] hover:border-[#2e1a47] hover:text-[#2e1a47] transition-colors font-medium"
+              >
+                Stay
+              </button>
+              <button
+                onClick={() => blocker.proceed()}
+                className="text-sm px-4 py-2 rounded-lg bg-[#2e1a47] text-white hover:bg-[#72569C] transition-colors font-medium"
+              >
+                Leave
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ── Nav ── */}
-      <nav className="flex items-center justify-between px-8 py-5 border-b border-[#E3DFEF] bg-white shadow-sm">
+      <nav className="flex items-center justify-between px-4 sm:px-8 py-5 border-b border-[#E3DFEF] bg-white shadow-sm">
         <button
           onClick={() => navigate('/dashboard')}
           className="text-xl font-semibold tracking-tight text-[#2e1a47]"
@@ -66,7 +102,7 @@ export default function SubmitCard() {
       </nav>
 
       {/* ── Form container ── */}
-      <div className="max-w-2xl mx-auto px-8 py-12">
+      <div className="max-w-2xl mx-auto px-4 sm:px-8 py-12">
 
         {/* Header */}
         <div className="mb-10">
@@ -89,7 +125,7 @@ export default function SubmitCard() {
             <input
               type="text"
               value={form.brand}
-              onChange={e => setForm({ ...form, brand: e.target.value })}
+              onChange={e => handleChange('brand', e.target.value)}
               required
               placeholder="Search or select a brand"
               className="w-full bg-white border border-[#E3DFEF] rounded-lg px-4 py-3 text-sm text-[#2e1a47] placeholder-[#AFABC9] focus:outline-none focus:border-[#72569C] focus:ring-1 focus:ring-[#72569C] transition-colors"
@@ -104,7 +140,7 @@ export default function SubmitCard() {
                   <button
                     key={b}
                     type="button"
-                    onClick={() => setForm({ ...form, brand: b })}
+                    onClick={() => handleChange('brand', b)}
                     className="w-full text-left px-4 py-2.5 text-sm text-[#2e1a47] hover:bg-[#F6F3F9] transition-colors"
                   >
                     {b}
@@ -122,7 +158,7 @@ export default function SubmitCard() {
             <input
               type="text"
               value={form.cardNumber}
-              onChange={e => setForm({ ...form, cardNumber: e.target.value })}
+              onChange={e => handleChange('cardNumber', e.target.value)}
               required
               maxLength={20}
               minLength={8}
@@ -139,7 +175,7 @@ export default function SubmitCard() {
             <input
               type="text"
               value={form.pin}
-              onChange={e => setForm({ ...form, pin: e.target.value })}
+              onChange={e => handleChange('pin', e.target.value)}
               required
               maxLength={8}
               minLength={4}
@@ -156,7 +192,7 @@ export default function SubmitCard() {
             <input
               type="number"
               value={form.declaredValue}
-              onChange={e => setForm({ ...form, declaredValue: e.target.value })}
+              onChange={e => handleChange('declaredValue', e.target.value)}
               required
               min="1"
               max="2000"
@@ -175,7 +211,7 @@ export default function SubmitCard() {
               <input
                 type="text"
                 value={form.description}
-                onChange={e => setForm({ ...form, description: e.target.value })}
+                onChange={e => handleChange('description', e.target.value)}
                 required
                 placeholder="e.g. Nordstrom gift card, $50"
                 className="w-full bg-white border border-[#E3DFEF] rounded-lg px-4 py-3 text-sm text-[#2e1a47] placeholder-[#AFABC9] focus:outline-none focus:border-[#72569C] focus:ring-1 focus:ring-[#72569C] transition-colors"
