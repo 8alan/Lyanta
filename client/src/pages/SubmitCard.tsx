@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { useNavigate, useBlocker } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useApi } from '../services/api.ts'
 import { SUPPORTED_BRANDS } from '../services/brandImages.ts'
 
@@ -16,16 +16,42 @@ export default function SubmitCard() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [isDirty, setIsDirty] = useState(false)
+  const [showLeaveModal, setShowLeaveModal] = useState(false)
 
-  const blocker = useBlocker(
-    ({ currentLocation, nextLocation }) =>
-      isDirty && currentLocation.pathname !== nextLocation.pathname
-  )
+  // Intercept browser back button
+  useEffect(() => {
+    if (!isDirty) return
+    window.history.pushState(null, '', window.location.href)
+    const handlePopState = () => {
+      window.history.pushState(null, '', window.location.href)
+      setShowLeaveModal(true)
+    }
+    window.addEventListener('popstate', handlePopState)
+    return () => window.removeEventListener('popstate', handlePopState)
+  }, [isDirty])
 
-  // Mark form dirty on any field change
+  // Intercept refresh / tab close
+  useEffect(() => {
+    if (!isDirty) return
+    const handler = (e: BeforeUnloadEvent) => {
+      e.preventDefault()
+      e.returnValue = ''
+    }
+    window.addEventListener('beforeunload', handler)
+    return () => window.removeEventListener('beforeunload', handler)
+  }, [isDirty])
+
   const handleChange = (field: string, value: string) => {
     setIsDirty(true)
     setForm(prev => ({ ...prev, [field]: value }))
+  }
+
+  const handleBackClick = () => {
+    if (isDirty) {
+      setShowLeaveModal(true)
+    } else {
+      navigate('/dashboard')
+    }
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -40,7 +66,7 @@ export default function SubmitCard() {
         declaredValue: parseFloat(form.declaredValue),
         description: form.description || undefined
       })
-      setIsDirty(false) // clear before navigating so blocker doesn't fire
+      setIsDirty(false)
       navigate('/create-listing', {
         state: {
           giftCardId: result.giftCard.id,
@@ -59,23 +85,27 @@ export default function SubmitCard() {
   return (
     <div className="min-h-screen bg-[#F6F3F9] text-[#2e1a47]">
 
-      {/* ── Leave confirmation dialog ── */}
-      {blocker.state === 'blocked' && (
-        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center">
-          <div className="bg-white rounded-2xl p-8 max-w-sm w-full mx-4 shadow-xl border border-[#E3DFEF]">
+      {/* ── Leave confirmation modal ── */}
+      {showLeaveModal && (
+        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center px-4">
+          <div className="bg-white rounded-2xl p-8 max-w-sm w-full shadow-xl border border-[#E3DFEF]">
             <h2 className="text-base font-semibold text-[#2e1a47] mb-2">Leave this page?</h2>
             <p className="text-sm text-[#7c6992] mb-6">
               Your card submission is still in progress. Changes won't be saved if you leave.
             </p>
             <div className="flex gap-3 justify-end">
               <button
-                onClick={() => blocker.reset()}
+                onClick={() => setShowLeaveModal(false)}
                 className="text-sm px-4 py-2 rounded-lg border border-[#E3DFEF] text-[#7c6992] hover:border-[#2e1a47] hover:text-[#2e1a47] transition-colors font-medium"
               >
                 Stay
               </button>
               <button
-                onClick={() => blocker.proceed()}
+                onClick={() => {
+                  setIsDirty(false)
+                  setShowLeaveModal(false)
+                  navigate('/dashboard')
+                }}
                 className="text-sm px-4 py-2 rounded-lg bg-[#2e1a47] text-white hover:bg-[#72569C] transition-colors font-medium"
               >
                 Leave
@@ -94,7 +124,7 @@ export default function SubmitCard() {
           Lantana
         </button>
         <button
-          onClick={() => navigate('/dashboard')}
+          onClick={handleBackClick}
           className="text-sm text-[#7c6992] hover:text-[#2e1a47] transition-colors font-medium"
         >
           ← Back to dashboard
