@@ -60,26 +60,26 @@ router.post('/submit', requireAuth, async (req: Request, res: Response) => {
       return
     }
 
-    const giftCard = await prisma.giftCard.create({
-      data: {
-        userId: user.id,
-        brand,
-        cardNumber: encrypt(cardNumber),
-        pin: encrypt(pin),
-        balance: declaredValue,
-        faceValue: declaredValue,
-        status: 'PENDING',
-        source: 'USER',
-        description: description ?? null,
-      },
-      include: { listing: true }
-    })
+    // In the POST /submit route, change status from 'PENDING' to 'DRAFT':
+      const giftCard = await prisma.giftCard.create({
+        data: {
+          userId: user.id,
+          brand,
+          cardNumber: encrypt(cardNumber),
+          pin: encrypt(pin),
+          balance: declaredValue,
+          faceValue: declaredValue,
+          status: 'DRAFT',           // <-- changed
+          source: 'USER',
+          description: description ?? null,
+        },
+        include: { listing: true }
+      })
 
-    // Auto-verify if supported
-    res.status(201).json({
-      giftCard,
-      message: 'Gift card submitted successfully. Verification in progress.'
-    })
+      res.status(201).json({
+        giftCard,
+        message: 'Gift card saved as draft.'
+      })
 
   } catch (error) {
     console.error(error)
@@ -153,7 +153,12 @@ router.delete('/:id', requireAuth, async (req: Request, res: Response) => {
       return
     }
 
-    if (giftCard.status !== 'PENDING' && giftCard.status !== 'AVAILABLE' && giftCard.status !== 'FAILED') {
+    if (
+      giftCard.status !== 'DRAFT' &&
+      giftCard.status !== 'PENDING' &&
+      giftCard.status !== 'AVAILABLE' &&
+      giftCard.status !== 'FAILED'
+    ) {
       res.status(400).json({ error: 'Only pending or unsold cards can be deleted' })
       return
     }
@@ -175,4 +180,43 @@ router.delete('/:id', requireAuth, async (req: Request, res: Response) => {
     res.status(500).json({ error: 'Internal server error' })
   }
 })
+
+// Confirm a draft card — promotes it to PENDING for verification
+router.patch('/:id/confirm', requireAuth, async (req: Request, res: Response) => {
+  try {
+    const id = req.params.id as string
+    const clerkId = req.userId!
+
+    const user = await prisma.user.findUnique({ where: { clerkId } })
+    if (!user) {
+      res.status(404).json({ error: 'User not found' })
+      return
+    }
+
+    const giftCard = await prisma.giftCard.findFirst({
+      where: { id, userId: user.id }
+    })
+
+    if (!giftCard) {
+      res.status(404).json({ error: 'Gift card not found' })
+      return
+    }
+
+    if (giftCard.status !== 'DRAFT') {
+      res.status(400).json({ error: 'Only draft cards can be confirmed' })
+      return
+    }
+
+    const updated = await prisma.giftCard.update({
+      where: { id },
+      data: { status: 'PENDING' }
+    })
+
+    res.json({ giftCard: updated })
+  } catch (error) {
+    console.error(error)
+    res.status(500).json({ error: 'Internal server error' })
+  }
+})
+
 export default router

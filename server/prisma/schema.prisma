@@ -183,6 +183,7 @@ enum GiftCardStatus {
   CASHED_OUT
   FLAGGED
   FAILED
+  DRAFT
 }
 
 enum GiftCardSource {
