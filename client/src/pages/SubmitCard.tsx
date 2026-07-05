@@ -66,6 +66,9 @@ export default function SubmitCard() {
         declaredValue: parseFloat(form.declaredValue),
         description: form.description || undefined
       })
+
+      await api.confirmGiftCard(result.giftCard.id)
+      
       setIsDirty(false)
       navigate('/create-listing', {
         state: {

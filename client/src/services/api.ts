@@ -91,6 +91,9 @@ export function useApi() {
     deleteGiftCard: (id: string) =>
       request('DELETE', `/api/giftcards/${id}`),
 
+    confirmGiftCard: (id: string) =>
+      request('PATCH', `/api/giftcards/${id}/confirm`, {}),
+
     getActiveListings: (brand?: string, type?: string) =>
       request('GET', `/api/listings/active${brand ? `?brand=${brand}` : ''}${type ? `${brand ? '&' : '?'}type=${type}` : ''}`, undefined, false),
 
@@ -181,6 +184,11 @@ export function useApi() {
       if (!res.ok) throw new Error((await res.json()).error)
       return res.json()
     },
+    confirmGiftCard: (id: string) =>
+      fetch(`/api/gift-cards/${id}/confirm`, {
+        method: 'PATCH',
+        headers: { Authorization: `Bearer ${await getToken()}` }
+      }).then(r => r.json()), 
 
     getTopCards: async () => {
       const res = await fetch(`${BASE_URL}/api/listings/my/top-cards`)
@@ -189,5 +197,7 @@ export function useApi() {
     },
 
     verifyIdentity: () => request('POST', '/api/stripe/verify-identity', {}),
+
+    
   }
 }
