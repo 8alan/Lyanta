@@ -184,11 +184,6 @@ export function useApi() {
       if (!res.ok) throw new Error((await res.json()).error)
       return res.json()
     },
-    confirmGiftCard: (id: string) =>
-      fetch(`/api/gift-cards/${id}/confirm`, {
-        method: 'PATCH',
-        headers: { Authorization: `Bearer ${await getToken()}` }
-      }).then(r => r.json()), 
 
     getTopCards: async () => {
       const res = await fetch(`${BASE_URL}/api/listings/my/top-cards`)
