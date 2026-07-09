@@ -56,6 +56,26 @@ export default function CreateListing() {
     return () => window.removeEventListener('beforeunload', handleBeforeUnload)
   }, [listingCompleted])
 
+  // Intercept browser back button
+  useEffect(() => {
+    if (listingCompleted) return
+    window.history.pushState(null, '', window.location.href)
+    const handlePopState = async () => {
+      window.history.pushState(null, '', window.location.href)
+      const confirmed = window.confirm('Are you sure? Your card submission will be deleted if you leave.')
+      if (confirmed) {
+        try {
+          await api.deleteGiftCard(giftCardId)
+        } catch (err) {
+          console.error(err)
+        }
+        navigate('/dashboard')
+      }
+    }
+    window.addEventListener('popstate', handlePopState)
+    return () => window.removeEventListener('popstate', handlePopState)
+  }, [listingCompleted])
+
   const handleExit = async () => {
     if (listingCompleted) {
       navigate('/dashboard')
