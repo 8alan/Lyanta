@@ -33,6 +33,7 @@ export default function MyListings() {
   )
   const [loading, setLoading] = useState(cachedListings.length === 0)
   const [cancellingId, setCancellingId] = useState<string | null>(null)
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
 
   useEffect(() => {
     api.getMyListings()
@@ -61,6 +62,36 @@ export default function MyListings() {
 
   return (
     <div className="min-h-screen bg-[#F6F3F9] text-[#2e1a47]">
+
+      {/* ── Delete confirmation modal ── */}
+      {confirmDeleteId && (
+        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center px-4">
+          <div className="bg-white rounded-2xl p-8 max-w-sm w-full shadow-xl border border-[#E3DFEF]">
+            <h2 className="text-base font-semibold text-[#2e1a47] mb-2">Delete listing?</h2>
+            <p className="text-sm text-[#7c6992] mb-6">
+              This will permanently remove your listing from the marketplace.
+            </p>
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => setConfirmDeleteId(null)}
+                className="text-sm px-4 py-2 rounded-lg border border-[#E3DFEF] text-[#7c6992] hover:border-[#2e1a47] hover:text-[#2e1a47] transition-colors font-medium"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  handleCancel(confirmDeleteId)
+                  setConfirmDeleteId(null)
+                }}
+                disabled={cancellingId === confirmDeleteId}
+                className="text-sm px-4 py-2 rounded-lg bg-red-500 text-white hover:bg-red-600 transition-colors font-medium disabled:opacity-50"
+              >
+                {cancellingId === confirmDeleteId ? 'Deleting...' : 'Delete'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── Nav ── */}
       <nav className="flex items-center justify-between px-4 sm:px-8 py-5 border-b border-[#E3DFEF] bg-white shadow-sm">
@@ -137,11 +168,10 @@ export default function MyListings() {
                             Edit
                           </button>
                           <button
-                            onClick={() => handleCancel(listing.id)}
-                            disabled={cancellingId === listing.id}
-                            className="text-xs border border-red-200 px-3 py-1.5 rounded-lg text-red-500 hover:bg-red-50 transition-colors disabled:opacity-50 font-medium"
+                            onClick={() => setConfirmDeleteId(listing.id)}
+                            className="text-xs border border-red-200 px-3 py-1.5 rounded-lg text-red-500 hover:bg-red-50 transition-colors font-medium"
                           >
-                            {cancellingId === listing.id ? 'Cancelling...' : 'Cancel'}
+                            Delete
                           </button>
                         </div>
                       </div>
