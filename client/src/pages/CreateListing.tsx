@@ -74,6 +74,7 @@ export default function CreateListing() {
     }
     window.addEventListener('popstate', handlePopState)
     return () => window.removeEventListener('popstate', handlePopState)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [listingCompleted])
 
   const handleExit = async () => {
