@@ -26,7 +26,7 @@ export default function SetupUsername() {
     <div className="min-h-screen bg-[#F6F3F9] flex items-center justify-center px-4">
       <div className="bg-white border border-[#E3DFEF] rounded-2xl p-8 w-full max-w-md shadow-sm">
         <div className="mb-8">
-          <h1 className="text-2xl font-semibold text-[#2e1a47] mb-2">Welcome to Lantana</h1>
+          <h1 className="text-2xl font-semibold text-[#2e1a47] mb-2">Welcome to Lyanta</h1>
           <p className="text-sm text-[#7c6992]">Choose a username to get started. This is how other users will see you on the marketplace.</p>
         </div>
 

@@ -104,7 +104,7 @@ export default function BrowseCards() {
           onClick={() => navigate('/dashboard')}
           className="text-xl font-semibold tracking-tight text-[#2e1a47]"
         >
-          Lantana
+          Lyanta
         </button>
         <div className="flex items-center gap-3">
           <button

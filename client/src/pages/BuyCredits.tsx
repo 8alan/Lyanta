@@ -95,14 +95,14 @@ export default function BuyCredits() {
       <div className="min-h-screen bg-[#f8f7f4] text-[#1a1a2e]">
         <nav className="flex items-center justify-between px-8 py-5 border-b border-[#e2e0db] bg-white">
           <button onClick={() => navigate('/dashboard')} className="text-xl font-semibold tracking-tight">
-            Lantana
+            Lyanta
           </button>
         </nav>
         <div className="max-w-2xl mx-auto px-8 py-24 text-center">
           <p className="text-xs uppercase tracking-widest text-[#7a7a9a] mb-4">Complete</p>
           <h1 className="text-3xl font-semibold text-[#1a1a2e] mb-4">Credits added.</h1>
           <p className="text-sm text-[#4a4a6a] mb-8">
-            ${selectedAmount.toFixed(2)} in Lantana credits have been added to your account.
+            ${selectedAmount.toFixed(2)} in Lyanta credits have been added to your account.
           </p>
           <button
             onClick={() => navigate('/dashboard')}
@@ -119,7 +119,7 @@ export default function BuyCredits() {
     <div className="min-h-screen bg-[#f8f7f4] text-[#1a1a2e]">
       <nav className="flex items-center justify-between px-8 py-5 border-b border-[#e2e0db] bg-white">
         <button onClick={() => navigate('/dashboard')} className="text-xl font-semibold tracking-tight">
-          Lantana
+          Lyanta
         </button>
         <button
           onClick={() => navigate('/dashboard')}
@@ -132,7 +132,7 @@ export default function BuyCredits() {
       <div className="max-w-2xl mx-auto px-8 py-12">
         <div className="mb-10">
           <p className="text-xs uppercase tracking-widest text-[#7a7a9a] mb-2">Credits</p>
-          <h1 className="text-3xl font-semibold text-[#1a1a2e]">Buy Lantana credits</h1>
+          <h1 className="text-3xl font-semibold text-[#1a1a2e]">Buy Lyanta credits</h1>
           <p className="text-sm text-[#4a4a6a] mt-2">
             Credits can be used to purchase gift cards in the marketplace. No cash advance fees.
           </p>

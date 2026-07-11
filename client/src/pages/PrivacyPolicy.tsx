@@ -17,7 +17,7 @@ const privacyPolicyHTML = `
   <h1>PRIVACY POLICY</h1>
   <p><strong>Last updated June 15, 2026</strong></p>
 
-  <p>This Privacy Notice for <strong>Lantana Inc</strong> ("we," "us," or "our") describes how and why we might access, collect, store, use, and/or share ("process") your personal information when you use our services ("Services"), including when you:</p>
+  <p>This Privacy Notice for <strong>Lyanta Inc</strong> ("we," "us," or "our") describes how and why we might access, collect, store, use, and/or share ("process") your personal information when you use our services ("Services"), including when you:</p>
   <ul>
     <li>Visit our website at <a href="https://www.lyanta.com/" target="_blank">https://www.lyanta.com/</a> or any website of ours that links to this Privacy Notice</li>
     <li>Use a gift card marketplace where users can buy, sell, and exchange gift cards for money or other gift cards</li>
@@ -133,7 +133,7 @@ const privacyPolicyHTML = `
 
   <h2 id="infominors">9. DO WE COLLECT INFORMATION FROM MINORS?</h2>
   <p><em><strong>In Short:</strong> We do not knowingly collect data from or market to children under 18 years of age.</em></p>
-  <p>We do not knowingly collect, solicit data from, or market to children under 18 years of age. By using the Services, you represent that you are at least 18 or that you are the parent or guardian of such a minor and consent to such minor dependent's use of the Services. If you become aware of any data we may have collected from children under age 18, please contact us at <a href="mailto:privacy@myriapods.com">privacy@myriapods.com</a>.</p>
+  <p>We do not knowingly collect, solicit data from, or market to children under 18 years of age. By using the Services, you represent that you are at least 18 or that you are the parent or guardian of such a minor and consent to such minor dependent's use of the Services. If you become aware of any data we may have collected from children under age 18, please contact us at <a href="mailto:privacy@lyanta.com">privacy@lyanta.com</a>.</p>
 
   <h2 id="privacyrights">10. WHAT ARE YOUR PRIVACY RIGHTS?</h2>
   <p><em><strong>In Short:</strong> Depending on your state of residence in the US or in some regions, such as the EEA, UK, Switzerland, and Canada, you have rights that allow you greater access to and control over your personal information.</em></p>
@@ -142,7 +142,7 @@ const privacyPolicyHTML = `
   <p><strong><u>Withdrawing your consent:</u></strong> You have the right to withdraw your consent at any time by contacting us using the contact details provided in the section "HOW CAN YOU CONTACT US ABOUT THIS NOTICE?" below.</p>
   <h3>Account Information</h3>
   <p>If you would at any time like to review or change the information in your account or terminate your account, you can log in to your account settings and update your user account. Upon your request to terminate your account, we will deactivate or delete your account and information from our active databases.</p>
-  <p>If you have questions or comments about your privacy rights, you may email us at <a href="mailto:privacy@myriapods.com">privacy@myriapods.com</a>.</p>
+  <p>If you have questions or comments about your privacy rights, you may email us at <a href="mailto:privacy@lyanta.com">privacy@lyanta.com</a>.</p>
 
   <h2 id="DNT">11. CONTROLS FOR DO-NOT-TRACK FEATURES</h2>
   <p>Most web browsers and some mobile operating systems and mobile applications include a Do-Not-Track ("DNT") feature or setting you can activate to signal your privacy preference not to have data about your online browsing activities monitored and collected. As such, we do not currently respond to DNT browser signals or any other mechanism that automatically communicates your choice not to be tracked online.</p>
@@ -181,17 +181,17 @@ const privacyPolicyHTML = `
     <li><strong>Right to opt out</strong> of the processing of your personal data if it is used for targeted advertising, the sale of personal data, or profiling</li>
   </ul>
   <h3>How to Exercise Your Rights</h3>
-  <p>To exercise these rights, you can contact us by submitting a <a href="https://app.termly.io/dsar/348c8b7e-4015-44fd-b94e-a39f62c2ab73" target="_blank">data subject access request</a>, by visiting <a href="https://www.myriapods.com/contact" target="_blank">https://www.myriapods.com/contact</a>, or by referring to the contact details at the bottom of this document.</p>
+  <p>To exercise these rights, you can contact us by submitting a <a href="https://app.termly.io/dsar/348c8b7e-4015-44fd-b94e-a39f62c2ab73" target="_blank">data subject access request</a>, by visiting <a href="https://www.lyanta.com/contact" target="_blank">https://www.lyanta.com/contact</a>, or by referring to the contact details at the bottom of this document.</p>
   <h3>Appeals</h3>
-  <p>Under certain US state data protection laws, if we decline to take action regarding your request, you may appeal our decision by emailing us at <a href="mailto:privacy@myriapods.com">privacy@myriapods.com</a>. If your appeal is denied, you may submit a complaint to your state attorney general.</p>
+  <p>Under certain US state data protection laws, if we decline to take action regarding your request, you may appeal our decision by emailing us at <a href="mailto:privacy@lyanta.com">privacy@lyanta.com</a>. If your appeal is denied, you may submit a complaint to your state attorney general.</p>
 
   <h2 id="policyupdates">13. DO WE MAKE UPDATES TO THIS NOTICE?</h2>
   <p><em><strong>In Short:</strong> Yes, we will update this notice as necessary to stay compliant with relevant laws.</em></p>
   <p>We may update this Privacy Notice from time to time. The updated version will be indicated by an updated "Revised" date at the top of this Privacy Notice. We encourage you to review this Privacy Notice frequently to be informed of how we are protecting your information.</p>
 
   <h2 id="contact">14. HOW CAN YOU CONTACT US ABOUT THIS NOTICE?</h2>
-  <p>If you have questions or comments about this notice, you may email us at <a href="mailto:privacy@myriapods.com">privacy@myriapods.com</a> or contact us by post at:</p>
-  <p>Lantana Inc<br>United States</p>
+  <p>If you have questions or comments about this notice, you may email us at <a href="mailto:privacy@lyanta.com">privacy@lyanta.com</a> or contact us by post at:</p>
+  <p>Lyanta Inc<br>United States</p>
 
   <h2 id="request">15. HOW CAN YOU REVIEW, UPDATE, OR DELETE THE DATA WE COLLECT FROM YOU?</h2>
   <p>You have the right to request access to the personal information we collect from you, details about how we have processed it, correct inaccuracies, or delete your personal information. To request to review, update, or delete your personal information, please fill out and submit a <a href="https://app.termly.io/dsar/348c8b7e-4015-44fd-b94e-a39f62c2ab73" target="_blank">data subject access request</a>.</p>
@@ -211,7 +211,7 @@ export default function PrivacyPolicy() {
           onClick={() => navigate('/')}
           className="text-xl font-semibold tracking-tight text-[#2e1a47]"
         >
-          Lantana
+          Lyanta
         </button>
         <button
           onClick={() => navigate('/')}

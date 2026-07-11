@@ -11,7 +11,7 @@ export default function Landing() {
       {/* ── Floating Pill Nav ── */}
       <div className="sticky top-4 z-50 flex justify-center px-4 sm:px-8 pt-8">
         <nav className="flex items-center justify-between w-full max-w-5xl bg-white px-5 py-3 rounded-2xl shadow-[0_2px_3px_rgba(0,0,0,0.06),0_0_0_1px_rgba(0,0,0,0.10)]">
-          <span className="font-display text-xl text-[#2e1a47] tracking-tight">Lantana</span>
+          <span className="font-display text-xl text-[#2e1a47] tracking-tight">Lyanta</span>
           <div className="flex items-center gap-2 sm:gap-4">
             <button onClick={() => navigate('/browse')} className="text-sm text-[#7c6992] hover:text-[#2e1a47] transition-colors font-medium px-3 py-1.5 rounded-lg hover:bg-[#F6F3F9]">
               Browse cards
@@ -138,7 +138,7 @@ export default function Landing() {
                 Roughly <span className="font-semibold text-[#2e1a47]">43% of American adults</span> are currently sitting on unused or partially spent gift cards. Between <span className="font-semibold text-[#2e1a47]">10–19% of all gift card balances</span> are never redeemed — and up to <span className="font-semibold text-[#2e1a47]">6% are never touched at all</span>. That's real money collecting dust.
               </p>
               <p className="text-base text-[#7c6992] leading-relaxed mt-4">
-                Lantana exists so your value doesn't go to waste.
+                Lyanta exists so your value doesn't go to waste.
               </p>
             </div>
             <div className="grid grid-cols-2 gap-4">
@@ -205,7 +205,7 @@ export default function Landing() {
         <div className="max-w-6xl mx-auto px-4 sm:px-8 py-16">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-10 mb-12">
             <div className="col-span-2 sm:col-span-1">
-              <span className="font-display text-xl text-[#2e1a47] block mb-3">Lantana</span>
+              <span className="font-display text-xl text-[#2e1a47] block mb-3">Lyanta</span>
               <p className="text-xs text-[#AFABC9] leading-relaxed max-w-xs">
                 The P2P gift card exchange. Trade smarter, waste nothing.
               </p>
@@ -254,7 +254,7 @@ export default function Landing() {
               </div>
           </div>
           <div className="border-t border-[#E3DFEF] pt-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <span className="text-xs text-[#AFABC9]">© 2026 Lantana. Secure. Straightforward. Fast.</span>
+            <span className="text-xs text-[#AFABC9]">© 2026 Lyanta. Secure. Straightforward. Fast.</span>
             <div className="flex items-center gap-6">
               <button onClick={() => navigate('/privacy-policy')} className="text-xs text-[#AFABC9] hover:text-[#7c6992] transition-colors">Privacy</button>
               <button className="text-xs text-[#AFABC9] hover:text-[#7c6992] transition-colors">Terms</button>

@@ -76,7 +76,7 @@ export default function EditListing() {
           onClick={() => navigate('/my-listings')}
           className="text-xl font-semibold tracking-tight text-[#2e1a47]"
         >
-          Lantana
+          Lyanta
         </button>
         <button
           onClick={() => navigate('/my-listings')}

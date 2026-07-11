@@ -11,8 +11,8 @@ const FAQS = [
         a: 'Browse listings on the marketplace, select a card you want, and either buy it instantly at the listed price or make an offer. Once accepted, the card details will be sent to your email.'
       },
       {
-        q: 'Is it safe to buy gift cards on Lantana?',
-        a: 'All cards on Lantana are verified before being listed. We check balances and card validity to ensure you receive what you paid for.'
+        q: 'Is it safe to buy gift cards on Lyanta?',
+        a: 'All cards on Lyanta are verified before being listed. We check balances and card validity to ensure you receive what you paid for.'
       },
       {
         q: 'What happens after my offer is accepted?',
@@ -119,7 +119,7 @@ export default function Help() {
           onClick={() => navigate('/dashboard')}
           className="text-xl font-semibold tracking-tight text-[#2e1a47]"
         >
-          Lantana
+          Lyanta
         </button>
         <button
           onClick={() => navigate('/browse')}

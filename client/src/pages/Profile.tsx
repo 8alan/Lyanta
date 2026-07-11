@@ -206,7 +206,7 @@ export default function Profile() {
             onClick={() => navigate('/dashboard')}
             className="text-xl font-semibold tracking-tight text-[#2e1a47]"
           >
-            Lantana
+            Lyanta
           </button>
           <button
             onClick={() => navigate('/dashboard')}

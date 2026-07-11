@@ -117,7 +117,7 @@ export default function MyTrades() {
             onClick={() => navigate('/dashboard')}
             className="text-xl font-semibold tracking-tight text-[#2e1a47]"
           >
-            Lantana
+            Lyanta
           </button>
         </nav>
 
@@ -170,7 +170,7 @@ export default function MyTrades() {
           </div>
 
           <p className="text-xs text-[#AFABC9] mb-8 leading-relaxed">
-            These details will not be shown again on Lantana for security reasons.
+            These details will not be shown again on Lyanta for security reasons.
           </p>
 
           <div className="flex gap-3 justify-center flex-wrap">
@@ -213,7 +213,7 @@ export default function MyTrades() {
           onClick={() => navigate('/dashboard')}
           className="text-xl font-semibold tracking-tight text-[#2e1a47]"
         >
-          Lantana
+          Lyanta
         </button>
         <button
           onClick={() => navigate('/dashboard')}

@@ -108,7 +108,7 @@ export default function Admin() {
   return (
     <div className="min-h-screen bg-[#f8f7f4] text-[#1a1a2e]">
       <nav className="flex items-center justify-between px-8 py-5 border-b border-[#e2e0db] bg-white">
-        <span className="text-xl font-semibold tracking-tight">Lantana Admin</span>
+        <span className="text-xl font-semibold tracking-tight">Lyanta Admin</span>
         <button
           onClick={() => navigate('/dashboard')}
           className="text-sm text-[#4a4a6a] hover:text-[#1a1a2e] transition-colors"

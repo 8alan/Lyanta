@@ -130,7 +130,7 @@ export default function CreateListing() {
       {/* Nav */}
       <nav className="flex items-center justify-between px-8 py-5 border-b border-[#E3DFEF] bg-white shadow-sm">
         <button onClick={handleExit} className="text-xl font-semibold tracking-tight text-[#2e1a47]">
-          Lantana
+          Lyanta
         </button>
         <button onClick={handleExit} className="text-sm text-[#7c6992] hover:text-[#2e1a47] transition-colors font-medium">
           ← Back to dashboard

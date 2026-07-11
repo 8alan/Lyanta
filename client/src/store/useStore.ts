@@ -96,7 +96,7 @@ export const useStore = create<Store>()(
       setTrades: (trades) => set({ trades }),
     }),
     {
-      name: 'lantana-store',
+      name: 'Lyanta-store',
     }
   )
 )
