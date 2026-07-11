@@ -66,7 +66,7 @@ app.get('/who-am-i', (req: Request, res: Response) => {
 
 // Public test routes
 app.get('/health', (req: Request, res: Response) => {
-  res.json({ status: 'Lantana server is running' })
+  res.json({ status: 'Lyanta server is running' })
 })
 
 app.get('/ping', (req: Request, res: Response) => {

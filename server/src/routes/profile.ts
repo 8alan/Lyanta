@@ -134,7 +134,7 @@ router.post('/avatar', requireAuth, upload.single('avatar'), async (req: Request
     const result = await new Promise<{ secure_url: string }>((resolve, reject) => {
       const stream = cloudinary.uploader.upload_stream(
         {
-          folder: 'lantana/avatars',
+          folder: 'Lyanta/avatars',
           transformation: [{ width: 200, height: 200, crop: 'fill', gravity: 'face' }],
           resource_type: 'image'
         },

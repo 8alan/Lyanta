@@ -189,7 +189,7 @@ enum GiftCardStatus {
 enum GiftCardSource {
   USER
   VENDOR
-  LANTANA
+  LYANTA
 }
 
 enum ListingStatus {
