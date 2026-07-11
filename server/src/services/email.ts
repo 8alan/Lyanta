@@ -5,7 +5,7 @@ import path from 'path'
 dotenv.config({ path: path.resolve(process.cwd(), '.env') })
 
 const resend = new Resend(process.env.RESEND_API_KEY)
-const FROM_EMAIL = 'Lantana <notifications@myriapods.com>'
+const FROM_EMAIL = 'Lyanta <notifications@lyanta.com>'
 
 // ── Shared template ──────────────────────────────────────────────────────────
 
@@ -26,7 +26,7 @@ function emailWrapper(content: string): string {
               <!-- Logo bar -->
               <tr>
                 <td style="padding-bottom: 24px;">
-                  <span style="font-size: 22px; font-weight: 700; color: #2e1a47; letter-spacing: -0.5px;">Lantana</span>
+                  <span style="font-size: 22px; font-weight: 700; color: #2e1a47; letter-spacing: -0.5px;">Lyanta</span>
                 </td>
               </tr>
 
@@ -41,10 +41,10 @@ function emailWrapper(content: string): string {
               <tr>
                 <td style="padding-top: 28px; text-align: center;">
                   <p style="margin:0; font-size:12px; color:#AFABC9;">
-                    © 2026 Lantana · Secure. Straightforward. Fast.
+                    © 2026 Lyanta · Secure. Straightforward. Fast.
                   </p>
                   <p style="margin: 6px 0 0; font-size:12px; color:#AFABC9;">
-                    You're receiving this because you have an account on Lantana.
+                    You're receiving this because you have an account on Lyanta.
                   </p>
                 </td>
               </tr>
@@ -87,7 +87,7 @@ function infoRow(label: string, value: string): string {
   return `<p style="margin: 0 0 10px; font-size: 14px; color: #2e1a47;"><span style="color:#7c6992;">${label}</span> &nbsp;${value}</p>`
 }
 
-function ctaButton(text: string, href = 'https://myriapods.com'): string {
+function ctaButton(text: string, href = 'https://lyanta.com'): string {
   return `
     <table cellpadding="0" cellspacing="0" style="margin-top: 28px;">
       <tr>
@@ -136,7 +136,7 @@ export async function sendBidReceivedEmail(
         ${cashAmount ? infoRow('Amount offered:', `$${cashAmount.toFixed(2)}`) : ''}
       `)}
       ${body('Log in to review the bid and decide whether to accept or decline.')}
-      ${ctaButton('View bid on Lantana')}
+      ${ctaButton('View bid on Lyanta')}
     `)
   })
 }
@@ -243,7 +243,7 @@ export async function sendContactEmail(
     from: FROM_EMAIL,
     to: 'jousuealan@gmail.com',
     replyTo: email,
-    subject: `[Lantana Support] ${subject}`,
+    subject: `[Lyanta Support] ${subject}`,
     html: emailWrapper(`
       ${badge('Support Request')}
       ${heading('New support message')}
@@ -282,7 +282,7 @@ export async function sendCardDetailsEmail(
         ${infoRow('PIN:', `<strong style="font-family: monospace; letter-spacing: 0.1em;">${pin}</strong>`)}
       `)}
       <p style="margin: 20px 0 0; font-size:12px; color:#AFABC9; line-height:1.6;">
-        Keep this email safe. These details will not be shown again on Lantana.
+        Keep this email safe. These details will not be shown again on Lyanta.
       </p>
     `)
   })

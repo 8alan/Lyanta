@@ -16,7 +16,6 @@ import supportRouter from './routes/support.js'
 
 dotenv.config()
 
-
 const app = express()
 app.set('trust proxy', 1)
 
@@ -30,9 +29,9 @@ app.use(cors({
   origin: [
     'http://localhost:5173',
     'http://localhost:5174',
-    'https://lantana-rho.vercel.app',
-    'https://myriapods.com',
-    'https://www.myriapods.com'
+    'lantana-iwslwxf8t-lantana-s-projects.vercel.app',
+    'https://lyanta.com',
+    'https://www.lyanta.com'
   ],
   credentials: true
 }))
