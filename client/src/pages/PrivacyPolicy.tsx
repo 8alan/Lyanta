@@ -19,12 +19,12 @@ const privacyPolicyHTML = `
 
   <p>This Privacy Notice for <strong>Lantana Inc</strong> ("we," "us," or "our") describes how and why we might access, collect, store, use, and/or share ("process") your personal information when you use our services ("Services"), including when you:</p>
   <ul>
-    <li>Visit our website at <a href="https://www.myriapods.com/" target="_blank">https://www.myriapods.com/</a> or any website of ours that links to this Privacy Notice</li>
+    <li>Visit our website at <a href="https://www.lyanta.com/" target="_blank">https://www.lyanta.com/</a> or any website of ours that links to this Privacy Notice</li>
     <li>Use a gift card marketplace where users can buy, sell, and exchange gift cards for money or other gift cards</li>
     <li>Engage with us in other related ways, including any marketing or events</li>
   </ul>
 
-  <p><strong>Questions or concerns?</strong> Reading this Privacy Notice will help you understand your privacy rights and choices. If you do not agree with our policies and practices, please do not use our Services. If you still have any questions or concerns, please contact us at <a href="mailto:privacy@myriapods.com">privacy@myriapods.com</a>.</p>
+  <p><strong>Questions or concerns?</strong> Reading this Privacy Notice will help you understand your privacy rights and choices. If you do not agree with our policies and practices, please do not use our Services. If you still have any questions or concerns, please contact us at <a href="mailto:privacy@lyanta.com">privacy@lyanta.com</a>.</p>
 
   <h2>SUMMARY OF KEY POINTS</h2>
   <p><strong><em>This summary provides key points from our Privacy Notice.</em></strong></p>
