@@ -8,7 +8,6 @@ export default defineConfig({
     sitemap({
       hostname: 'https://lyanta.com',
       dynamicRoutes: [
-        '/',
         '/dashboard',
         '/browse',
       ]
