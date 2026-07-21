@@ -193,6 +193,21 @@ export function useApi() {
 
     verifyIdentity: () => request('POST', '/api/stripe/verify-identity', {}),
 
-    
+    // Add these to your useApi() return object
+    createListingPaymentIntent: (listingId: string) =>
+      request('POST', '/api/stripe/create-payment-intent', { listingId }),
+
+    connectOnboard: () =>
+      request('POST', '/api/stripe/connect/onboard'),
+
+    getConnectStatus: () =>
+      request('GET', '/api/stripe/connect/status'),
+
+    confirmTrade: (tradeId: string) =>
+      request('POST', `/api/stripe/confirm-trade/${tradeId}`),
+
+    requestPayout: () =>
+      request('POST', '/api/stripe/connect/payout'),
   }
+  
 }

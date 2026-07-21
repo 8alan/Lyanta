@@ -4,6 +4,7 @@ import { useApi } from '../services/api.ts'
 import { useStore } from '../store/useStore.ts'
 import { getBrandImage } from '../services/brandImages.ts'
 import { UserButton, useUser } from '@clerk/react'
+
 interface GiftCard {
   id: string
   brand: string
@@ -41,6 +42,13 @@ export default function Dashboard() {
   const [localTopCards, setLocalTopCards] = useState<TopCard[]>(cachedTopCards)
   const [loading, setLoading] = useState(cachedListings.length === 0)
   const [avatarUrl, setLocalAvatarUrl] = useState<string | null>(cachedAvatarUrl)
+
+  // Payout state
+  const [connectStatus, setConnectStatus] = useState<{ connected: boolean; detailsSubmitted?: boolean } | null>(null)
+  const [payoutLoading, setPayoutLoading] = useState(false)
+  const [payoutSuccess, setPayoutSuccess] = useState('')
+  const [payoutError, setPayoutError] = useState('')
+
   const hour = new Date().getHours()
   const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening'
 
@@ -52,7 +60,8 @@ export default function Dashboard() {
       api.getMyEarnings(),
       api.getTopCards(),
       api.getMyProfile(),
-    ]).then(([cardsData, listingsData, balanceData, earningsData, topCardsData, profileData]) => {
+      api.getConnectStatus(),
+    ]).then(([cardsData, listingsData, balanceData, earningsData, topCardsData, profileData, connectData]) => {
       setLocalCards(cardsData.giftCards)
       setCards(cardsData.giftCards)
       setLocalListings(listingsData.listings)
@@ -64,11 +73,39 @@ export default function Dashboard() {
       setTopCards(topCardsData.topCards ?? [])
       setAvatarUrl(profileData.profile.avatarUrl ?? null)
       setLocalAvatarUrl(profileData.profile.avatarUrl ?? null)
-      setAvatarUrl(profileData.profile.avatarUrl ?? null)
+      setConnectStatus(connectData)
     }).catch(console.error)
     .finally(() => setLoading(false))
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  const handleSetupPayouts = async () => {
+    setPayoutLoading(true)
+    setPayoutError('')
+    try {
+      const data = await api.connectOnboard()
+      window.location.href = data.url
+    } catch {
+      setPayoutError('Failed to start payout setup. Please try again.')
+    } finally {
+      setPayoutLoading(false)
+    }
+  }
+
+  const handlePayout = async () => {
+    setPayoutLoading(true)
+    setPayoutError('')
+    setPayoutSuccess('')
+    try {
+      const data = await api.requestPayout()
+      setPayoutSuccess(`$${data.amount.toFixed(2)} payout initiated! Funds will arrive in 1-2 business days.`)
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Payout failed. Please try again.'
+      setPayoutError(message)
+    } finally {
+      setPayoutLoading(false)
+    }
+  }
 
   const activeListings = localListings.filter(l => l.status === 'ACTIVE')
   const pendingCards = localCards.filter(c => c.status === 'PENDING' || c.status === 'FAILED')
@@ -199,6 +236,60 @@ export default function Dashboard() {
                 <p className="text-xs uppercase tracking-widest text-[#7c6992] mb-2 font-semibold">Pending Cards</p>
                 <p className="text-4xl font-light text-[#2e1a47]">{pendingCards.length}</p>
               </div>
+            </div>
+
+            {/* ── Payouts ── */}
+            <div className="bg-white border border-[#E3DFEF] rounded-2xl p-6 shadow-sm">
+              <div className="flex items-center justify-between mb-4">
+                <p className="text-xs uppercase tracking-widest text-[#7c6992] font-semibold">Payouts</p>
+                {connectStatus?.connected && (
+                  <span className="text-xs text-[#2e7d32] font-medium bg-green-50 border border-green-200 px-2.5 py-1 rounded-full">
+                    Account connected
+                  </span>
+                )}
+              </div>
+
+              {payoutSuccess && (
+                <p className="text-sm text-[#2e7d32] bg-green-50 border border-green-200 rounded-xl px-4 py-3 mb-4">
+                  {payoutSuccess}
+                </p>
+              )}
+
+              {payoutError && (
+                <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl px-4 py-3 mb-4">
+                  {payoutError}
+                </p>
+              )}
+
+              {!connectStatus?.connected ? (
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                  <div>
+                    <p className="text-sm font-semibold text-[#2e1a47] mb-1">Set up your payout account</p>
+                    <p className="text-xs text-[#7c6992]">Connect your bank account to receive payments when your cards sell.</p>
+                  </div>
+                  <button
+                    onClick={handleSetupPayouts}
+                    disabled={payoutLoading}
+                    className="shrink-0 text-sm bg-[#2e1a47] text-white px-5 py-2.5 rounded-lg hover:bg-[#72569C] transition-colors font-semibold disabled:opacity-50"
+                  >
+                    {payoutLoading ? 'Loading...' : 'Set up payouts'}
+                  </button>
+                </div>
+              ) : (
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                  <div>
+                    <p className="text-sm font-semibold text-[#2e1a47] mb-1">Available to cash out</p>
+                    <p className="text-xs text-[#7c6992]">Funds are released after buyers confirm card receipt. Payouts arrive in 1–2 business days.</p>
+                  </div>
+                  <button
+                    onClick={handlePayout}
+                    disabled={payoutLoading}
+                    className="shrink-0 text-sm bg-[#2e1a47] text-white px-5 py-2.5 rounded-lg hover:bg-[#72569C] transition-colors font-semibold disabled:opacity-50"
+                  >
+                    {payoutLoading ? 'Processing...' : 'Cash out'}
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* Active listings preview */}
